@@ -1,0 +1,3891 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LineUP Fantasy - Моя команда</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="supabaseClient.js"></script>
+  <style>
+    :root {
+      --purple: #633EDC;
+      --purple-light: #7d5ce6;
+      --purple-dark: #4e32b0;
+      --orange: #FE641C;
+      --orange-light: #ff7d40;
+      --orange-dark: #d4530e;
+      --yellow: #FDE600;
+      --yellow-light: #ffeb33;
+      --yellow-dark: #e6cf00;
+      --black: #121212;
+      --black-light: #1c1c1c;
+      --white: #ffffff;
+      --gray: #888;
+    }
+    
+    @font-face {
+      font-family: 'Petrov Sans';
+      src: url('/fonts/PetrovSans-Trial-Bold.otf') format('opentype');
+      font-weight: bold;
+      font-style: normal;
+      font-display: swap;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', 'Petrov Sans', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: var(--black);
+      color: var(--white);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(99, 62, 220, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 85% 30%, rgba(254, 100, 28, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 50% 80%, rgba(253, 230, 0, 0.05) 0%, transparent 20%);
+    }
+    
+    /* Анимации */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes glow {
+      0% { box-shadow: 0 0 5px var(--yellow); }
+      50% { box-shadow: 0 0 20px var(--yellow); }
+      100% { box-shadow: 0 0 5px var(--yellow); }
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .animate-fadeIn {
+      animation: fadeIn 0.6s ease forwards;
+	  margin-top: -30px;
+    }
+    
+    .animate-pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    .animate-slideIn {
+      animation: slideIn 0.5s ease forwards;
+    }
+    
+    .animate-glow {
+      animation: glow 2s infinite;
+    }
+    
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    header {
+      width: 100%;
+      background-color: var(--purple);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      height: 80px;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .header-logo img {
+      height: 50px;
+      transition: transform 0.3s ease;
+    }
+    
+    .header-logo img:hover {
+      transform: scale(1.1);
+    }
+    
+    .account-link {
+      color: var(--yellow);
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 8px 16px;
+      border-radius: 20px;
+    }
+    
+    .account-link:hover {
+      background-color: rgba(253, 230, 0, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .main-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+    
+    aside {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5%;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--orange), var(--orange-dark));
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: width 0.3s ease, padding 0.3s ease;
+      --content-width: 15vw;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    aside:hover {
+      width: 15%;
+      padding: 20px 1rem;
+    }
+    
+    .sidebar-item {
+      width: 100%;
+      padding: 12px;
+      text-align: center;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .sidebar-item:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .sidebar-item:hover:before {
+      left: 100%;
+    }
+    
+    .sidebar-item:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+    
+    .sidebar-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar-item:hover img {
+      transform: scale(1.1);
+    }
+    
+    .sidebar-item span {
+      font-size: 14px;
+      transition: transform 0.3s ease;
+    }
+    
+    .sidebar-item:hover span {
+      transform: translateX(3px);
+    }
+    
+/* Убираем ограничение ширины у main */
+main {
+  margin-left: 7%;
+  width: 85%;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--black);
+  flex: 1;
+  max-width: none; /* Убираем ограничение */
+}
+    
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 11%;
+      padding: 10px 20px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      color: var(--black);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Starting VI стили */
+    .starting-vi-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin: 30px 0 15px 0;
+      width: 100%;
+      max-width: 1000px;
+    }
+    
+    .starting-vi {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--yellow);
+      margin-right: 15px;
+      text-shadow: 0 0 10px rgba(253, 230, 0, 0.5);
+    }
+    @keyframes shine {
+      0% { transform: rotate(45deg) translate(-50%, -50%); }
+      100% { transform: rotate(45deg) translate(50%, 50%); }
+    }
+    
+    .empty-slot {
+      font-size: 14px;
+      color: #ccc;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .player-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .player-photo {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--yellow);
+      box-shadow: 0 0 10px rgba(253, 230, 0, 0.5);
+    }
+    
+    .player-name {
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .player-price {
+      font-size: 11px;
+      color: var(--yellow);
+    } 
+    .remove-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: var(--orange);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+      transition: all 0.3s ease;
+      z-index: 2;
+    }
+    
+    .remove-btn:hover {
+      background: #ff3333;
+      transform: scale(1.1);
+    }
+    .tour-points {
+  cursor: pointer;
+  color: var(--yellow);
+  font-weight: bold;
+  transition: all 0.3s ease;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.tour-points:hover {
+  background-color: rgba(253, 230, 0, 0.3);
+  transform: scale(1.05);
+}
+.table-container.fixed-width {
+  width: 1300px;
+  margin: 0 auto;
+}
+
+    @keyframes borderAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    /* Стили для уведомлений */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s, transform 0.3s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .notification.success {
+      background: linear-gradient(to right, #4CAF50, #2E7D32);
+    }
+    
+    .notification.error {
+      background: linear-gradient(to right, #f44336, #c62828);
+    }
+    
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Стили для кнопки сохранения */
+    .save-status {
+      margin-left: 15px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .saving {
+      color: #2196F3;
+    }
+    
+    .saved {
+      color: #4CAF50;
+    }
+    
+    .error-status {
+      color: #f44336;
+    }
+    
+    /* Стили для таблицы - более компактные */
+.players-table {
+  width: 100%;
+  margin-top: 20px;
+  background: linear-gradient(to bottom, var(--purple), var(--purple-dark));
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+  font-size: 14px;
+  max-width: none; /* Убираем ограничение */
+}
+    
+    .players-table:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(to right, var(--orange), var(--yellow), var(--orange));
+    }
+    
+    .players-table table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed; /* Фиксированная ширина столбцов */
+    }
+    
+    .players-table th, .players-table td {
+      padding: 8px 10px; /* Уменьшаем отступы */
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .players-table th {
+      background-color: rgba(100, 60, 220, 0.5);
+      color: var(--white);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      white-space: nowrap; /* Запрещаем перенос текста */
+    }
+    
+    /* Узкий столбец для кнопки добавления */
+    .players-table th[data-sort="add"],
+    .players-table td:first-child {
+      width: 50px; /* Уменьшаем ширину */
+      min-width: 50px;
+      max-width: 50px;
+    }
+    
+    /* Уменьшаем ширину столбца с фото */
+    .players-table th[data-sort="photo"],
+    .players-table td:nth-child(2) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+    }
+    
+    /* Ширина для столбца с именем игрока */
+    .players-table th[data-sort="name"],
+    .players-table td:nth-child(3) {
+      width: 120px;
+      min-width: 120px;
+      max-width: 120px;
+    }
+    /* Уменьшаем ширину столбца "Среднее" */
+.players-table th[data-sort="avgAvg"],
+.players-table td:nth-child(5) {
+  width: 50px; /* Уменьшаем ширину */
+  min-width: 50px;
+  max-width: 50px;
+}
+
+    /* Делаем столбцы со статистикой уже */
+    .players-table th[data-sort="price"],
+    .players-table th[data-sort="avg"],
+    .players-table th[data-sort="points"],
+    .players-table th[data-sort="threes"],
+    .players-table th[data-sort="assists"],
+    .players-table th[data-sort="rebounds"],
+    .players-table th[data-sort="steals"],
+    .players-table th[data-sort="blocks"],
+    .players-table th[data-sort="turnovers"],
+    .players-table th[data-sort="selection"],
+    .players-table td:nth-child(4),
+    .players-table td:nth-child(5),
+    .players-table td:nth-child(n+6):nth-child(-n+13) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+    }
+    
+    /* Контейнер для горизонтальной прокрутки */
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+    }
+    
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+  padding: 0 15px;
+  max-width: none; /* Убираем ограничение */
+}
+    
+    .filter-row {
+      display: flex;
+      gap: 15px; /* Увеличиваем отступ между фильтрами */
+      flex-wrap: wrap;
+	  margin-top: 10px;
+      margin-left: 10px; /* Отступ от левого края */
+    }
+    
+    .filter-row label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      color: var(--white);
+    }
+    
+    .filter-row select {
+      padding: 8px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--purple);
+      background-color: var(--black-light);
+      color: var(--white);
+      transition: all 0.3s ease;
+      min-width: 120px; /* Минимальная ширина для селектов */
+    }
+    
+    .players-table th:hover {
+      background-color: rgba(100, 60, 220, 0.7);
+    }
+    
+    .players-table th:after {
+      content: '↕';
+      margin-left: 5px;
+      opacity: 0.5;
+      font-size: 12px;
+    }
+    
+    .players-table th.sort-asc:after {
+      content: '↑';
+      opacity: 1;
+    }
+    
+    .players-table th.sort-desc:after {
+      content: '↓';
+      opacity: 1;
+    }
+    
+    .players-table tr {
+      transition: all 0.3s ease;
+    }
+    
+    .players-table tr:nth-child(even) {
+      background-color: rgba(100, 60, 220, 0.1);
+    }
+    
+    .players-table tr:hover {
+      background-color: rgba(100, 60, 220, 0.3);
+      transform: scale(1.01);
+    }
+    
+    .players-table .select-button {
+      padding: 8px 12px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      color: var(--black);
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+    
+    .players-table .select-button:hover {
+      transform: scale(1.1);
+      background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
+      box-shadow: 0 0 15px rgba(253, 230, 0, 0.5);
+    }
+    
+    .filter-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-row label {
+      display: flex;
+      flex-direction: column;
+      font-size: 14px;
+      color: var(--white);
+    }
+    
+    .filter-row select {
+      padding: 8px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--purple);
+      background-color: var(--black-light);
+      color: var(--white);
+      transition: all 0.3s ease;
+    }
+    
+    .filter-row select:focus {
+      outline: none;
+      border-color: var(--orange);
+      box-shadow: 0 0 10px rgba(254, 100, 28, 0.5);
+    }
+    
+    .budget-counter {
+      font-size: 16px;
+      color: var(--yellow);
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(253, 230, 0, 0.5);
+    }
+    
+    .budget-info {
+      margin: 15px 0;
+      font-size: 18px;
+      color: var(--yellow);
+      text-shadow: 0 0 5px rgba(253, 230, 0, 0.5);
+    }
+    
+    .save-roster-btn {
+      padding: 12px 24px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      color: var(--black);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      font-size: 16px;
+    }
+    
+    .save-roster-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
+    }
+    
+    footer {
+      width: 100%;
+      background: linear-gradient(to right, var(--purple), var(--purple-dark));
+      padding: 30px 20px;
+      text-align: center;
+      color: var(--white);
+      font-size: 16px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      position: relative;
+      z-index: 10;
+    }
+    
+    footer a {
+      color: var(--white);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    footer a:after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--yellow);
+      transition: width 0.3s ease;
+    }
+    
+    footer a:hover {
+      color: var(--yellow);
+    }
+    
+    footer a:hover:after {
+      width: 100%;
+    }
+    
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: var(--white);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      position: relative;
+      display: inline-block;
+    }
+    
+    h1:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, var(--orange), transparent);
+    }
+    
+    h2 {
+      font-size: 24px;
+      margin: 20px 0;
+      color: var(--white);
+      text-align: center;
+    }
+    
+    .player-stats {
+      font-size: 12px;
+      color: var(--gray);
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 1200px) {
+      main {
+        margin-left: 60px;
+        width: calc(100% - 60px);
+      }
+      
+      aside {
+        width: 60px;
+      }
+      
+      aside:hover {
+        width: 200px;
+      }
+      
+      .back-button {
+        left: 70px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .roles-lineup {
+        flex-direction: column;
+      }
+      
+      .role-slot {
+        min-width: 100%;
+      }
+      
+      .filter-row {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .table-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      footer {
+        flex-wrap: wrap;
+        height: auto;
+        gap: 15px;
+        padding: 20px;
+      }
+    }
+/* Модальное окно состава */
+.leaderboard-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  animation: modalFadeIn 0.5s ease forwards;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Контент модального окна */
+.leaderboard-content {
+  background: linear-gradient(to bottom, var(--purple), var(--purple-dark));
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--purple-light);
+  position: relative;
+  transform: scale(0.9);
+  animation: modalScaleIn 0.5s ease forwards;
+}
+
+@keyframes modalScaleIn {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+    
+    .leaderboard-content h2 {
+      color: var(--yellow);
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px rgba(253, 230, 0, 0.5);
+    }
+    
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    
+    .leaderboard-table th, 
+    .leaderboard-table td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .leaderboard-table th {
+      background-color: rgba(100, 60, 220, 0.5);
+      color: var(--white);
+      font-weight: bold;
+      position: sticky;
+      top: 0;
+    }
+    
+    .leaderboard-table tr:nth-child(even) {
+      background-color: rgba(100, 60, 220, 0.1);
+    }
+    
+    .leaderboard-table tr:hover {
+      background-color: rgba(100, 60, 220, 0.3);
+    }
+    
+    .user-position {
+      background-color: rgba(253, 230, 0, 0.2) !important;
+      font-weight: bold;
+    }
+    
+    .position-1 {
+      background-color: rgba(255, 215, 0, 0.3) !important;
+    }
+    
+    .position-2 {
+      background-color: rgba(192, 192, 192, 0.3) !important;
+    }
+    
+    .position-3 {
+      background-color: rgba(205, 127, 50, 0.3) !important;
+    }
+    
+    .tour-selector {
+      margin-bottom: 20px;
+    }
+    
+    .tour-selector select {
+      padding: 10px 15px;
+      border-radius: 20px;
+      border: 1px solid var(--purple);
+      background-color: var(--black-light);
+      color: var(--white);
+      font-size: 16px;
+    }
+    
+    .close-leaderboard {
+      padding: 10px 20px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      color: var(--black);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+    .scroll-slider-container {
+  margin: 15px 0;
+  width: 100%;
+}
+    .matches-container {
+      width: 100%;
+      margin: 20px 0;
+	  margin-left: 12%;
+      max-width: 800px;
+      display: flex;
+	  justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+.match-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Распределяет пространство между элементами */
+  padding: 10px 10px; /* Отступы внутри строки матча */
+  background: linear-gradient(to right, var(--purple-light), var(--purple));
+  border-radius: 10px;
+  position: relative;
+  transition: all 0.3s ease;
+  margin-bottom: 10px; /* Отступ между строками матчей */
+  width: 75%; /* Ширина на весь контейнер */
+}
+
+    .match-row:hover {
+      box-shadow: 0 0 15px rgba(253, 230, 0, 0.5);
+      transform: scale(1.02);
+    }
+.team-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: 1; /* Равномерное распределение пространства */
+  justify-content: center; /* Центрирование содержимого */
+}
+.team-home {
+  order: 1; /* Домашняя команда справа */
+  
+}
+
+.team-away {
+  order: 2; /* Гостевая команда слева */
+}
+/* Логотип команды */
+.team-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain; /* Показываем картинку полностью (без обрезки) */
+  border-radius: 50%;
+  border: 1px solid var(--white);
+  flex-shrink: 0; /* Запрещаем сжатие логотипа */
+}
+.multiple-games-badge {
+    position: absolute;
+    top: -12px;
+    right: -5px;
+    width: 24px;
+    height: 24px;
+    background: url('data:image/jpeg;base64,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') no-repeat center center;
+    background-size: cover !important;
+    border-radius: 50%;
+    border: 2px solid var(--yellow);
+    z-index: 10;
+    animation: pulse 2s infinite;
+}
+	    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+.team-name {
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  position: relative; /* Добавляем для правильного позиционирования бейджа */
+}
+    .vs-separator {
+      margin: 0 15px;
+      color: var(--yellow);
+      font-weight: bold;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+    .tour-header {
+	margin-left: 36%;
+      color: var(--yellow);
+      margin-bottom: 10px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+.tour-slider {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--purple-dark);
+  border-radius: 4px;
+  outline: none;
+}
+.tour-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--yellow);
+  cursor: pointer;
+}
+
+    .close-leaderboard:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+@import url('https://fonts.googleapis.com/css?family=Poppins:900i');
+
+.cta {
+  display: flex;
+  padding: 10px 45px;
+  text-decoration: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 18px;
+  color: white;
+  background: #6225E6;
+  transition: 1s;
+  box-shadow: 6px 6px 0 black;
+  transform: skewX(-15deg);
+  cursor: pointer;
+  margin: 0 auto;
+}
+
+.cta:focus {
+  outline: none;
+}
+
+.cta:hover {
+  transition: 0.5s;
+  box-shadow: 10px 10px 0 #FBC638;
+}
+
+.cta span:nth-child(2) {
+  transition: 0.5s;
+  margin-right: 0px;
+}
+
+.cta:hover span:nth-child(2) {
+  transition: 0.5s;
+  margin-right: 20px;
+}
+
+.cta span {
+  transform: skewX(15deg);
+}
+
+.cta span:nth-child(2) {
+  width: 20px;
+  margin-left: 20px;
+  position: relative;
+  top: 12%;
+}
+
+/* Анимация для SVG */
+.cta path.one {
+  transition: 0.4s;
+  transform: translateX(-60%);
+}
+
+.cta:hover path.one {
+  transform: translateX(0%);
+  animation: color_anim 1s infinite 0.6s;
+}
+
+@keyframes color_anim {
+  0% {
+    fill: white;
+  }
+  50% {
+    fill: #FBC638;
+  }
+  100% {
+    fill: white;
+  }
+}
+  
+.team-details {
+  text-align: center;
+  margin-top: 20px;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  display: none;
+  animation: fadeIn 0.5s ease forwards;
+}
+    
+    .team-details h3 {
+      color: var(--yellow);
+      margin-bottom: 10px;
+    }
+/* Анимация появления */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Контейнер для игроков */
+#team-players {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* Карточка игрока */
+.team-player {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: slideIn 0.5s ease forwards;
+  opacity: 0;
+}@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Анимация при наведении */
+.team-player:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Фото игрока */
+.team-player img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  border: 2px solid var(--yellow);
+  object-fit: cover;
+}
+
+/* Информация об игроке */
+.team-player-info {
+  flex-grow: 1;
+  text-align: left;
+}
+
+/* Имя игрока */
+.team-player-name {
+  font-weight: bold;
+  font-size: 14px;
+}
+/* Пагинация */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  gap: 15px;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  background: linear-gradient(to right, var(--purple), var(--purple-dark));
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.pagination-button:hover {
+  background: linear-gradient(to right, var(--purple-light), var(--purple));
+  transform: scale(1.05);
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#page-info {
+  color: var(--white);
+  font-weight: bold;
+}
+
+/* Статистика игрока */
+.team-player-stats {
+  font-size: 12px;
+  color: var(--gray);
+  margin-top: 3px;
+}
+
+/* Общие очки команды */
+.team-total-points {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--yellow);
+  font-weight: bold;
+  font-size: 16px;
+}
+}
+
+.team-player-stats:nth-child(4) {
+  color: var(--yellow);
+  font-weight: bold;
+}
+
+	/* Контейнер для таблицы с горизонтальной прокруткой */
+.leaderboard-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+/* Ползунок для горизонтальной прокрутки */
+.scroll-slider-container {
+  margin: 15px 0;
+  width: 100%;
+}
+.my-team-title {
+  font-size: 2rem;
+  color: #ffffff;
+  position: relative;
+  display: inline-block;
+}
+
+.my-team-title::after,
+.my-team-title::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #633EDC, #FDE600);
+  bottom: -5px;
+  left: 0;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s ease-out;
+}
+
+.my-team-title::before {
+  top: -5px;
+  transform-origin: left;
+}
+
+.my-team-title:hover::after,
+.my-team-title:hover::before {
+  transform: scaleX(1);
+}
+
+.tour-slider {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--purple-dark);
+  border-radius: 4px;
+  outline: none;
+}
+/* ДОБАВИТЬ эти стили */
+.selected-players-container {
+  width: 100%;
+  max-width: 1000px;
+  margin-bottom: 20px;
+}
+
+.selected-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.selected-header h3 {
+  color: var(--yellow);
+  margin: 0;
+}
+
+.selected-players-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.empty-slot {
+  background: linear-gradient(to bottom, var(--purple), var(--purple-dark));
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.empty-slot:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.empty-slot-text {
+  font-size: 14px;
+  color: #ccc;
+}
+
+.player-slot {
+  background: linear-gradient(to bottom, var(--purple), var(--purple-dark));
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.player-slot:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.player-slot:hover .remove-btn {
+  display: block;
+}
+
+.player-slot-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.tour-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--yellow);
+  cursor: pointer;
+}
+
+/* Закреплённые столбцы */
+.leaderboard-table th:first-child,
+.leaderboard-table th:nth-child(2),
+.leaderboard-table th:nth-child(3) {
+  position: sticky;
+  left: 0;
+  background-color: rgba(100, 60, 220, 0.7);
+  z-index: 10;
+}
+
+/* Кликабельные очки менеджера */
+.leaderboard-table td.total-points {
+  cursor: pointer;
+  color: var(--yellow);
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.leaderboard-table td.total-points:hover {
+  text-decoration: underline;
+  transform: scale(1.05);
+}
+/* Popup стили */
+.player-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(to bottom, var(--purple-dark), var(--purple));
+  border-radius: 15px;
+  padding: 25px;
+  width: 80%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: none;
+  opacity: 0;
+  border: 1px solid var(--yellow);
+}
+
+.player-popup-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 15px;
+}
+
+.player-popup-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--yellow);
+  margin-right: 20px;
+}
+
+.player-popup-info h3 {
+  color: var(--yellow);
+  margin-bottom: 5px;
+  font-size: 24px;
+}
+
+.player-popup-info p {
+  color: var(--white);
+  margin-bottom: 3px;
+  font-size: 16px;
+}
+
+.player-popup-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.player-popup-close:hover {
+  color: var(--orange);
+  transform: rotate(90deg);
+}
+
+.player-popup-section {
+  margin-bottom: 20px;
+}
+
+.player-popup-section h4 {
+  color: var(--yellow);
+  margin-bottom: 10px;
+  font-size: 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 5px;
+}
+
+.scout-report {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--orange);
+  font-style: italic;
+  line-height: 1.6;
+}
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.stats-table th,
+.stats-table td {
+  padding: 8px 12px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-table th {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--yellow);
+}
+
+.stats-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1999;
+  display: none;
+  backdrop-filter: blur(5px);
+}
+
+/* Анимации для popup */
+@keyframes popupFadeIn {
+  from { opacity: 0; transform: translate(-50%, -60%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+
+@keyframes popupFadeOut {
+  from { opacity: 1; transform: translate(-50%, -50%); }
+  to { opacity: 0; transform: translate(-50%, -40%); }
+}
+
+.player-popup.show {
+  animation: popupFadeIn 0.3s ease forwards;
+}
+
+.player-popup.hide {
+  animation: popupFadeOut 0.2s ease forwards;
+}
+
+.popup-overlay.show {
+  display: block;
+}
+
+.popup-overlay.hide {
+  display: none;
+}
+    /* Стили для кнопки Правила в хэдере */
+    .header-rules-btn {
+      color: var(--white);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .header-rules-btn:hover {
+      transform: translateX(-50%) translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
+    }
+/* Обновленные стили для модального окна правил */
+.rules-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  animation: modalFadeIn 0.5s ease forwards;
+}
+
+.rules-content {
+  background: transparent;
+  padding: 40px;
+  border-radius: 20px;
+  text-align: left;
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  transform: scale(0.9);
+  animation: modalScaleIn 0.5s ease forwards;
+  border: 2px solid var(--yellow);
+  box-shadow: 0 0 30px rgba(253, 230, 0, 0.3);
+}
+
+.rules-content h2 {
+  color: var(--white);
+  margin-bottom: 30px;
+  text-align: center;
+  font-size: 2.5rem;
+  text-shadow: 0 0 15px rgba(253, 230, 0, 0.7);
+  position: relative;
+}
+
+.rules-content h2:after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(to right, var(--orange), var(--yellow));
+  border-radius: 2px;
+}
+
+.rules-list {
+  margin-bottom: 30px;
+  color: var(--white);
+}
+
+.rules-list ol {
+  padding-left: 20px;
+}
+
+.rule-item {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  border-left: 3px solid var(--purple);
+}
+
+.rule-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(5px);
+  border-left-color: var(--yellow);
+  box-shadow: 0 0 15px rgba(253, 230, 0, 0.2);
+}
+
+.close-rules-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.close-rules-btn:hover {
+  color: var(--orange);
+  transform: rotate(90deg) scale(1.2);
+  text-shadow: 0 0 10px rgba(254, 100, 28, 0.7);
+}
+
+/* Анимации */
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalScaleIn {
+  from { transform: scale(0.9); }
+  to { transform: scale(1); }
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(253, 230, 0, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(253, 230, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(253, 230, 0, 0); }
+}
+
+.rule-item strong {
+  color: var(--yellow);
+  font-weight: bold;
+}
+
+
+    .rules-list li {
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .close-rules {
+      padding: 10px 20px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      color: var(--black);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .close-rules:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Стиль для предупреждения о превышении лимита команды */
+    .team-limit-warning {
+      color: var(--orange);
+      font-weight: bold;
+      margin-top: 5px;
+      font-size: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-logo">
+      <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="FIBA Logo">
+    </div>
+	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
+    <a href="profile.html" class="account-link">Кабинет менеджера</a>
+  </header>
+  <div class="main-container">
+     <aside id="leagues-sidebar">
+      <div class="sidebar-item" onclick="window.location.href='scout.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <span>Скаут</span>
+      </div>
+      <div class="sidebar-item" onclick="showLeaderboard()">
+        <img src="https://cdn-icons-png.flaticon.com/512/9297/9297853.png" alt="Лидерборд">
+        <span>Лидерборд</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='index.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+        <span>Выход</span>
+      </div>
+      <div id="user-leagues"></div>
+    </aside>
+    <main>
+      <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
+      <h1 class="animate-fadeIn my-team-title">Моя команда</h1>
+
+      
+<div class="table-container animate-fadeIn fixed-width">
+    <div class="players-table">
+      <div class="table-controls">
+        <div class="filter-row">
+          <!-- ЗАМЕНА: Страна → Команда -->
+          <label>Команда
+            <select id="filter-team">
+              <option value="">Все</option>
+            </select>
+          </label>
+        </div>
+        <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
+      </div>
+      
+      <table style="width: 100%; min-width: 1300px;">
+		<thead>
+		  <tr>
+			<th data-sort="add"></th>
+			<th data-sort="photo">Фото</th>
+			<th data-sort="name">Игрок</th>
+			<th data-sort="price">Цена</th>
+			<th data-sort="avgAvg">Среднее</th>  <!-- Изменено с "avg" на "avgAvg" -->
+			<th data-sort="points">Очки</th>
+			<th data-sort="threes">3-очк</th>
+			<th data-sort="assists">Ассисты</th>
+			<th data-sort="rebounds">Подборы</th>
+			<th data-sort="steals">Перехваты</th>
+			<th data-sort="blocks">Блоки</th>
+			<th data-sort="turnovers">Потери</th>
+			<th data-sort="selection">% Выбора</th>
+		  </tr>
+		</thead>
+
+        <tbody id="players-table-body">
+          <!-- Игроки будут добавлены динамически -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+      
+      <!-- Starting VI -->
+      <div class="starting-vi-container animate-fadeIn">
+        <div class="starting-vi">STARTING VI</div>
+        <div class="budget-info">Бюджет: <span id="spent-budget">0</span>$ / 70$</div>
+      </div>
+      
+<!-- ЗАМЕНИТЬ весь блок roles-lineup на этот -->
+<div class="selected-players-container animate-fadeIn">
+  <div class="selected-header">
+  </div>
+  <div id="selected-players-list" class="selected-players-grid">
+    <div class="empty-slot" id="empty-slot-1">
+      <div class="empty-slot-text">—</div>
+    </div>
+    <div class="empty-slot" id="empty-slot-2">
+      <div class="empty-slot-text">—</div>
+    </div>
+    <div class="empty-slot" id="empty-slot-3">
+      <div class="empty-slot-text">—</div>
+    </div>
+    <div class="empty-slot" id="empty-slot-4">
+      <div class="empty-slot-text">—</div>
+    </div>
+    <div class="empty-slot" id="empty-slot-5">
+      <div class="empty-slot-text">—</div>
+    </div>
+    <div class="empty-slot" id="empty-slot-6">
+      <div class="empty-slot-text">—</div>
+    </div>
+  </div>
+  <div style="text-align: center; width: 100%; max-width: 1000px; margin-bottom: 20px;">
+    <span style="color: white; font-style: italic; font-size: 14px;">
+      Игроки не должны повторяться, ровно 6 игроков в состав! Иначе, состав будет удалён из базы и очки аннулируются
+    </span>
+  </div>
+</div>
+      
+      <div style="display: flex; align-items: center; margin: 20px 0;">
+        <button id="save-roster" class="save-roster-btn cta animate-pulse">
+		  <span>Сохранить состав</span>
+		  <span>
+			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+			  <path class="one" d="M12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5C13 4.44772 12.5523 4 12 4Z" fill="white"/>
+			</svg>
+		  </span>
+		</button>
+        <span id="save-status" class="save-status"></span>
+      </div>
+	  <!-- После кнопки "Сохранить состав" -->
+	<div id="matches-container" class="matches-container"></div>
+    </main>
+  </div>
+<div id="leaderboard-modal" class="leaderboard-modal">
+  <div class="leaderboard-content">
+    <h2>Турнирная таблица</h2>
+    
+    <!-- Таблица лидерборда -->
+    <div class="leaderboard-table-container">
+      <table class="leaderboard-table">
+        <tbody id="leaderboard-body">
+          <!-- Данные будут загружены динамически -->
+        </tbody>
+		<!-- Внутри leaderboard-modal -->
+		<div class="scroll-slider-container">
+		  <input type="range" id="tour-slider" class="tour-slider" min="0" max="100" value="0">
+		</div>
+
+      </table>
+    </div>
+    <!-- Пагинация -->
+    <div class="pagination">
+      <button id="prev-page" class="pagination-button" onclick="prevPage()">❮</button>
+      <span id="page-info">Страница 1 из 1</span>
+      <button id="next-page" class="pagination-button" onclick="nextPage()">❯</button>
+    </div>
+    <!-- Блок для отображения состава команды -->
+	<div id="team-details" class="team-details">
+	  <h3>Состав команды</h3>
+	  <div id="team-players"></div>
+	</div>
+
+    <button class="close-leaderboard" onclick="closeLeaderboard()">Закрыть</button>
+  </div>
+</div>
+
+<div id="tour-matches-modal" class="leaderboard-modal">
+  <div class="leaderboard-content">
+    <h2>Матчи текущего тура</h2>
+    
+    <div id="matches-container" class="matches-container" >
+      <!-- Матчи будут загружены динамически -->
+    </div>
+    
+    <button class="close-leaderboard" onclick="closeTourMatches()">Закрыть</button>
+  </div>
+</div>
+
+  <!-- Контейнер для уведомлений -->
+  <div id="notification" class="notification"></div>
+  <!-- Player Popup -->
+<div id="player-popup" class="player-popup">
+  <button class="player-popup-close" onclick="closePlayerPopup()">×</button>
+  <div class="player-popup-header">
+    <img id="popup-player-photo" class="player-popup-photo" src="" alt="">
+    <div class="player-popup-info">
+      <h3 id="popup-player-name"></h3>
+      <p id="popup-player-position"></p>
+      <p id="popup-player-team"></p>
+    </div>
+  </div>
+
+  <div class="player-popup-section">
+    <h4>Скаут отчёт</h4>
+    <div class="scout-report" id="popup-scout-report"></div>
+  </div>
+
+  <div class="player-popup-section">
+    <h4>Статистика по турам</h4>
+    <table class="stats-table" id="popup-tour-stats">
+      <thead>
+        <tr>
+          <th>Тур</th>
+          <th>Очки</th>
+          <th>3-очк</th>
+          <th>Ассисты</th>
+          <th>Подборы</th>
+          <th>Перехваты</th>
+          <th>Блоки</th>
+          <th>Потери</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="player-popup-section">
+    <h4>Средняя статистика</h4>
+    <div id="popup-avg-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+  </div>
+
+  <div class="player-popup-section">
+    <h4>Суммарная статистика</h4>
+    <div id="popup-total-stats" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;"></div>
+  </div>
+</div>
+
+<div id="popup-overlay" class="popup-overlay"></div>
+<!-- Модальное окно с правилами -->
+<div id="rules-modal" class="rules-modal">
+  <div class="rules-content">
+    <button class="close-rules-btn" onclick="closeRules()">✕</button>
+    <h2>Правила турнира</h2>
+    <div class="rules-list">
+      <ol>
+        <li class="rule-item">
+          <strong>Бюджет команды:</strong> 70$ на 6 игроков.
+        </li>
+        <li class="rule-item">
+          <strong>Состав команды:</strong> Должен содержать ровно 6 игроков без повторений.
+        </li>
+        <li class="rule-item">
+          <strong>Лимит игроков из одной команды:</strong> Не более 3 игроков из одного клуба.
+        </li>
+        <li class="rule-item">
+          <strong>Роли игроков:</strong>
+          <div class="roles-grid">
+            <div class="role-card" data-role="Scorer">
+              <div class="role-icon">🏀</div>
+              <div class="role-name">Скорер</div>
+              <div class="role-desc">Основной забивающий</div>
+            </div>
+            <div class="role-card" data-role="Assistant">
+              <div class="role-icon">🎯</div>
+              <div class="role-name">Ассистент</div>
+              <div class="role-desc">Лучший разыгрывающий</div>
+            </div>
+            <div class="role-card" data-role="Rebounder">
+              <div class="role-icon">🤲</div>
+              <div class="role-name">Подбирающий</div>
+              <div class="role-desc">Лучший подбирающий</div>
+            </div>
+            <div class="role-card" data-role="Stopper">
+              <div class="role-icon">🛡️</div>
+              <div class="role-name">Защитник</div>
+              <div class="role-desc">Лучший защитник</div>
+            </div>
+            <div class="role-card" data-role="Shooter">
+              <div class="role-icon">🎯</div>
+              <div class="role-name">Шутер</div>
+              <div class="role-desc">Снайпер</div>
+            </div>
+            <div class="role-card" data-role="Surprise">
+              <div class="role-icon">✨</div>
+              <div class="role-name">Сюрприз</div>
+              <div class="role-desc">Любой игрок с ценой до 7$</div>
+            </div>
+          </div>
+        </li>
+        <li class="rule-item">
+          <strong>Подсчет очков:</strong> Очки начисляются по специальным формулам для каждой роли.
+        </li>
+        <li class="rule-item">
+          <strong>Сроки сдачи состава:</strong> Состав должен быть сформирован до начала очередного тура.
+        </li>
+        <li class="rule-item">
+          <strong>Изменения состава:</strong> Возможны между турами без ограничений.
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+  <footer>
+    <a href="pick.html">Главная</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
+    <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
+    <a href="https://vtb-league.com/ru/standings/">Таблица</a>
+    <a href="#">Разработчик</a>
+  </footer>
+  
+<script>
+    let selectedPlayers = [];
+    let roles = [];
+    let players = [];
+    let managersCount = 0;
+    let currentRoster = {
+      Scorer: null,
+      Assistant: null,
+      Rebounder: null,
+      Stopper: null,
+      Shooter: null,
+      Suprise: null
+    };
+    let autoSaveTimeout = null;
+    let currentSort = {
+      column: null,
+      direction: 'asc'
+    };
+    let tours = [];
+    let currentUserId = null;
+    let currentUserTeamId = null; // Добавляем переменную для ID команды пользователя
+	let currentPage = 1;
+let managersPerPage = 8;
+let totalPages = 1;
+let sortedLeaderboard = [];
+let currentButton = null;
+let currentSelectedPlayer = null;
+const playersPerPage = 10;
+
+async function loadPlayersPage(page) {
+  const { data } = await supabase
+    .from('players')
+    .select('*, teams(name, logo_url)')
+    .range((page - 1) * playersPerPage, page * playersPerPage - 1);
+  // Добавляем данные в таблицу
+}
+
+// Обработчик скролла
+window.addEventListener('scroll', () => {
+  if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+    currentPage++;
+    loadPlayersPage(currentPage);
+  }
+});
+
+// Функция для отображения страницы лидерборда
+function renderLeaderboardPage(page) {
+  const tableBody = document.getElementById('leaderboard-body');
+  tableBody.innerHTML = '';
+
+  const startIndex = (page - 1) * managersPerPage;
+  const endIndex = startIndex + managersPerPage;
+  const pageData = sortedLeaderboard.slice(startIndex, endIndex);
+
+  // Заголовок таблицы
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `
+    <th>Место</th>
+    <th>Команда</th>
+    <th>Общие очки</th>
+    <th>Очки по турам</th>
+  `;
+  tableBody.appendChild(headerRow);
+
+  // Данные страницы
+  pageData.forEach((entry) => {
+    const row = document.createElement('tr');
+    if (entry.place === 1) row.classList.add('position-1');
+    if (entry.place === 2) row.classList.add('position-2');
+    if (entry.place === 3) row.classList.add('position-3');
+    if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
+
+    // Очки по турам (кликабельно)
+    const tourPointsCells = entry.tourPoints
+      .split(' | ')
+      .map((points, tourIndex) => {
+        const tourId = Object.keys(entry.tourPointsById)[tourIndex];
+        return `<span class="tour-points" onclick="viewTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
+      })
+      .join(' | ');
+
+    row.innerHTML = `
+      <td>${entry.place}</td>
+      <td>${entry.teamName}</td>
+      <td>${entry.totalPoints}</td>
+      <td>${tourPointsCells}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+    // Обновляем информацию о странице
+  document.getElementById('page-info').textContent = `Страница ${page} из ${totalPages}`;
+
+  // Обновляем состояние кнопок пагинации
+  document.getElementById('prev-page').disabled = page === 1;
+  document.getElementById('next-page').disabled = page === totalPages;
+}
+// Функция для перехода на предыдущую страницу
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    renderLeaderboardPage(currentPage);
+  }
+}
+
+// Функция для перехода на следующую страницу
+function nextPage() {
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderLeaderboardPage(currentPage);
+  }
+}
+
+    // Функция для отображения лидерборда
+async function showLeaderboard() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      showNotification('Пожалуйста, авторизуйтесь', false);
+      return;
+    }
+    currentUserId = user.id;
+
+    // Получаем команду текущего пользователя
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (teamError || !userTeam) {
+      showNotification('У вас нет команды', false);
+      return;
+    }
+
+    currentUserTeamId = userTeam.id;
+
+    // Показываем модальное окно
+    const modal = document.getElementById('leaderboard-modal');
+    modal.style.display = 'flex';
+
+    // Анимация появления
+    anime({
+      targets: '.leaderboard-content',
+      scale: [0.8, 1],
+      opacity: [0, 1],
+      duration: 500,
+      easing: 'easeOutElastic(1, .8)'
+    });
+
+    // Загружаем лидерборд
+    await loadLeaderboard();
+  } catch (error) {
+    console.error('Ошибка открытия лидерборда:', error);
+    showNotification('Ошибка загрузки лидерборда', false);
+  }
+}
+
+    // Функция для закрытия лидерборда
+    function closeLeaderboard() {
+      const modal = document.getElementById('leaderboard-modal');
+      
+      anime({
+        targets: '.leaderboard-content',
+        scale: 0.8,
+        opacity: 0,
+        duration: 300,
+        complete: function() {
+          modal.style.display = 'none';
+        }
+      });
+    }
+
+    // Загрузка списка туров
+async function showLeaderboard() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      showNotification('Пожалуйста, авторизуйтесь', false);
+      return;
+    }
+    currentUserId = user.id;
+
+    // Получаем команду текущего пользователя
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (teamError || !userTeam) {
+      showNotification('У вас нет команды', false);
+      return;
+    }
+
+    currentUserTeamId = userTeam.id;
+
+    // Показываем модальное окно
+    const modal = document.getElementById('leaderboard-modal');
+    modal.style.display = 'flex';
+
+    // Анимация появления
+    anime({
+      targets: '.leaderboard-content',
+      scale: [0.8, 1],
+      opacity: [0, 1],
+      duration: 500,
+      easing: 'easeOutElastic(1, .8)'
+    });
+
+    // Загружаем лидерборд
+    await loadLeaderboard();
+  } catch (error) {
+    console.error('Ошибка открытия лидерборда:', error);
+    showNotification('Ошибка загрузки лидерборда', false);
+  }
+}
+// ИЗМЕНИТЬ функцию - Загрузка лидерборда (новая таблица team_players2)
+async function loadLeaderboard() {
+  try {
+    // 1. Получаем все туры
+    const { data: tours, error: toursError } = await supabase
+      .from('tours')
+      .select('*')
+      .order('round_number', { ascending: true });
+
+    if (toursError || !tours) {
+      console.error('Ошибка загрузки туров:', toursError);
+      showNotification('Ошибка загрузки туров', false);
+      return;
+    }
+
+    // 2. Получаем все команды
+    const { data: teams, error: teamsError } = await supabase
+      .from('user_teams')
+      .select('*');
+
+    if (teamsError || !teams) {
+      console.error('Ошибка загрузки команд:', teamsError);
+      showNotification('Ошибка загрузки команд', false);
+      return;
+    }
+
+    // 3. Получаем все связи "команда-игрок-тур" (ИЗМЕНЕНО: team_players2)
+    const { data: teamPlayers, error: teamPlayersError } = await supabase
+      .from('team_players2')
+      .select('*');
+
+    if (teamPlayersError || !teamPlayers) {
+      console.error('Ошибка загрузки связей "команда-игрок":', teamPlayersError);
+      showNotification('Ошибка загрузки связей "команда-игрок"', false);
+      return;
+    }
+
+    // 4. Получаем статистику всех игроков
+    const { data: playerStats, error: playerStatsError } = await supabase
+      .from('player_stats')
+      .select('*');
+
+    if (playerStatsError || !playerStats) {
+      console.error('Ошибка загрузки статистики игроков:', playerStatsError);
+      showNotification('Ошибка загрузки статистики игроков', false);
+      return;
+    }
+
+    // 5. Объединяем данные и считаем очки по единой формуле
+    const leaderboardData = {};
+
+    for (const team of teams) {
+      // Для каждого тура
+      const teamTourPoints = {};
+
+      for (const tour of tours) {
+        // Находим игроков команды для этого тура (ИЗМЕНЕНО: team_players2)
+        const teamPlayersForTour = teamPlayers.filter(tp =>
+          tp.team_id === team.id && tp.tour_id === tour.id
+        );
+
+        // Суммируем очки игроков команды за тур по единой формуле
+        let totalPoints = 0;
+
+        for (const tp of teamPlayersForTour) {
+          const playerStat = playerStats.find(ps => 
+            ps.player_id === tp.player_id && ps.tour === tour.id
+          );
+          
+          if (playerStat) {
+            // Используем единую формулу для всех игроков
+            const playerPoints = calculatePlayerPoints(playerStat);
+            totalPoints += playerPoints;
+          }
+        }
+
+        teamTourPoints[tour.id] = totalPoints.toFixed(1);
+      }
+
+      // Общие очки команды по всем турам
+      const totalPoints = Object.values(teamTourPoints)
+        .reduce((sum, points) => sum + parseFloat(points), 0)
+        .toFixed(1);
+
+      // Формируем строку с очками по турам
+      const tourPointsString = tours
+        .map(tour => teamTourPoints[tour.id] || "0")
+        .join(' | ');
+
+      leaderboardData[team.id] = {
+        teamName: team.team_name,
+        totalPoints,
+        tourPoints: tourPointsString,
+        teamId: team.id,
+        tourPointsById: teamTourPoints,
+      };
+    }
+
+    // 6. Сортируем по общим очкам
+    const sortedLeaderboard = Object.values(leaderboardData)
+      .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
+      .map((data, index) => ({ ...data, place: index + 1 }));
+
+    // 7. Отображаем таблицу
+    renderLeaderboard(sortedLeaderboard);
+  } catch (error) {
+    console.error('Ошибка загрузки лидерборда:', error);
+    showNotification('Ошибка загрузки лидерборда', false);
+  }
+}
+// Функция для открытия модального окна с матчами текущего тура
+async function showTourMatches() {
+  try {
+    const modal = document.getElementById('tour-matches-modal');
+    modal.style.display = 'flex';
+    
+    // Анимация появления
+    anime({
+      targets: '.leaderboard-content',
+      scale: [0.8, 1],
+      opacity: [0, 1],
+      duration: 500,
+      easing: 'easeOutElastic(1, .8)'
+    });
+    
+    // Загружаем матчи текущего тура
+    await loadCurrentTourMatches();
+    
+  } catch (error) {
+    console.error('Ошибка открытия матчей тура:', error);
+    showNotification('Ошибка загрузки матчей', false);
+  }
+}
+
+// Функция для закрытия модального окна
+function closeTourMatches() {
+  const modal = document.getElementById('tour-matches-modal');
+  anime({
+    targets: '.leaderboard-content',
+    scale: 0.8,
+    opacity: 0,
+    duration: 300,
+    complete: function() {
+      modal.style.display = 'none';
+    }
+  });
+}
+
+// Загрузка матчей текущего тура
+   // Автоматическая загрузка матчей тура при загрузке страницы
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        // Загружаем матчи текущего тура
+        await loadCurrentTourMatches();
+      } catch (error) {
+        console.error('Ошибка загрузки матчей:', error);
+      }
+    });
+
+    // Обновлённая функция загрузки матчей тура
+async function loadCurrentTourMatches() {
+    try {
+        // 1. Получаем текущий тур
+        const { data: currentTour, error: tourError } = await supabase
+            .from('tours')
+            .select('*')
+            .order('start_time', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (tourError || !currentTour) {
+            console.error('Ошибка загрузки текущего тура:', tourError);
+            return;
+        }
+
+        // 2. Получаем все матчи для текущего тура
+        const { data: matches, error: matchesError } = await supabase
+            .from('games')
+            .select(`
+                *,
+                home_team:teams!games_home_team_id_fkey(*),
+                away_team:teams!games_away_team_id_fkey(*)
+            `)
+            .eq('tour_id', currentTour.id);
+
+        if (matchesError || !matches) {
+            console.error('Ошибка загрузки матчей:', matchesError);
+            return;
+        }
+
+        // 3. Считаем количество игр для каждой команды в туре
+        const teamGameCounts = {};
+
+        matches.forEach(match => {
+            const homeTeamId = match.home_team.id;
+            const awayTeamId = match.away_team.id;
+
+            // Увеличиваем счётчик для домашней команды
+            if (!teamGameCounts[homeTeamId]) {
+                teamGameCounts[homeTeamId] = 0;
+            }
+            teamGameCounts[homeTeamId]++;
+
+            // Увеличиваем счётчик для гостевой команды
+            if (!teamGameCounts[awayTeamId]) {
+                teamGameCounts[awayTeamId] = 0;
+            }
+            teamGameCounts[awayTeamId]++;
+        });
+
+        // 4. Отображаем матчи в контейнере
+        const matchesContainer = document.getElementById('matches-container');
+        matchesContainer.innerHTML = '';
+
+        if (!matches || matches.length === 0) {
+            matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
+            return;
+        }
+
+        // Добавляем заголовок с номером тура
+        const tourHeader = document.createElement('div');
+        tourHeader.className = 'tour-header';
+        tourHeader.textContent = `Тур ${currentTour.round_number}`;
+        matchesContainer.appendChild(tourHeader);
+
+        // Отображаем матчи
+        matches.forEach(match => {
+            const matchRow = document.createElement('div');
+            matchRow.className = 'match-row';
+
+            // Проверяем количество игр у команд
+            const homeTeamId = match.home_team.id;
+            const awayTeamId = match.away_team.id;
+
+            const homeMultipleGames = teamGameCounts[homeTeamId] > 1;
+            const awayMultipleGames = teamGameCounts[awayTeamId] > 1;
+
+            // Контейнер для домашней команды
+            const homeTeamContainer = document.createElement('div');
+            homeTeamContainer.className = 'team-container team-home';
+
+            const homeLogo = document.createElement('img');
+            homeLogo.src = match.home_team?.logo_url || 'https://via.placeholder.com/40';
+            homeLogo.alt = match.home_team?.name;
+            homeLogo.className = 'team-logo';
+
+            const homeName = document.createElement('div');
+            homeName.className = 'team-name';
+            homeName.textContent = match.home_team?.name;
+
+            
+            homeTeamContainer.appendChild(homeName);
+			homeTeamContainer.appendChild(homeLogo);
+
+            // Разделитель "VS"
+            const vsSeparator = document.createElement('div');
+            vsSeparator.className = 'vs-separator';
+            vsSeparator.textContent = '';
+            // Контейнер для гостевой команды
+            const awayTeamContainer = document.createElement('div');
+            awayTeamContainer.className = 'team-container team-away';
+
+            const awayLogo = document.createElement('img');
+            awayLogo.src = match.away_team?.logo_url || 'https://via.placeholder.com/40';
+            awayLogo.alt = match.away_team?.name;
+            awayLogo.className = 'team-logo';
+
+            const awayName = document.createElement('div');
+            awayName.className = 'team-name';
+            awayName.textContent = match.away_team?.name;
+
+            awayTeamContainer.appendChild(awayLogo);
+            awayTeamContainer.appendChild(awayName);
+            // Собираем строку матча
+<!-- Внутри функции loadCurrentTourMatches() -->
+// Собираем строку матча
+matchRow.appendChild(homeTeamContainer);
+matchRow.appendChild(vsSeparator);
+matchRow.appendChild(awayTeamContainer);
+
+// Добавляем бейджи для команд с несколькими играми
+if (homeMultipleGames) {
+    const badge = document.createElement('div');
+    badge.className = 'multiple-games-badge';
+    badge.title = 'У команды несколько игр в этом туре';
+    homeTeamContainer.style.position = 'relative';
+    homeTeamContainer.appendChild(badge);
+    // Позиционируем бейдж слева от текста
+    badge.style.left = '0%';
+    badge.style.top = '10%';
+    badge.style.transform = 'translateY(-50%)';
+    badge.style.marginRight = '8px';
+}
+
+if (awayMultipleGames) {
+    const badge = document.createElement('div');
+    badge.className = 'multiple-games-badge';
+    badge.title = 'У команды несколько игр в этом туре';
+    awayTeamContainer.style.position = 'relative';
+    awayTeamContainer.appendChild(badge);
+    // Позиционируем бейдж справа от текста
+    badge.style.right = '0%';
+    badge.style.top = '10%';
+    badge.style.transform = 'translateY(-50%)';
+    badge.style.marginLeft = '8px';
+}
+
+            matchesContainer.appendChild(matchRow);
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки матчей:', error);
+    }
+}
+
+async function addPlayerStats(playerId, tourId, stats) {
+  try {
+    const { error } = await supabase
+      .rpc('upsert_player_stats', {
+        p_player_id: playerId,
+        p_tour: tourId,
+        p_points: stats.points || 0,
+        p_threes: stats.threes || 0,
+        p_assists: stats.assists || 0,
+        p_rebounds: stats.rebounds || 0,
+        p_blocks: stats.blocks || 0,
+        p_steals: stats.steals || 0,
+        p_turnover: stats.turnover || 0
+      });
+    
+    if (error) throw error;
+    
+    return true;
+  } catch (error) {
+    console.error('Ошибка добавления статистики:', error);
+    return false;
+  }
+}
+async function checkDatabaseStructure() {
+  try {
+    console.log("Проверяем структуру базы данных...");
+    
+    // Проверяем существование таблиц
+    const tables = ['tours', 'user_teams', 'managers'];
+    
+    for (const table of tables) {
+      const { data, error } = await supabase
+        .from(table)
+        .select('count')
+        .limit(1);
+      
+      if (error) {
+        console.error(`Таблица ${table} не существует или недоступна:`, error);
+      } else {
+        console.log(`Таблица ${table} доступна`);
+      }
+    }
+  } catch (error) {
+    console.error('Ошибка проверки структуры БД:', error);
+  }
+}
+// Обновлённая функция renderLeaderboard
+function renderLeaderboard(data) {
+  const tableBody = document.getElementById('leaderboard-body');
+  tableBody.innerHTML = '';
+
+  // Заголовок таблицы
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `
+    <th>Место</th>
+    <th>Команда</th>
+    <th>Общие очки</th>
+    <th>Очки по турам</th>
+  `;
+  tableBody.appendChild(headerRow);
+
+  // Данные лидерборда
+  data.forEach((entry, index) => {
+    const row = document.createElement('tr');
+    if (entry.place === 1) row.classList.add('position-1');
+    if (entry.place === 2) row.classList.add('position-2');
+    if (entry.place === 3) row.classList.add('position-3');
+    if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
+
+    // Очки по турам (кликабельно)
+    const tourPointsCells = entry.tourPoints.split(' | ').map((points, tourIndex) => {
+      const tourId = Object.keys(entry.tourPointsById)[tourIndex];
+      return `<span class="tour-points" onclick="viewTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
+    }).join(' | ');
+
+    row.innerHTML = `
+      <td>${entry.place}</td>
+      <td>${entry.teamName}</td>
+      <td>${entry.totalPoints}</td>
+      <td>${tourPointsCells}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  // Настройка ползунка, если туров больше 5
+  if (tours.length > 5) {
+    document.getElementById('tour-slider').style.display = 'block';
+  }
+}
+
+
+async function showLeaderboard() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      showNotification('Пожалуйста, авторизуйтесь', false);
+      return;
+    }
+    currentUserId = user.id;
+
+    // Получаем команду текущего пользователя
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (teamError || !userTeam) {
+      showNotification('У вас нет команды', false);
+      return;
+    }
+
+    currentUserTeamId = userTeam.id;
+
+    // Показываем модальное окно
+    const modal = document.getElementById('leaderboard-modal');
+    modal.style.display = 'flex';
+
+    // Анимация появления
+    anime({
+      targets: '.leaderboard-content',
+      scale: [0.8, 1],
+      opacity: [0, 1],
+      duration: 500,
+      easing: 'easeOutElastic(1, .8)'
+    });
+    // Проверяем структуру БД
+    await checkDatabaseStructure();
+    
+    // Загружаем лидерборд
+    await loadLeaderboard();
+  } catch (error) {
+    console.error('Ошибка открытия лидерборда:', error);
+    showNotification('Ошибка загрузки лидерборда', false);
+  }
+}
+// ИЗМЕНИТЬ функцию - Просмотр состава команды (новая таблица team_players2)
+async function viewTeamDetails(teamId, tourId) {
+  try {
+    // Проверяем, что тур завершён
+    const { data: tour, error: tourError } = await supabase
+      .from('tours')
+      .select('*')
+      .eq('id', tourId)
+      .single();
+
+    if (tourError || !tour) {
+      showNotification('Ошибка загрузки тура', false);
+      return;
+    }
+
+    const now = new Date();
+    const tourEnd = new Date(tour.end_time);
+
+    if (now < tourEnd) {
+      showNotification('Состав можно посмотреть только после окончания тура', false);
+      return;
+    }
+
+    // Загружаем состав команды для этого тура (ИЗМЕНЕНО: team_players2)
+    const { data: teamPlayers, error } = await supabase
+      .from('team_players2')
+      .select('*, players:player_id(*)')
+      .eq('team_id', teamId)
+      .eq('tour_id', tourId);
+
+    if (error || !teamPlayers) {
+      showNotification('Ошибка загрузки состава', false);
+      return;
+    }
+
+    // Загружаем статистику игроков за этот тур
+    const { data: playerStats, error: playerStatsError } = await supabase
+      .from('player_stats')
+      .select('*')
+      .eq('tour', tourId);
+
+    if (playerStatsError || !playerStats) {
+      showNotification('Ошибка загрузки статистики игроков', false);
+      return;
+    }
+    
+    // Рассчитываем очки команды за тур по единой формуле
+    let totalTeamPoints = 0;
+
+    // Отображаем состав с очками
+    const teamDetails = document.getElementById('team-details');
+    const teamPlayersContainer = document.getElementById('team-players');
+    teamPlayersContainer.innerHTML = '';
+
+    for (const tp of teamPlayers) {
+      const player = tp.players;
+      const playerStat = playerStats.find(ps => ps.player_id === player.id);
+
+      // Рассчитываем очки по единой формуле
+      let playerPoints = 0;
+
+      if (playerStat) {
+        playerPoints = calculatePlayerPoints(playerStat);
+      }
+
+      totalTeamPoints += playerPoints;
+
+      const playerDiv = document.createElement('div');
+      playerDiv.className = 'team-player';
+      playerDiv.innerHTML = `
+        <img src="${player.photo_url || 'https://via.placeholder.com/40'}" alt="${player.first_name} ${player.last_name}">
+        <div class="team-player-info">
+          <div class="team-player-name">${player.first_name} ${player.last_name}</div>
+          <div class="team-player-stats">Цена: ${player.price}$</div>
+          <div class="team-player-stats">Очки: ${playerPoints.toFixed(1)}</div>
+        </div>
+      `;
+      teamPlayersContainer.appendChild(playerDiv);
+    }
+
+    // Отображаем общие очки команды за тур
+    const totalPointsDiv = document.createElement('div');
+    totalPointsDiv.className = 'team-total-points';
+    totalPointsDiv.innerHTML = `
+      <h3>Общие очки команды за тур: ${totalTeamPoints.toFixed(1)}</h3>
+    `;
+    teamPlayersContainer.prepend(totalPointsDiv);
+
+    // Анимация появления состава
+    teamDetails.style.display = 'block';
+
+    // Запускаем анимацию для каждого игрока
+    const players = document.querySelectorAll('.team-player');
+    players.forEach((player, index) => {
+      player.style.animationDelay = `${index * 0.1}s`;
+    });
+
+  } catch (error) {
+    console.error('Ошибка просмотра состава:', error);
+    showNotification('Ошибка просмотра состава', false);
+  }
+}
+    // Функция для отображения уведомлений
+    function showNotification(message, isSuccess = true) {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+
+    // Функция для обновления статуса сохранения
+    function updateSaveStatus(message, status = '') {
+      const statusElement = document.getElementById('save-status');
+      statusElement.textContent = message;
+      statusElement.className = `save-status ${status}`;
+    }
+
+    // Функция для проверки дублирования игроков
+    function hasDuplicatePlayers() {
+      const players = Object.values(currentRoster).filter(player => player !== null);
+      const playerIds = players.map(player => player.id);
+      return new Set(playerIds).size !== players.length;
+    }
+
+    // Функция удаления игрока из роли
+function removePlayer(index) {
+  if (index < 0 || index >= selectedPlayers.length) return;
+
+  const player = selectedPlayers[index];
+  selectedPlayers.splice(index, 1);  // Удаляем игрока из массива
+
+  // Обновляем UI
+  updateSelectedPlayersUI();
+  updateSpentBudget();
+
+  showNotification(`Игрок ${player.first_name} ${player.last_name} удалён`, true);
+}
+
+function updateSelectedPlayersUI() {
+  const selectedPlayersList = document.getElementById('selected-players-list');
+  if (!selectedPlayersList) return;
+
+  selectedPlayersList.innerHTML = '';
+
+  // Если игроков меньше 6, добавляем пустые слоты
+  for (let i = 0; i < 6; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'player-slot';
+
+    if (i < selectedPlayers.length) {
+      const player = selectedPlayers[i];
+      slot.innerHTML = `
+        <div class="player-slot-info">
+          <img src="${player.photo_url || 'https://via.placeholder.com/50'}"
+               alt="${player.first_name} ${player.last_name}"
+               class="player-photo">
+          <div class="player-name">${player.first_name} ${player.last_name}</div>
+          <div class="player-price">${player.price}$</div>
+        </div>
+        <button class="remove-btn" onclick="removePlayer(${i})">×</button>
+      `;
+    } else {
+      slot.className = 'empty-slot';
+      slot.innerHTML = '<div class="empty-slot-text">—</div>';
+    }
+
+    selectedPlayersList.appendChild(slot);
+  }
+}
+
+    // Функция для сохранения состава в Supabase
+// ИЗМЕНИТЬ функцию - Сохранение состава в БД (новая таблица team_players2)
+async function saveRosterToDatabase() {
+  try {
+    updateSaveStatus('Сохранение...', 'saving');
+    
+    // Проверка на количество игроков
+    if (selectedPlayers.length !== 6) {
+      showNotification(`Ошибка: должно быть ровно 6 игроков в составе. Сейчас выбрано: ${selectedPlayers.length}`, false);
+      updateSaveStatus(`Ошибка: нужно ${6 - selectedPlayers.length} ${getPlayerWordForm(6 - selectedPlayers.length)}`, 'error-status');
+      return false;
+    }
+
+    // Проверка на дублирование игроков
+    const playerIds = selectedPlayers.map(player => player.id);
+    if (new Set(playerIds).size !== playerIds.length) {
+      showNotification('Ошибка: в составе есть дублирующиеся игроки', false);
+      updateSaveStatus('Ошибка: дублирование игроков', 'error-status');
+      return false;
+    }
+
+    // Получаем текущего пользователя
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      showNotification('Ошибка: пользователь не авторизован', false);
+      updateSaveStatus('Ошибка: не авторизован', 'error-status');
+      return false;
+    }
+
+    // Получаем или создаем команду пользователя
+    let teamId;
+    const { data: existingTeam, error: fetchTeamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (fetchTeamError) {
+      console.error('Ошибка получения команды:', fetchTeamError);
+      showNotification('Ошибка получения команды', false);
+      updateSaveStatus('Ошибка получения команды', 'error-status');
+      return false;
+    }
+
+    if (!existingTeam) {
+      const { data: manager } = await supabase
+        .from('managers')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      const { data: newTeam, error: createTeamError } = await supabase
+        .from('user_teams')
+        .insert([{
+          user_id: user.id,
+          team_name: `Команда ${manager.name}`,
+          manager_name: manager.name
+        }])
+        .select('id')
+        .single();
+      
+      if (createTeamError) {
+        console.error('Ошибка создания команды:', createTeamError);
+        showNotification('Ошибка создания команды', false);
+        updateSaveStatus('Ошибка создания команды', 'error-status');
+        return false;
+      }
+      teamId = newTeam.id;
+    } else {
+      teamId = existingTeam.id;
+    }
+
+    // Получаем текущий тур
+    const { data: currentTour, error: fetchTourError } = await supabase
+      .from('tours')
+      .select('id')
+      .order('start_time', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (fetchTourError || !currentTour) {
+      console.error('Ошибка получения текущего тура:', fetchTourError);
+      showNotification('Ошибка получения текущего тура', false);
+      updateSaveStatus('Ошибка получения тура', 'error-status');
+      return false;
+    }
+
+    // Очищаем старые связи для этой команды и тура (ИЗМЕНЕНО: team_players2)
+    const { error: deleteError } = await supabase
+      .from('team_players2')
+      .delete()
+      .eq('team_id', teamId)
+      .eq('tour_id', currentTour.id);
+    
+    if (deleteError) {
+      console.error('Ошибка очистки старых связей:', deleteError);
+      showNotification('Ошибка очистки старых связей', false);
+      updateSaveStatus('Ошибка очистки связей', 'error-status');
+      return false;
+    }
+
+    // Формируем массив для новых связей
+    const teamPlayers = selectedPlayers.map(player => ({
+      team_id: teamId,
+      player_id: player.id,
+      tour_id: currentTour.id,
+    }));
+
+    // Сохраняем новые связи (ИЗМЕНЕНО: team_players2)
+    const { error: insertError } = await supabase
+      .from('team_players2')
+      .insert(teamPlayers);
+    
+    if (insertError) {
+      console.error('Ошибка сохранения связей:', insertError);
+      showNotification(`Ошибка сохранения: ${insertError.message}`, false);
+      updateSaveStatus('Ошибка сохранения', 'error-status');
+      return false;
+    }
+    
+    // Успешное сохранение
+    showNotification('Состав успешно сохранен!');
+    updateSaveStatus('Сохранено', 'saved');
+
+    // Анимация кнопки сохранения
+    const saveBtn = document.getElementById('save-roster');
+    anime({
+      targets: saveBtn,
+      background: ['linear-gradient(to right, #4CAF50, #2E7D32)', 'linear-gradient(to right, var(--orange), var(--orange-dark))'],
+      duration: 2000,
+      easing: 'easeInOutQuad'
+    });
+
+    setTimeout(() => {
+      updateSaveStatus('', '');
+    }, 3000);
+
+    return true;
+  } catch (error) {
+    console.error('Непредвиденная ошибка:', error);
+    showNotification('Непредвиденная ошибка при сохранении', false);
+    updateSaveStatus('Ошибка сохранения', 'error-status');
+    return false;
+  }
+}
+// ИЗМЕНИТЬ функцию - Загрузка сохраненного состава (новая таблица team_players2)
+async function loadSavedRoster() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return;
+    
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (teamError || !userTeam) {
+      console.log('Сохраненный состав не найден');
+      return;
+    }
+    
+    // Получаем текущий тур
+    const { data: currentTour, error: tourError } = await supabase
+      .from('tours')
+      .select('id')
+      .order('start_time', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (tourError || !currentTour) return;
+    
+    // Загружаем игроков команды для текущего тура (ИЗМЕНЕНО: team_players2)
+    const { data: teamPlayers, error: playersError } = await supabase
+      .from('team_players2')
+      .select('player_id')
+      .eq('team_id', userTeam.id)
+      .eq('tour_id', currentTour.id);
+    
+    if (playersError || !teamPlayers || teamPlayers.length === 0) {
+      console.log('Игроки не найдены');
+      return;
+    }
+    
+    // Загружаем данные игроков
+    const playerIds = teamPlayers.map(tp => tp.player_id);
+    const { data: players, error: playersDataError } = await supabase
+      .from('players')
+      .select('*, teams(*)')
+      .in('id', playerIds);
+    
+    if (playersDataError || !players) {
+      console.log('Ошибка загрузки данных игроков');
+      return;
+    }
+    
+    // Заполняем выбранных игроков
+    selectedPlayers = players;
+    
+    // Обновляем UI
+    updateSelectedPlayersUI();
+    updateSpentBudget();
+    
+    console.log('Сохраненный состав загружен');
+  } catch (error) {
+    console.error('Ошибка загрузки состава:', error);
+  }
+}
+    // Функция для отложенного автоматического сохранения
+    function scheduleAutoSave() {
+      // Очищаем предыдущий таймер
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+      
+      // Устанавливаем новый таймер на 2 секунды
+      autoSaveTimeout = setTimeout(() => {
+        saveRosterToDatabase();
+      }, 2000);
+      
+      updateSaveStatus('Сохранение через 2 сек...', 'saving');
+    }
+	    // Функция для показа модального окна с правилами
+    function showRules() {
+      const modal = document.getElementById('rules-modal');
+      modal.style.display = 'flex';
+      
+      anime({
+        targets: '.rules-content',
+        scale: [0.8, 1],
+        opacity: [0, 1],
+        duration: 500,
+        easing: 'easeOutElastic(1, .8)'
+      });
+    }
+
+    // Функция для закрытия модального окна с правилами
+// Функция для закрытия модального окна с правилами
+function closeRules() {
+  const modal = document.getElementById('rules-modal');
+  const content = document.querySelector('.rules-content');
+
+  anime({
+    targets: content,
+    scale: 0.8,
+    opacity: 0,
+    duration: 300,
+    complete: function() {
+      modal.style.display = 'none';
+      content.style.transform = 'scale(0.9)';
+      content.style.opacity = '0';
+    }
+  });
+}
+
+
+    // Функция для проверки лимита игроков из одной команды
+    function checkTeamLimit(player, role) {
+      // Получаем команду выбранного игрока
+      const playerTeam = player.teams?.name;
+      if (!playerTeam) return true; // Если команда не определена, пропускаем проверку
+
+      // Считаем количество игроков из этой команды в текущем составе
+      let sameTeamCount = 0;
+      for (const [r, p] of Object.entries(currentRoster)) {
+        if (p && p.teams?.name === playerTeam) {
+          sameTeamCount++;
+        }
+      }
+
+      // Если игрок уже есть в составе, не считаем его повторно
+      if (currentRoster[role] && currentRoster[role].id === player.id) {
+        sameTeamCount--;
+      }
+
+      // Проверяем лимит
+      if (sameTeamCount >= 3) {
+        // Показываем предупреждение
+        showNotification(`Лимит игроков из команды ${playerTeam} исчерпан (максимум 3)`, false);
+        
+        // Показываем предупреждение в UI
+        const warningElement = document.getElementById('team-limit-warning');
+        if (warningElement) {
+          warningElement.textContent = `Лимит игроков из ${playerTeam} исчерпан`;
+          warningElement.style.display = 'block';
+          
+          // Скрываем предупреждение через 5 секунд
+          setTimeout(() => {
+            warningElement.style.display = 'none';
+          }, 5000);
+        }
+        
+        return false;
+      }
+      
+      // Скрываем предупреждение, если оно было показано ранее
+      const warningElement = document.getElementById('team-limit-warning');
+      if (warningElement) {
+        warningElement.style.display = 'none';
+      }
+      
+      return true;
+    }
+    // Модифицированная функция назначения игрока на роль
+    function assignPlayerToRole(player, role, autoSave = true) {
+      // Проверка на дублирование игроков
+      for (const [r, p] of Object.entries(currentRoster)) {
+        if (p && p.id === player.id && r !== role) {
+          showNotification('Этот игрок уже выбран на другой позиции', false);
+          return false;
+        }
+      }
+	      // Проверка лимита игроков из одной команды
+      if (!checkTeamLimit(player, role)) {
+        return false;
+      }
+      // Обновляем текущий состав
+      currentRoster[role] = player;
+
+      // Обновляем UI
+      const slot = document.getElementById(`slot-${role}`);
+      const emptySlot = slot.querySelector('.empty-slot');
+      
+      // Скрываем текст и отображаем информацию об игроке
+      emptySlot.style.display = 'none';
+      
+      // Создаем элемент с информацией об игроке
+      const playerInfo = document.createElement('div');
+      playerInfo.className = 'player-info';
+      playerInfo.innerHTML = `
+        <img src="${player.photo_url || 'https://via.placeholder.com/50'}" alt="${player.first_name} ${player.last_name}" class="player-photo">
+        <div class="player-name">${player.first_name} ${player.last_name}</div>
+        <div class="player-price">${player.price}$</div>
+      `;
+      
+      // Анимация появления
+      playerInfo.style.opacity = '0';
+      playerInfo.style.transform = 'translateY(20px)';
+      slot.appendChild(playerInfo);
+      
+      anime({
+        targets: playerInfo,
+        opacity: 1,
+        translateY: 0,
+        duration: 500,
+        easing: 'easeOutQuad'
+      });
+
+      // Пересчитываем бюджет
+      updateSpentBudget();
+
+      // Если autoSave=true, планируем автоматическое сохранение
+      if (autoSave) {
+        scheduleAutoSave();
+      }
+
+      return true;
+    }
+    // Добавляем элемент для отображения предупреждения о лимите команды
+    document.addEventListener("DOMContentLoaded", function() {
+      // Добавляем элемент для предупреждения после Starting VI
+      const startingViContainer = document.querySelector('.starting-vi-container');
+      if (startingViContainer) {
+        const warningElement = document.createElement('div');
+        warningElement.id = 'team-limit-warning';
+        warningElement.className = 'team-limit-warning';
+        warningElement.style.display = 'none';
+        startingViContainer.parentNode.insertBefore(warningElement, startingViContainer.nextSibling);
+      }
+    });
+    // Инициализация страницы
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert("Пожалуйста, авторизуйтесь.");
+          window.location.href = "index.html";
+          return;
+        }
+
+        // Загружаем роли
+        await loadRoles();
+
+        // Загружаем игроков
+        await loadPlayers();
+
+        // Загружаем количество менеджеров
+        await loadManagersCount();
+
+        // Загружаем текущую команду пользователя
+        await loadUserTeam(user.id);
+
+        // Загружаем сохраненный состав
+        setTimeout(() => {
+          loadSavedRoster();
+        }, 1000);
+
+        // Отображаем таблицу игроков
+        renderPlayersTable();
+
+        // Обработчик для кнопки ручного сохранения
+        document.getElementById('save-roster')?.addEventListener('click', function() {
+          saveRosterToDatabase();
+        });
+
+        // Добавляем обработчики сортировки для заголовков таблицы
+        document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+          header.addEventListener('click', () => {
+            const column = header.getAttribute('data-sort');
+            sortTable(column);
+          });
+        });
+
+        // Анимация появления элементов
+        anime({
+          targets: '.animate-fadeIn',
+          opacity: [0, 1],
+          translateY: [20, 0],
+          delay: anime.stagger(100),
+          duration: 800,
+          easing: 'easeOutQuad'
+        });
+      } catch (error) {
+        console.error("Ошибка инициализации:", error);
+      }
+    });
+
+    // Функция сортировки таблицы
+function sortTable(column) {
+  const tbody = document.getElementById('players-table-body');
+  if (!tbody) return;  // Проверка на существование tbody
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  if (rows.length === 0) return;  // Проверка на пустоту
+
+  const header = document.querySelector(`th[data-sort="${column}"]`);
+  if (!header) return;  // Проверка на существование заголовка
+
+  // Сбрасываем классы сортировки
+  document.querySelectorAll('.players-table th').forEach(h => {
+    h.classList.remove('sort-asc', 'sort-desc');
+  });
+
+  // Определяем направление сортировки
+  let direction = 'asc';
+  if (currentSort.column === column) {
+    direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+  }
+
+  header.classList.add(`sort-${direction}`);
+  currentSort = { column, direction };
+
+  // Сортируем строки с проверкой на существование ячеек
+  rows.sort((a, b) => {
+    const aCell = a.querySelector(`td:nth-child(${getColumnIndex(column)})`);
+    const bCell = b.querySelector(`td:nth-child(${getColumnIndex(column)})`);
+
+    if (!aCell || !bCell) return 0;  // Если ячейки не существуют, не сортируем
+
+    let aValue = aCell.textContent.trim();
+    let bValue = bCell.textContent.trim();
+
+    // Преобразуем числовые значения
+    if (column !== 'name' && column !== 'photo' && column !== 'add') {
+      aValue = aValue.replace(/[^\d.-]/g, '');
+      bValue = bValue.replace(/[^\d.-]/g, '');
+      aValue = parseFloat(aValue) || 0;
+      bValue = parseFloat(bValue) || 0;
+    }
+
+    return direction === 'asc' ? aValue - bValue : bValue - aValue;
+  });
+
+  // Очищаем и добавляем отсортированные строки
+  while (tbody.firstChild) {
+    tbody.removeChild(tbody.firstChild);
+  }
+
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+    // Получение индекса колонки по имени
+    function getColumnIndex(columnName) {
+      const headers = document.querySelectorAll('.players-table th');
+      for (let i = 0; i < headers.length; i++) {
+        if (headers[i].getAttribute('data-sort') === columnName) {
+          return i + 1;
+        }
+      }
+      return 1;
+    }
+
+    // Загрузка ролей
+    async function loadRoles() {
+      const { data, error } = await supabase
+        .from('roles')
+        .select('*');
+
+      if (error) {
+        console.error("Ошибка загрузки ролей:", error);
+        return;
+      }
+
+      roles = data;
+    }
+
+// Исправленная функция загрузки игроков
+async function loadPlayers() {
+  try {
+    // 1. Загружаем игроков с данными о командах
+    const { data: playersData, error: playersError } = await supabase
+      .from('players')
+      .select('*, teams(*)');
+
+    if (playersError) throw playersError;
+
+    players = playersData;
+
+    // 2. Получаем уникальные команды
+    const teamsSet = new Set();
+    players.forEach(player => {
+      if (player.teams?.name) {
+        teamsSet.add(player.teams.name);
+      }
+    });
+
+    // 3. Заполняем фильтр командами
+    const teamFilter = document.getElementById('filter-team');
+
+    // Очищаем существующие опции (кроме "Все")
+    while (teamFilter.options.length > 1) {
+      teamFilter.remove(1);
+    }
+
+    // Добавляем команды в фильтр в алфавитном порядке
+    Array.from(teamsSet).sort().forEach(teamName => {
+      const option = document.createElement('option');
+      option.value = teamName;
+      option.textContent = teamName;
+      teamFilter.appendChild(option);
+    });
+
+    return playersData;
+
+  } catch (error) {
+    console.error("Ошибка загрузки игроков:", error);
+    return [];
+  }
+}
+
+
+
+    // Загрузка количества менеджеров
+    async function loadManagersCount() {
+      const { count, error } = await supabase
+        .from('user_teams')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        console.error("Ошибка загрузки количества менеджеров:", error);
+        return;
+      }
+
+      managersCount = count;
+    }
+
+    // Загрузка текущей команды пользователя
+    async function loadUserTeam(userId) {
+      const { data: userTeam, error: userTeamError } = await supabase
+        .from('user_teams')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (userTeamError) {
+        console.error("Ошибка загрузки команды пользователя:", userTeamError);
+        return;
+      }
+
+      const { data: teamPlayers, error: teamPlayersError } = await supabase
+        .from('team_players')
+        .select('*')
+        .eq('team_id', userTeam.id);
+
+      if (teamPlayersError) {
+        console.error("Ошибка загрузки игроков команды:", teamPlayersError);
+        return;
+      }
+
+      // Заполняем выбранных игроков
+      for (const tp of teamPlayers) {
+        const player = players.find(p => p.id === tp.player_id);
+        if (player) {
+          const role = roles.find(r => r.id === tp.role_id);
+          if (role) {
+            currentRoster[role.name] = player;
+            selectedPlayers[role.name] = {
+              playerId: player.id,
+              playerName: `${player.first_name} ${player.last_name}`,
+              playerPrice: player.price,
+              playerPhoto: player.photo_url,
+            };
+            
+            // Обновляем UI
+            const slot = document.getElementById(`slot-${role.name}`);
+            if (slot) {
+              const emptySlot = slot.querySelector('.empty-slot');
+              emptySlot.style.display = 'none';
+              
+              const playerInfo = document.createElement('div');
+              playerInfo.className = 'player-info';
+              playerInfo.innerHTML = `
+                <img src="${player.photo_url || 'https://via.placeholder.com/50'}" alt="${player.first_name} ${player.last_name}" class="player-photo">
+                <div class="player-name">${player.first_name} ${player.last_name}</div>
+                <div class="player-price">${player.price}$</div>
+              `;
+              slot.appendChild(playerInfo);
+            }
+          }
+        }
+      }
+
+      // Обновляем потраченный бюджет
+      updateSpentBudget();
+    }
+
+    // Обновление потраченного бюджета
+    function updateSpentBudget() {
+      const spentBudget = Object.values(currentRoster).reduce((sum, player) => {
+        return player ? sum + player.price : sum;
+      }, 0);
+      
+      document.getElementById('spent-budget').textContent = spentBudget;
+      document.getElementById('spent-money').textContent = spentBudget;
+      
+      // Анимация изменения бюджета
+      anime({
+        targets: '#spent-budget, #spent-money',
+        scale: [1.2, 1],
+        duration: 500,
+        easing: 'easeOutElastic(1, .8)'
+      });
+    }
+
+    // Отображение таблицы игроков
+// Функция для фильтрации игроков по команде
+function filterPlayersByTeam() {
+  const teamFilter = document.getElementById('filter-team').value;
+  const rows = document.querySelectorAll('#players-table-body tr');
+
+  rows.forEach(row => {
+    const teamName = row.querySelector('td:nth-child(3) img')?.alt ||
+                     row.querySelector('td:nth-child(3) span')?.textContent.split(' ').slice(1).join(' ');
+    if (!teamFilter || teamName.includes(teamFilter)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+// Функция для добавления игрока в команду
+function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamName) {
+  try {
+    // Проверка на дублирование игроков
+    if (selectedPlayers.some(p => p.id === playerId)) {
+      showNotification('Этот игрок уже выбран', false);
+      return false;
+    }
+
+    // Проверка на максимальное количество игроков (6)
+    if (selectedPlayers.length >= 6) {
+      showNotification('Максимум 6 игроков в команде', false);
+      return false;
+    }
+
+    // Проверка бюджета
+    const spentBudget = selectedPlayers.reduce((sum, p) => sum + p.price, 0);
+    if (spentBudget + price > 70) {
+      showNotification('Превышен бюджет в 70$', false);
+      return false;
+    }
+
+    // Добавляем игрока в массив
+    selectedPlayers.push({
+      id: playerId,
+      first_name: firstName,
+      last_name: lastName,
+      price: price,
+      photo_url: photoUrl,
+      teams: { name: teamName }
+    });
+
+    // Обновляем UI
+    updateSelectedPlayersUI();
+    updateSpentBudget();
+    showNotification(`${firstName} ${lastName} добавлен в команду`, true);
+    return true;
+  } catch (error) {
+    console.error('Ошибка добавления игрока:', error);
+    showNotification('Ошибка добавления игрока', false);
+    return false;
+  }
+}
+// Модифицированная функция renderPlayersTable
+async function renderPlayersTable() {
+  const tableBody = document.getElementById("players-table-body");
+  tableBody.innerHTML = "<tr></tr>";
+
+  try {
+    // Получаем текущее значение фильтра
+    const teamFilterValue = document.getElementById('filter-team').value;
+
+    // 1. Загружаем игроков с данными о командах
+    const { data: players, error: playersError } = await supabase
+      .from('players')
+      .select('*, teams(*)');
+
+    if (playersError) throw playersError;
+
+    // 2. Загружаем статистику игроков
+    const { data: allStats, error: statsError } = await supabase
+      .from('player_stats')
+      .select('player_id, points, threes, assists, rebounds, steals, blocks, turnover');
+
+    if (statsError) throw statsError;
+
+    // 3. Группируем статистику
+    const statsByPlayer = allStats.reduce((acc, stat) => {
+      if (!acc[stat.player_id]) acc[stat.player_id] = [];
+      acc[stat.player_id].push(stat);
+      return acc;
+    }, {});
+
+    // 4. Фильтруем игроков
+    const filteredPlayers = teamFilterValue
+      ? players.filter(player => player.teams?.name === teamFilterValue)
+      : players;
+
+    // 5. Обрабатываем каждого игрока
+    filteredPlayers.forEach(player => {
+      const playerStats = statsByPlayer[player.id] || [];
+      const gamesCount = playerStats.length;
+
+      // Рассчитываем средние значения
+	  const avgAvg = gamesCount > 0 ?
+  (playerStats.reduce((sum, s) =>
+    sum + (
+      (s.points || 0) +
+      1.5 * (s.assists || 0) +
+      1.3 * (s.rebounds || 0) +
+      3 * (s.steals || 0) +
+      3 * (s.blocks || 0) -
+      2 * (s.turnover || 0)
+    ), 0) / gamesCount).toFixed(1) : 0;
+      const avgPoints = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgThrees = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgAssists = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgRebounds = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgSteals = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgBlocks = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgTurnover = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : 0;
+const row = document.createElement("tr");
+row.innerHTML = `
+  <td>
+    <button class="select-button" onclick="addPlayerToTeam(${player.id}, '${player.first_name.replace(/'/g, "\\'")}', '${player.last_name.replace(/'/g, "\\'")}', ${player.price}, '${player.photo_url || ''}', '${player.teams?.name || ''}')">+</button>
+  </td>
+  <td>
+    <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
+         alt="${player.first_name} ${player.last_name}"
+         width="40" height="40" style="border-radius: 50%;">
+  </td>
+  <td>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      ${player.teams?.logo_url ?
+        `<img src="${player.teams.logo_url}" alt="${player.teams.name}" width="24" height="24" style="border-radius: 50%;">` : ''}
+      <span class="player-name-cell" onclick="openPlayerPopup(${player.id})" style="cursor: pointer; color: var(--white); transition: color 0.3s ease;">
+        ${player.first_name} ${player.last_name}
+      </span>
+    </div>
+  </td>
+  <td>${player.price || 0}$</td>
+  <td>${avgAvg}</td> 
+  <td>${avgPoints}</td>           <!-- AVG (средние очки) -->
+  <td>${avgThrees}</td>          <!-- 3-очк (средние трёхочковые) -->
+  <td>${avgAssists}</td>         <!-- Ассисты (средние передачи) -->
+  <td>${avgRebounds}</td>        <!-- Подборы (средние подборы) -->
+  <td>${avgSteals}</td>          <!-- Перехваты (средние перехваты) -->
+  <td>${avgBlocks}</td>          <!-- Блоки (средние блоки) -->
+  <td>${avgTurnover}</td>        <!-- Потери (средние потери) -->
+  <td>${gamesCount > 0 ? Math.round((1 / gamesCount) * 100) : 0}%</td>  <!-- % выбора -->
+`;
+      // Добавляем обработчик наведения на имя игрока
+      const nameCell = row.querySelector('.player-name-cell');
+      nameCell.addEventListener('mouseenter', () => {
+        nameCell.style.color = 'var(--yellow)';
+        nameCell.style.textShadow = '0 0 5px rgba(253, 230, 0, 0.5)';
+      });
+
+      nameCell.addEventListener('mouseleave', () => {
+        nameCell.style.color = 'var(--white)';
+        nameCell.style.textShadow = 'none';
+      });
+
+      tableBody.appendChild(row);
+    });
+
+  } catch (error) {
+    console.error("Ошибка загрузки данных:", error);
+    tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: var(--gray);">Ошибка загрузки данных</td></tr>';
+  }
+}
+
+    // Расчёт средней статистики игрока
+async function calculateAverageStats(playerId) {
+  const { data: playerStats, error } = await supabase
+    .from('player_stats')
+    .select('points, threes, assists, rebounds, blocks, steals, turnover')
+    .eq('player_id', playerId);
+
+  if (error || !playerStats || playerStats.length === 0) {
+    return {
+      avgPoints: 0,
+      avgThrees: 0,
+      avgAssists: 0,
+      avgRebounds: 0,
+      avgBlocks: 0,
+      avgSteals: 0,
+      avgTurnover: 0,
+    };
+  }
+
+  return {
+    avgPoints: playerStats.reduce((sum, stat) => sum + stat.points, 0) / playerStats.length,
+    avgThrees: playerStats.reduce((sum, stat) => sum + stat.threes, 0) / playerStats.length,
+    avgAssists: playerStats.reduce((sum, stat) => sum + stat.assists, 0) / playerStats.length,
+    avgRebounds: playerStats.reduce((sum, stat) => sum + stat.rebounds, 0) / playerStats.length,
+    avgBlocks: playerStats.reduce((sum, stat) => sum + stat.blocks, 0) / playerStats.length,
+    avgSteals: playerStats.reduce((sum, stat) => sum + stat.steals, 0) / playerStats.length,
+    avgTurnover: playerStats.reduce((sum, stat) => sum + stat.turnover, 0) / playerStats.length,
+  };
+}
+
+
+    // Расчёт общего среднего показателя игрока
+    function calculatePlayerAverage(player) {
+      // Это упрощенная версия - в реальном приложении нужно использовать статистику из базы данных
+      return (player.price / 10) + Math.random() * 10;
+    }
+
+    // Расчёт процента выбора игрока
+    async function calculateSelectionPercentage(playerId) {
+      const { count, error } = await supabase
+        .from('team_players')
+        .select('*', { count: 'exact', head: true })
+        .eq('player_id', playerId);
+
+      if (error || managersCount === 0) {
+        return 0;
+      }
+
+      return Math.round((count / managersCount) * 100);
+    }
+	// Функция для открытия popup с информацией об игроке
+async function openPlayerPopup(playerId) {
+  try {
+    // Показываем оверлей
+    const overlay = document.getElementById('popup-overlay');
+    overlay.classList.add('show');
+
+    // Получаем данные игрока
+    const { data: player, error: playerError } = await supabase
+      .from('players')
+      .select('*, teams(name)')
+      .eq('id', playerId)
+      .single();
+
+    if (playerError) throw playerError;
+
+    // Получаем статистику игрока
+    const { data: stats, error: statsError } = await supabase
+      .from('player_stats')
+      .select('*, tours(round_number)')
+      .eq('player_id', playerId)
+      .order('tour', { ascending: false });
+
+    if (statsError) throw statsError;
+
+    // Получаем данные о турах для статистики
+    const tourIds = stats.map(s => s.tour);
+    const { data: tours, error: toursError } = await supabase
+      .from('tours')
+      .select('id, round_number')
+      .in('id', tourIds);
+
+    if (toursError) throw toursError;
+
+    // Заполняем данные в popup
+    document.getElementById('popup-player-photo').src = player.photo_url || 'https://via.placeholder.com/80';
+    document.getElementById('popup-player-name').textContent = `${player.first_name} ${player.last_name}`;
+    document.getElementById('popup-player-position').textContent = `Позиция: ${player.position || 'Не указана'}`;
+    document.getElementById('popup-player-team').textContent = `Команда: ${player.teams?.name || 'Не указана'}`;
+    document.getElementById('popup-scout-report').textContent = player.scout || 'Скаут отчёт отсутствует';
+
+    // Заполняем статистику по турам
+    const tourStatsBody = document.querySelector('#popup-tour-stats tbody');
+    tourStatsBody.innerHTML = '';
+
+    if (stats.length > 0) {
+      stats.forEach(stat => {
+        const tour = tours.find(t => t.id === stat.tour);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${tour ? `Тур ${tour.round_number}` : 'Н/Д'}</td>
+          <td>${stat.points || 0}</td>
+          <td>${stat.threes || 0}</td>
+          <td>${stat.assists || 0}</td>
+          <td>${stat.rebounds || 0}</td>
+          <td>${stat.steals || 0}</td>
+          <td>${stat.blocks || 0}</td>
+          <td>${stat.turnover || 0}</td>
+        `;
+        tourStatsBody.appendChild(row);
+      });
+    } else {
+      tourStatsBody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Статистика отсутствует</td></tr>';
+    }
+
+    // Рассчитываем среднюю статистику
+    const avgStats = calculateAverageStatsFromArray(stats);
+    const avgStatsContainer = document.getElementById('popup-avg-stats');
+    avgStatsContainer.innerHTML = `
+      <div><strong>Очки:</strong> ${avgStats.avgPoints.toFixed(1)}</div>
+      <div><strong>3-очк:</strong> ${avgStats.avgThrees.toFixed(1)}</div>
+      <div><strong>Ассисты:</strong> ${avgStats.avgAssists.toFixed(1)}</div>
+      <div><strong>Подборы:</strong> ${avgStats.avgRebounds.toFixed(1)}</div>
+      <div><strong>Перехваты:</strong> ${avgStats.avgSteals.toFixed(1)}</div>
+      <div><strong>Блоки:</strong> ${avgStats.avgBlocks.toFixed(1)}</div>
+      <div><strong>Потери:</strong> ${avgStats.avgTurnover.toFixed(1)}</div>
+      <div><strong>Игры:</strong> ${stats.length}</div>
+    `;
+
+    // Рассчитываем суммарную статистику
+    const totalStats = calculateTotalStatsFromArray(stats);
+    const totalStatsContainer = document.getElementById('popup-total-stats');
+    totalStatsContainer.innerHTML = `
+      <div><strong>Очки:</strong> ${totalStats.totalPoints}</div>
+      <div><strong>3-очк:</strong> ${totalStats.totalThrees}</div>
+      <div><strong>Ассисты:</strong> ${totalStats.totalAssists}</div>
+      <div><strong>Подборы:</strong> ${totalStats.totalRebounds}</div>
+      <div><strong>Перехваты:</strong> ${totalStats.totalSteals}</div>
+      <div><strong>Блоки:</strong> ${totalStats.totalBlocks}</div>
+      <div><strong>Потери:</strong> ${totalStats.totalTurnover}</div>
+      <div><strong>Игры:</strong> ${stats.length}</div>
+    `;
+
+    // Показываем popup с анимацией
+    const popup = document.getElementById('player-popup');
+    popup.style.display = 'block';
+    setTimeout(() => {
+      popup.classList.add('show');
+    }, 10);
+
+  } catch (error) {
+    console.error('Ошибка загрузки данных игрока:', error);
+    showNotification('Ошибка загрузки данных игрока', false);
+  }
+}
+
+// Функция для закрытия popup
+function closePlayerPopup() {
+  const popup = document.getElementById('player-popup');
+  const overlay = document.getElementById('popup-overlay');
+
+  popup.classList.remove('show');
+  popup.classList.add('hide');
+  overlay.classList.remove('show');
+  overlay.classList.add('hide');
+
+  setTimeout(() => {
+    popup.style.display = 'none';
+    popup.classList.remove('hide');
+  }, 200);
+}
+
+// Вспомогательная функция для расчета средней статистики из массива
+function calculateAverageStatsFromArray(stats) {
+  if (stats.length === 0) {
+    return {
+      avgPoints: 0,
+      avgThrees: 0,
+      avgAssists: 0,
+      avgRebounds: 0,
+      avgSteals: 0,
+      avgBlocks: 0,
+      avgTurnover: 0
+    };
+  }
+
+  return {
+    avgPoints: stats.reduce((sum, s) => sum + (s.points || 0), 0) / stats.length,
+    avgThrees: stats.reduce((sum, s) => sum + (s.threes || 0), 0) / stats.length,
+    avgAssists: stats.reduce((sum, s) => sum + (s.assists || 0), 0) / stats.length,
+    avgRebounds: stats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / stats.length,
+    avgSteals: stats.reduce((sum, s) => sum + (s.steals || 0), 0) / stats.length,
+    avgBlocks: stats.reduce((sum, s) => sum + (s.blocks || 0), 0) / stats.length,
+    avgTurnover: stats.reduce((sum, s) => sum + (s.turnover || 0), 0) / stats.length
+  };
+}
+
+// Вспомогательная функция для расчета суммарной статистики из массива
+function calculateTotalStatsFromArray(stats) {
+  return {
+    totalPoints: stats.reduce((sum, s) => sum + (s.points || 0), 0),
+    totalThrees: stats.reduce((sum, s) => sum + (s.threes || 0), 0),
+    totalAssists: stats.reduce((sum, s) => sum + (s.assists || 0), 0),
+    totalRebounds: stats.reduce((sum, s) => sum + (s.rebounds || 0), 0),
+    totalSteals: stats.reduce((sum, s) => sum + (s.steals || 0), 0),
+    totalBlocks: stats.reduce((sum, s) => sum + (s.blocks || 0), 0),
+    totalTurnover: stats.reduce((sum, s) => sum + (s.turnover || 0), 0)
+  };
+}
+
+  </script>
+</body>
+</html>

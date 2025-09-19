@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="image/img.jpg" type="image/jpg">
+  <title>LineUP Fantasy League's - Вход и Регистрация</title>
+  
+  <link rel="stylesheet" href="style.css">
+  
+</head>
+<body class="auth-page">
+
+  <header class="site-header">
+    <div class="logo-left">
+      <img src="logo-left.png" alt="Logo Left" loading="lazy" decoding="async" onerror="this.remove()">
+    </div>
+    <h1>LineUP Fantasy Leagues</h1>
+    <div class="logo-right">
+      <img src="logo-right.png" alt="Logo Right" loading="lazy" decoding="async" onerror="this.remove()">
+    </div>
+  </header>
+
+<main class="auth-container">
+  <!-- Форма регистрации -->
+  <section class="form-section">
+    <h2>Регистрация</h2>
+    <form id="register-form">
+      <input type="text" id="register-username" placeholder="Никнейм" required>
+      <input type="email" id="register-email" placeholder="Email" required>
+      <input type="password" id="register-password" placeholder="Пароль" required>
+      <button type="submit" class="btn-primary">Зарегистрироваться</button>
+    </form>
+  </section>
+
+  <!-- Форма входа -->
+  <section class="form-section">
+    <h2>Вход</h2>
+    <form id="login-form">
+      <input type="email" id="login-email" placeholder="Email" required>
+      <input type="password" id="login-password" placeholder="Пароль" required>
+      <button type="submit" class="btn-secondary">Войти</button>
+    </form>
+  </section>
+
+  <!-- Блок с картинками (строго под формами) -->
+  <section class="preview-images">
+    <div class="preview-item">
+      <img src="https://zbs.bet/wp-content/uploads/2021/09/statistika-v-basketbole.jpg" alt="Превью 1" loading="lazy" decoding="async" onerror="this.remove()">
+      <p>Составление команды</p>
+    </div>
+    <div class="preview-item">
+      <img src="https://zbs.bet/wp-content/uploads/2021/09/statistika-v-basketbole.jpg" alt="Превью 2" loading="lazy" decoding="async" onerror="this.remove()">
+      <p>Статистика игроков</p>
+    </div>
+    <div class="preview-item">
+      <img src="https://zbs.bet/wp-content/uploads/2021/09/statistika-v-basketbole.jpg" alt="Превью 3" loading="lazy" decoding="async" onerror="this.remove()">
+      <p>Рейтинг лиги</p>
+    </div>
+  </section>
+</main>
+
+  <footer>
+    <p>© 2025 LineUP Fantasy Leagues</p>
+  </footer>
+
+  <!-- Скрипты -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabaseClient.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const registerForm = document.getElementById("register-form");
+    const loginForm = document.getElementById("login-form");
+
+    const ensureClient = () => {
+      if (!window.supabase || !window.supabase.auth) {
+        alert("Ошибка инициализации Supabase");
+        return false;
+      }
+      return true;
+    };
+
+    // Создание записи user_team
+    async function ensureUserTeam(user) {
+      if (!user?.id) return;
+      try {
+        const { data: existingTeam } = await supabase
+          .from('user_teams')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (!existingTeam) {
+          const username = user.user_metadata?.username || "Игрок";
+          await supabase.from('user_teams').insert([{ user_id: user.id, team_name: username }]);
+        }
+      } catch (err) {
+        console.error("Ошибка user_team:", err);
+      }
+    }
+
+    // Регистрация
+    registerForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!ensureClient()) return;
+
+      const username = document.getElementById("register-username").value.trim();
+      const email = document.getElementById("register-email").value.trim();
+      const password = document.getElementById("register-password").value;
+
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { username } }
+        });
+
+        if (error) { alert("Ошибка регистрации: " + error.message); return; }
+        if (data?.user) await ensureUserTeam(data.user);
+
+        alert("Регистрация успешна! Подтвердите email, затем войдите.");
+      } catch (err) {
+        console.error("Ошибка регистрации:", err);
+        alert("Не удалось завершить регистрацию.");
+      }
+    });
+
+    // Вход
+    loginForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!ensureClient()) return;
+
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) { alert("Ошибка входа: " + error.message); return; }
+
+        const user = data.user || data.session?.user;
+        if (!user) { alert("Не удалось получить пользователя."); return; }
+
+        await ensureUserTeam(user);
+
+        // **редирект на дашборд**
+        window.location.href = "pick.html";
+
+      } catch (err) {
+        console.error("Ошибка входа:", err);
+        alert("Не удалось войти.");
+      }
+    });
+
+
+  });
+  </script>
+</body>
+</html>
+
+

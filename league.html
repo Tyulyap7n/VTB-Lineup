@@ -1,0 +1,3661 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIBA Fantasy - Лига</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --purple: #633EDC;
+      --orange: #FE641C;
+      --yellow: #FDE600;
+      --black: #1c1c1c;
+      --white: #ffffff;
+      --gray: #333;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+	
+    body {
+      background-color: var(--black);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    header {
+      background-color: var(--purple);
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 60px;
+      position: relative;
+      z-index: 10;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo img {
+      height: 40px;
+    }
+    .league-code {
+      font-weight: bold;
+      color: var(--yellow);
+      font-size: 14px;
+    }
+    .account-link {
+      color: var(--yellow);
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .main-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    aside {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      width: 60px;
+      height: calc(100vh - 120px);
+      background-color: var(--orange);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      overflow-y: auto;
+      transition: width 0.3s ease;
+    }
+    aside:hover {
+      width: 150px;
+    }
+    .sidebar-item {
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      color: var(--white);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 5px;
+    }
+    .sidebar-item:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+    .sidebar-item img {
+      width: 24px;
+      height: 24px;
+    }
+    .sidebar-item span {
+      display: none;
+      font-size: 12px;
+    }
+    aside:hover .sidebar-item span {
+      display: block;
+    }
+    main {
+      margin-left: 60px;
+      width: calc(100% - 60px);
+      padding: 20px;
+      flex: 1;
+      transition: margin-left 0.3s ease, width 0.3s ease;
+      overflow-y: auto;
+      height: calc(100vh - 120px);
+      position: fixed;
+      top: 60px;
+      left: 60px;
+      right: 0;
+      overflow: hidden;
+    }
+    aside:hover ~ main {
+      margin-left: 150px;
+      width: calc(100% - 150px);
+      left: 150px;
+    }
+    .league-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 15px;
+    }
+    .league-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-color: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--black);
+      overflow: hidden;
+    }
+    .league-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .league-info {
+      text-align: center;
+    }
+    .league-name {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .league-description {
+      font-size: 14px;
+      color: #ccc;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    .datetime-input {
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: var(--white);
+      color: var(--black);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .tab {
+      padding: 10px 20px;
+      background-color: var(--purple);
+      color: var(--white);
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+    .tab.active {
+      background-color: var(--yellow);
+      color: var(--black);
+    }
+    .tab-content {
+      display: none;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    /* Draft Room Styles */
+    .draft-room {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .draft-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .draft-timer {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--yellow);
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 10px 15px;
+      border-radius: 5px;
+      min-width: 200px;
+      text-align: center;
+    }
+    .draft-pick {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--white);
+      background-color: var(--purple);
+      padding: 10px 15px;
+      border-radius: 5px;
+      min-width: 250px;
+      text-align: center;
+    }
+    .draft-filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      justify-content: center;
+    }
+    .filter-btn {
+      padding: 8px 15px;
+      background-color: var(--purple);
+      color: var(--white);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .filter-btn.active {
+      background-color: var(--yellow);
+      color: var(--black);
+    }
+.draft-table-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 60vh;
+  border-radius: 10px;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  position: relative;
+}
+/* Стили для таблицы с учетом новых требований */
+.draft-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: rgba(99, 62, 220, 0.15);
+  table-layout: fixed;
+}
+
+.draft-table th,
+.draft-table td {
+  padding: 10px 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  word-break: break-word;
+}
+
+.draft-table th {
+  background-color: var(--purple);
+  color: var(--white);
+  padding: 12px 10px;
+  font-weight: bold;
+  position: sticky;
+  top: 0;
+}
+
+/* Увеличиваем ширину столбца с игроком */
+.draft-table th:first-child,
+.draft-table td:first-child {
+  width: 20% !important;
+  max-width: none !important;
+}
+
+.player-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px !important;
+  width: 100%;
+}
+
+.player-name-text {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Уменьшаем ширину остальных столбцов */
+.draft-table th:not(:first-child),
+.draft-table td:not(:first-child) {
+  width: 7% !important;
+  min-width: 60px !important;
+  max-width: 80px !important;
+}
+
+/* Убираем нижнюю границу у строк с игроками */
+.draft-table tr {
+  border-bottom: none !important;
+}
+
+.draft-table td {
+  border-bottom: none !important;
+}
+
+/* Увеличиваем фото игрока */
+.player-photo {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Увеличиваем шрифт имени игрока */
+.player-name-text {
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  color: var(--white);
+}
+
+/* Увеличиваем кнопку добавления */
+.add-player-btn {
+  background: rgba(254, 100, 28, 0.2);
+  border: 1px solid var(--orange);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--orange);
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 32px;
+  flex-shrink: 0;
+}
+
+.add-player-btn:hover:not(:disabled) {
+  background: var(--orange);
+  color: var(--black);
+  transform: scale(1.1);
+}
+
+.add-player-btn:disabled {
+  background: rgba(100, 100, 100, 0.3);
+  border-color: #555;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* Увеличиваем отступы в ячейках */
+.draft-table td {
+  padding: 12px 8px !important;
+}
+
+.player-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px !important;
+  width: 100%;
+}
+/* Скрытый столбец для сортировки */
+.hidden-column {
+  display: none;
+}
+
+/* Расширенный столбец для имен игроков */
+.draft-table th:first-child {
+  width: 30%;
+  min-width: 250px;
+}
+
+.draft-table td:first-child {
+  width: 30%;
+  min-width: 250px;
+}
+
+/* Стили для пагинации */
+.pagination-controls {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination-btn {
+  background-color: var(--purple);
+  color: var(--white);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: var(--orange);
+}
+
+.pagination-btn:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+/* Четные строки */
+.draft-table tr:nth-child(even) {
+  background-color: rgba(99, 62, 220, 0.1) !important;
+}
+
+/* Нечетные строки */
+.draft-table tr:nth-child(odd) {
+  background-color: rgba(99, 62, 220, 0.05) !important;
+}
+
+/* Ховер эффект */
+.draft-table tr:hover {
+  background-color: rgba(255, 215, 0, 0.1) !important;
+}
+
+/* Выбранные игроки */
+.draft-table tr.player-drafted {
+  background-color: rgba(255, 100, 28, 0.1) !important;
+  opacity: 0.7;
+}
+
+.draft-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.draft-table tr.player-drafted {
+  background-color: rgba(255, 215, 0, 0.1);
+  opacity: 0.8;
+}
+
+/* Стили для важных статистических показателей */
+.draft-table td:nth-child(3) { /* Очки */
+  font-weight: bold;
+  color: var(--yellow);
+}
+
+.draft-table td:nth-child(4), /* Трёхочковые */
+.draft-table td:nth-child(5) { /* Передачи */
+  color: var(--orange);
+}
+.player-name-cell[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  left: 0;
+  bottom: 100%;
+  background-color: var(--purple);
+  color: var(--white);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  margin-bottom: 5px;
+}
+/* Стили для логотипа команды */
+.team-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-left: 8px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.player-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px !important;
+  width: 100%;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.player-main-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.player-name-text {
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  color: var(--white);
+}
+
+.player-photo {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid var(--yellow);
+}
+
+/* Убираем нижнюю границу у строк с игроками */
+.draft-table tr {
+  border-bottom: none !important;
+}
+
+.draft-table td {
+  border-bottom: none !important;
+  padding: 12px 8px !important;
+  text-align: center;
+}
+
+/* Стили для статистических значений */
+.draft-table td:nth-child(3) { /* Очки */
+  font-weight: bold;
+  color: var(--yellow);
+}
+
+.draft-table td:nth-child(10) { /* Фэнтези очки */
+  font-weight: bold;
+  color: var(--orange);
+  font-size: 14px;
+}
+
+.draft-table td:nth-child(11) { /* Драфт позиция */
+  font-weight: bold;
+  color: var(--yellow);
+}
+/* Стрелка для tooltip */
+.player-name-cell[title]:hover::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  bottom: 100%;
+  margin-bottom: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent transparent var(--purple) transparent;
+}
+
+
+.add-player-btn {
+  background: rgba(254, 100, 28, 0.2);
+  border: 1px solid var(--orange);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--orange);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 24px;
+  flex-shrink: 0;
+}
+
+.add-player-btn:hover:not(:disabled) {
+  background: var(--orange);
+  color: var(--black);
+  transform: scale(1.1);
+}
+
+.add-player-btn:disabled {
+  background: rgba(100, 100, 100, 0.3);
+  border-color: #555;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* Стили для имени игрока */
+.player-name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 80px);
+}
+
+
+/* Стили для строк с выбранными игроками */
+.draft-table tr.player-drafted {
+  background-color: rgba(255, 215, 0, 0.1);
+  opacity: 0.8;
+}
+
+/* Стили для важных статистических показателей */
+.draft-table td:nth-child(3) { /* Очки */
+  font-weight: bold;
+  color: var(--yellow);
+}
+
+.draft-table td:nth-child(4), /* Трёхочковые */
+.draft-table td:nth-child(5) { /* Передачи */
+  color: var(--orange);
+}
+
+/* Стили для кнопки добавления */
+.player-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 15px;
+  text-align: left;
+}
+
+.add-player-btn {
+  background: rgba(254, 100, 28, 0.2);
+  border: 1px solid var(--orange);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--orange);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 24px;
+}
+
+.add-player-btn:hover:not(:disabled) {
+  background: var(--orange);
+  color: var(--black);
+  transform: scale(1.1);
+}
+
+.add-player-btn:disabled {
+  background: rgba(100, 100, 100, 0.3);
+  border-color: #555;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* Чередующиеся строки для лучшей читаемости */
+.draft-table tr:nth-child(even) {
+  background-color: rgba(99, 62, 220, 0.05);
+}
+
+.draft-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.draft-table td:nth-child(3), /* Очки */
+.draft-table td:nth-child(11) /* Фэнтези рейтинг */ {
+  font-weight: bold;
+  color: var(--yellow);
+}
+
+.draft-table td:nth-child(4), /* Трёхочковые */
+.draft-table td:nth-child(5), /* Передачи */
+.draft-table td:nth-child(6) /* Подборы */ {
+  color: var(--orange);
+}
+
+/* Стили для кнопки добавления игрока */
+.add-player-btn {
+  background: rgba(254, 100, 28, 0.2);
+  border: 1px solid var(--orange);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--orange);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-player-btn:hover:not(:disabled) {
+  background: var(--orange);
+  color: var(--black);
+  transform: scale(1.1);
+}
+
+.add-player-btn:disabled {
+  background: rgba(100, 100, 100, 0.3);
+  border-color: #555;
+  color: #555;
+  cursor: not-allowed;
+}
+
+/* Стили для выбранных игроков */
+.draft-table tr td:nth-child(12):contains('Выбран') {
+  color: var(--yellow);
+  font-weight: bold;
+}
+
+
+.draft-table tr:nth-child(even) {
+  background-color: rgba(99, 62, 220, 0.1);
+}
+
+.draft-table tr:hover {
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+.player-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+  padding-left: 15px;
+  text-align: left;
+}
+
+.add-player-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 5px;
+  color: var(--yellow);
+  min-width: 24px;
+}
+
+.add-player-btn:disabled {
+  color: #666;
+  cursor: not-allowed;
+}
+
+.add-player-btn:hover:not(:disabled) {
+  color: var(--orange);
+  transform: scale(1.1);
+}
+
+/* Стили для скроллбара */
+.draft-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.draft-table-container::-webkit-scrollbar-track {
+  background: rgba(99, 62, 220, 0.3);
+  border-radius: 4px;
+}
+
+.draft-table-container::-webkit-scrollbar-thumb {
+  background: var(--orange);
+  border-radius: 4px;
+}
+
+.draft-table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--yellow);
+}
+/* Улучшение скроллбара для Webkit браузеров */
+.draft-table-container::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.draft-table-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.draft-table-container::-webkit-scrollbar-thumb {
+  background: var(--purple);
+  border-radius: 6px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.draft-table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--orange);
+}
+
+.draft-table-container::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Для Firefox */
+.draft-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: var(--purple) rgba(255, 255, 255, 0.1);
+}
+
+/* Фиксированная ширина для колонок чтобы избежать скачков */
+.draft-table th,
+.draft-table td {
+  min-width: 80px;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-name-cell {
+  min-width: 200px;
+  max-width: 230px;
+}
+    .draft-table th:hover {
+      background-color: #FFD700;
+    }
+    .draft-table th.sort-asc::after {
+      content: " ↑";
+    }
+    .draft-table th.sort-desc::after {
+      content: " ↓";
+    }
+    .draft-table td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .draft-table tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    .player-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: flex-start;
+      padding-left: 15px;
+    }
+    .player-photo {
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .player-actions {
+      display: flex;
+      gap: 5px;
+    }
+    .add-player-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0 5px;
+      color: var(--yellow);
+    }
+    .add-player-btn:disabled {
+      color: gray;
+      cursor: not-allowed;
+    }
+    .add-player-btn:hover:not(:disabled) {
+      color: green;
+    }
+    .favorite-player-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 5px;
+      font-size: 20px;
+      transition: all 0.2s ease;
+      color: #ccc;
+    }
+    .favorite-player-btn.favorited {
+      color: var(--yellow);
+      transform: scale(1.2);
+    }
+    .favorite-player-btn:hover {
+      color: var(--yellow);
+      transform: scale(1.2);
+    }
+    /* Roster & Free Agents */
+    .roster, .free-agents{
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    .player-card {
+      background-color: var(--purple);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .player-card:hover {
+      transform: scale(1.03);
+    }
+    .player-card img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+    .player-name {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .player-position {
+      font-size: 12px;
+      color: var(--yellow);
+      margin-bottom: 5px;
+    }
+    .player-stats {
+      font-size: 12px;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+    .player-action-btn {
+      background-color: var(--yellow);
+      color: var(--black);
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    /* League Settings */
+    .league-settings {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+    .modal-content {
+      background-color: var(--purple);
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 500px;
+      position: relative;
+    }
+    .close-modal {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .replace-player-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .replace-player-card {
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .replace-player-card:hover {
+      transform: scale(1.03);
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+/* Стили для драфт-борда с табличной структурой */
+.draft-board {
+  margin-top: 20px;
+  background-color: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.draft-board h3 {
+  color: var(--yellow);
+  margin-bottom: 15px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.draft-pick-card {
+  background-color: var(--purple);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.draft-pick-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.draft-pick-card.current-pick {
+  background-color: rgba(255, 215, 0, 0.2);
+  border: 2px solid var(--yellow);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.draft-pick-card .pick-number {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--orange);
+  color: var(--black);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  border: 2px solid var(--black);
+  z-index: 1;
+}
+
+.draft-pick-card.current-pick .pick-number {
+  background-color: var(--yellow);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Улучшение отображения для мобильных устройств */
+@media (max-width: 768px) {
+  .draft-pick-card {
+    min-width: 100px;
+    min-height: 70px;
+    padding: 5px;
+  }
+  
+  .draft-pick-card .pick-number {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    top: -5px;
+    right: -5px;
+  }
+  
+  .draft-pick-card img {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  
+  .draft-pick-card .player-name {
+    font-size: 9px !important;
+  }
+  
+  .draft-pick-card .team-name {
+    font-size: 8px !important;
+  }
+}
+.draft-picks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 200px;
+}
+
+.draft-pick-card {
+  background-color: var(--purple);
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+/* Стили для пустых пиков */
+.draft-pick-card .empty-pick-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 5px 0;
+}
+
+.draft-pick-card .empty-pick-icon {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 3px;
+  border: 1px dashed #555;
+}
+
+.draft-pick-card .empty-pick-team {
+  font-size: 10px;
+  color: #ccc;
+  font-style: italic;
+  text-align: center;
+  min-height: 12px;
+}
+
+/* Подсветка текущего пика */
+.draft-pick-card.current-pick {
+  background-color: rgba(255, 215, 0, 0.2);
+  border: 1px solid var(--yellow);
+  box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.draft-pick-card.current-pick .pick-number {
+  background-color: var(--yellow);
+  color: var(--black);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.draft-pick-card .pick-number {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: var(--orange);
+  color: var(--black);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.draft-pick-card img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 5px;
+  border: 2px solid var(--yellow);
+}
+
+.draft-pick-card .player-name {
+  font-weight: bold;
+  margin-bottom: 2px;
+  font-size: 11px;
+}
+
+.draft-pick-card .team-name {
+  color: var(--yellow);
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+
+.draft-pick-card .player-position {
+  color: var(--white);
+  font-size: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+    .cancel-btn {
+      background-color: var(--orange);
+      color: var(--white);
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      display: block;
+      margin: 0 auto;
+    }
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .setting-group label {
+      font-weight: bold;
+    }
+	/* Стили для пустых пиков */
+.draft-pick-card .player-name {
+  font-weight: bold;
+  margin-bottom: 2px;
+  font-size: 11px;
+  min-height: 14px; /* Фиксированная высота для выравнивания */
+}
+
+.draft-pick-card .team-name {
+  color: var(--yellow);
+  font-size: 10px;
+  margin-bottom: 2px;
+  min-height: 12px; /* Фиксированная высота для выравнивания */
+}
+
+    .setting-group input, .setting-group select, .setting-group textarea {
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: var(--white);
+      color: var(--black);
+    }
+    .save-settings-btn {
+      background-color: var(--yellow);
+      color: var(--black);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    /* Standings */
+    .standings-table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: var(--purple);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .standings-table th {
+      background-color: var(--yellow);
+      color: var(--black);
+      padding: 12px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .standings-table td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    footer {
+      width: 100%;
+      background-color: var(--purple);
+      padding: 15px;
+      text-align: center;
+      color: var(--white);
+      font-size: 14px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      z-index: 10;
+    }
+    footer a {
+      color: var(--white);
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+      .draft-table {
+        font-size: 12px;
+      }
+      .draft-table th, .draft-table td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/FIBA_logo.svg/1200px-FIBA_logo.svg.png" alt="Лого FIBA">
+      <div class="league-code" id="league-code">Код лиги: -</div>
+    </div>
+    <a href="profile.html" class="account-link">Личный кабинет</a>
+  </header>
+  <div class="main-container">
+    <aside id="leagues-sidebar">
+      <div id="user-leagues-list" class="user-leagues-list"></div>
+      <div class="sidebar-item" onclick="window.location.href='pick.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Назад">
+        <span>Назад</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='scout.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <span>Скаут</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='index.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+        <span>Выход</span>
+      </div>
+    </aside>
+    <main>
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 20px;">
+        <div class="league-header">
+          <div class="league-logo" id="league-logo">Л</div>
+          <div class="league-info">
+            <div class="league-name" id="league-name">Название лиги</div>
+            <div class="league-description" id="league-description">Описание лиги</div>
+          </div>
+        </div>
+        <div class="tabs">
+          <button class="tab active" data-tab="draft">Драфт</button>
+          <button class="tab" data-tab="roster">Мой состав</button>
+          <button class="tab" data-tab="free-agents">Свободные агенты</button>
+          <button class="tab" data-tab="standings">Таблица лиги</button>
+          <button class="tab" data-tab="settings" id="settings-tab">Настройки</button>
+        </div>
+        <div class="tab-content active" id="draft">
+          <div class="draft-room">
+            <div class="draft-header">
+              <div class="draft-timer" id="draft-timer">До начала: <span id="countdown">00:00:00</span></div>
+              <div class="draft-pick" id="draft-pick">Сейчас ходит: <span id="current-pick-user"></span></div>
+              <div class="draft-pick-timer" id="draft-pick-timer" style="display: none;">
+                Осталось времени на ход: <span id="pick-countdown">00:00</span>
+              </div>
+            </div>
+            <div class="draft-filters">
+              <button class="filter-btn active" data-filter="available">Доступные</button>
+              <button class="filter-btn" data-filter="all">Все</button>
+            </div>
+            <div class="draft-table-container">
+			<table class="draft-table">
+			  <thead>
+				<tr>
+				  <th data-sort="name" style="width: 20%; min-width: 100px;">Игрок</th>
+				  <th data-sort="position" style="width: 10%; min-width: 60px;">Позиция</th>
+				  <th data-sort="points" style="width: 7%; min-width: 60px;">Очки</th>
+				  <th data-sort="threes" style="width: 7%; min-width: 60px;">3-хочковые</th>
+				  <th data-sort="assists" style="width: 7%; min-width: 60px;">Передачи</th>
+				  <th data-sort="rebounds" style="width: 7%; min-width: 60px;">Подборы</th>
+				  <th data-sort="blocks" style="width: 7%; min-width: 60px;">Блок-шоты</th>
+				  <th data-sort="steals" style="width: 7%; min-width: 60px;">Перехваты</th>
+				  <th data-sort="turnovers" style="width: 7%; min-width: 60px;">Потери</th>
+				  <th data-sort="fantasy_points" style="width: 8%; min-width: 70px;">Фэнтези</th>
+					<th data-sort="draft_position" style="width: 8%; min-width: 70px;">Место</th>
+				</tr>
+			  </thead>
+			  <tbody id="draft-players">
+				<!-- Игроки будут загружены сюда -->
+			  </tbody>
+			</table>
+            </div>
+				<div class="pagination-controls" style="display: flex; justify-content: center; margin-top: 15px;">
+				  <button id="prev-page" class="pagination-btn" disabled>← Предыдущая</button>
+				  <span id="page-info" style="margin: 0 15px; color: var(--white);">Стр. 1 из 1</span>
+				  <button id="next-page" class="pagination-btn">Следующая →</button>
+				</div>
+			<!-- Драфт-борд (история пиков) -->
+			<div class="draft-board">
+			  <h3>История драфта</h3>
+			  <div class="draft-picks-grid" id="draft-picks-grid">
+				<!-- Пики будут загружены сюда динамически -->
+			  </div>
+			</div>
+
+          </div>
+        </div>
+        <div class="tab-content" id="roster">
+          <div style="margin-bottom: 15px;">
+            <label for="tour-selector">Выберите тур:</label>
+            <select id="tour-selector" onchange="loadUserRoster()">
+              <!-- Туры будут загружены сюда -->
+            </select>
+          </div>
+          <div class="draft-table-container">
+            <table class="draft-table" id="roster-table">
+              <thead>
+                <tr>
+				  <th data-sort="name" style="width: 20%; min-width: 100px;">Игрок</th>
+				  <th data-sort="position" style="width: 10%; min-width: 60px;">Позиция</th>
+				  <th data-sort="points" style="width: 7%; min-width: 60px;">Очки</th>
+				  <th data-sort="threes" style="width: 7%; min-width: 60px;">3-хочковые</th>
+				  <th data-sort="assists" style="width: 7%; min-width: 60px;">Передачи</th>
+				  <th data-sort="rebounds" style="width: 7%; min-width: 60px;">Подборы</th>
+				  <th data-sort="blocks" style="width: 7%; min-width: 60px;">Блок-шоты</th>
+				  <th data-sort="steals" style="width: 7%; min-width: 60px;">Перехваты</th>
+				  <th data-sort="turnovers" style="width: 7%; min-width: 60px;">Потери</th>
+				  <th data-sort="fantasy_points" style="width: 8%; min-width: 70px;">Фэнтези</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="roster-body">
+                <!-- Игроки будут загружены сюда -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="tab-content" id="free-agents">
+          <div class="draft-table-container">
+            <table class="draft-table" id="free-agents-table">
+              <thead>
+                <tr>
+                  <th data-sort="name">Игрок</th>
+                  <th data-sort="position">Позиция</th>
+                  <th data-sort="points">Очки</th>
+                  <th data-sort="threes">Трёхочковые</th>
+                  <th data-sort="assists">Передачи</th>
+                  <th data-sort="rebounds">Подборы</th>
+                  <th data-sort="blocks">Блок-шоты</th>
+                  <th data-sort="steals">Перехваты</th>
+                  <th data-sort="turnovers">Потери</th>
+                  <th data-sort="fantasy_points">Фэнтези очки</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody id="free-agents-body">
+                <!-- Игроки будут загружены сюда -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="tab-content" id="standings">
+          <div class="standings">
+            <table class="standings-table">
+              <thead>
+                <tr>
+                  <th>Позиция</th>
+                  <th>Команда</th>
+                  <th>Очки</th>
+                  <th>Победы</th>
+                  <th>Поражения</th>
+                </tr>
+              </thead>
+              <tbody id="standings-body">
+                <!-- Здесь будет таблица лиги -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="tab-content" id="settings">
+          <div class="league-settings">
+            <div class="setting-group">
+              <label for="league-name-setting">Название лиги</label>
+              <input type="text" id="league-name-setting">
+            </div>
+            <div class="setting-group">
+              <label for="league-description-setting">Описание лиги</label>
+              <textarea id="league-description-setting" rows="3"></textarea>
+            </div>
+            <div class="setting-group">
+              <label for="league-format-setting">Формат турнира</label>
+              <select id="league-format-setting">
+                <option value="scoring">Скоринг</option>
+                <option value="h2h_points">H2H (по фэнтези очкам)</option>
+                <option value="h2h_categories">H2H (по категориям)</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label for="league-type-setting">Тип драфта</label>
+              <select id="league-type-setting">
+                <option value="snake">Змейка</option>
+                <option value="auction">Аукцион</option>
+              </select>
+            </div>
+            <div class="setting-group">
+              <label for="draft-datetime-setting">Время начала драфта (МСК)</label>
+              <input type="datetime-local" id="draft-datetime-setting" class="datetime-input">
+            </div>
+            <div class="setting-group">
+              <label for="draft-time-limit-setting">Время на ход (секунды)</label>
+              <input type="number" id="draft-time-limit-setting" min="10" max="300" value="60">
+            </div>
+            <div class="setting-group">
+              <label for="max-managers-setting">Макс. количество менеджеров</label>
+              <input type="number" id="max-managers-setting" min="8" max="14" value="10">
+            </div>
+            <button class="save-settings-btn" onclick="openPickEditor()" style="background-color: #FE641C;">
+              Редактировать пики
+            </button>
+            <button class="save-settings-btn" onclick="saveLeagueSettings()">Сохранить настройки</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <footer>
+    <a href="#">Главная</a>
+    <a href="#">Новости</a>
+    <a href="#">Календарь</a>
+    <a href="#">Результаты</a>
+    <a href="#">Таблица</a>
+    <a href="#">Команды</a>
+    <a href="#">Контакты</a>
+  </footer>
+  <div id="replacePlayerModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h3>Выберите игрока для замены</h3>
+      <div id="replacePlayerList" class="replace-player-list"></div>
+      <button id="cancelReplace" class="cancel-btn">Отмена</button>
+    </div>
+  </div>
+  <div id="pickEditorModal" class="modal">
+    <div class="modal-content" style="width: 90%; max-width: 800px;">
+      <span class="close-modal" onclick="closePickEditor()">&times;</span>
+      <h3>Редактирование пиков драфта</h3>
+      <div style="margin-bottom: 15px; color: #ccc; font-size: 14px;">
+        Здесь вы можете изменить порядок пиков до начала драфта.
+      </div>
+      <div class="draft-table-container">
+        <table class="draft-table" id="pick-editor-table">
+          <thead>
+            <tr>
+              <th>Номер пика</th>
+              <th>Менеджер</th>
+              <th>Игрок</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody id="pick-editor-body">
+            <!-- Пики будут загружены сюда -->
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top: 15px; display: flex; justify-content: space-between;">
+        <button class="cancel-btn" onclick="closePickEditor()">Закрыть</button>
+        <button class="save-settings-btn" onclick="saveEditedPicks()">Сохранить изменения</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Инициализация Supabase
+    const SUPABASE_URL = 'https://svnnneohwcuxirsximkp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bm5uZW9od2N1eGlyc3hpbWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjM0NTcsImV4cCI6MjA3MjYzOTQ1N30.9H5aI1gj0FHGAC6NM08BbMno26ZdueNg7G1PnTDItpA';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Получение ID лиги из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const leagueId = urlParams.get('id');
+    let currentUserId = null;
+    let isLeagueCreator = false;
+    let currentFilter = 'available';
+    let sortColumn = 'name';
+    let sortDirection = 'asc';
+    let countdownInterval = null;
+    let draftDateTime = null;
+    let currentPickUserId = null;
+    let pickTimerInterval = null;
+    let pickTimeLimit = 60;
+	// Глобальные переменные для пагинации
+	let currentPage = 1;
+	const rowsPerPage = 10;
+	let allPlayersData = [];
+	let filteredPlayersData = [];
+// Обновленная инициализация с сортировкой по цене по умолчанию
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('Страница загружена, лига ID:', leagueId);
+
+  // Инициализируем глобальные переменные
+  currentFilter = 'available';
+  sortColumn = 'draft_value';
+  sortDirection = 'asc';
+
+
+  await loadLeagueInfo();
+  await loadUserLeagues();
+  await loadCurrentPick();
+
+  // Инициализация обработчиков
+  initTabs();
+  initFilters();
+  initSorting();
+  initPagination(); // Теперь функция определена
+
+  startDraftCountdown();
+  await loadDraftPlayers();
+  await loadDraftPicksHistory();
+});
+
+// Функция инициализации пагинации
+// Обновленная функция инициализации пагинации с проверками
+function initPagination() {
+  const prevBtn = document.getElementById('prev-page');
+  const nextBtn = document.getElementById('next-page');
+
+  if (prevBtn && nextBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        renderPlayersPage(currentPage - 1);
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const totalPages = Math.ceil(filteredPlayersData.length / rowsPerPage);
+      if (currentPage < totalPages) {
+        renderPlayersPage(currentPage + 1);
+      }
+    });
+  } else {
+    console.error('Элементы пагинации не найдены');
+  }
+}
+
+
+    // Инициализация обработчиков вкладок
+    function initTabs() {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', async () => {
+          // Убираем активный класс у всех вкладок и контента
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          // Добавляем активный класс к выбранной вкладке и контенту
+          tab.classList.add('active');
+          document.getElementById(tab.dataset.tab).classList.add('active');
+
+          // Загрузка контента в зависимости от вкладки
+          switch (tab.dataset.tab) {
+            case 'draft': 
+              await loadDraftPlayers();
+              await loadDraftPicksHistory();
+              break;
+            case 'roster': 
+              await loadUserRoster(); 
+              break;
+            case 'free-agents': 
+              await loadFreeAgents(); 
+              break;
+            case 'standings': 
+              await loadStandings(); 
+              break;
+            case 'settings': 
+              await loadLeagueSettings(); 
+              break;
+          }
+        });
+      });
+    }
+// Загрузка истории пиков для драфт-борда
+async function loadDraftPicksHistory() {
+  try {
+    console.log("Загрузка истории пиков для лиги:", leagueId);
+    
+    if (!leagueId) {
+      showDraftBoardError('ID лиги не указан');
+      return;
+    }
+
+    // 1. Получаем всех менеджеров лиги (исправленный запрос)
+    const { data: userLeagues, error: managersError } = await supabase
+      .from('user_leagues')
+      .select('user_id')
+      .eq('league_id', leagueId)
+      .order('joined_at', { ascending: true });
+
+    if (managersError) {
+      console.error('Ошибка загрузки менеджеров:', managersError);
+      showDraftBoardError('Ошибка загрузки менеджеров');
+      return;
+    }
+
+    if (!userLeagues || userLeagues.length === 0) {
+      showDraftBoardError('Нет менеджеров в лиге');
+      return;
+    }
+
+    console.log('Менеджеры лиги:', userLeagues);
+
+    // 2. Получаем названия команд для каждого менеджера
+    const userIds = userLeagues.map(ul => ul.user_id);
+    const { data: userTeams, error: teamsError } = await supabase
+      .from('user_teams')
+      .select('user_id, team_name')
+      .in('user_id', userIds)
+      .eq('league_id', leagueId);
+
+    if (teamsError) {
+      console.error('Ошибка загрузки команд:', teamsError);
+      showDraftBoardError('Ошибка загрузки названий команд');
+      return;
+    }
+
+    // Создаем объект для быстрого поиска названий команд по user_id
+    const teamNamesMap = {};
+    if (userTeams) {
+      userTeams.forEach(team => {
+        teamNamesMap[team.user_id] = team.team_name || 'Без названия';
+      });
+    }
+
+    // 3. Получаем настройки лиги
+    const { data: league, error: leagueError } = await supabase
+      .from('leagues')
+      .select('max_managers, draft_type, draft_datetime')
+      .eq('id', leagueId)
+      .single();
+
+    if (leagueError) {
+      console.error('Ошибка загрузки настроек лиги:', leagueError);
+      showDraftBoardError('Ошибка загрузки настроек лиги');
+      return;
+    }
+
+    const maxManagers = league.max_managers || userLeagues.length;
+    const draftType = league.draft_type || 'snake';
+    const isDraftStarted = checkIfDraftStarted(league.draft_datetime);
+    console.log('Настройки лиги:', { maxManagers, draftType, isDraftStarted });
+
+    // 4. Получаем уже сделанные пики
+    let madePicks = [];
+    const { data: draftPicks, error: picksError } = await supabase
+      .from('draft_picks')
+      .select(`
+        pick_number,
+        user_id,
+        players(id, first_name, last_name, position, photo_url)
+      `)
+      .eq('league_id', leagueId)
+      .order('pick_number', { ascending: true });
+
+    if (picksError) {
+      console.error('Ошибка загрузки пиков:', picksError);
+    } else if (draftPicks) {
+      madePicks = draftPicks;
+      console.log('Найдено пиков:', madePicks.length);
+    }
+
+    // 5. Определяем общее количество пиков
+	const totalRounds = 10; // Изменяем с 15 на 10 раундов
+	const totalPicks = maxManagers * totalRounds;
+    const maxMadePick = madePicks.length > 0 ? Math.max(...madePicks.map(p => p.pick_number)) : 0;
+    console.log('Всего пиков будет:', totalPicks, 'Сделано пиков:', madePicks.length);
+
+    // 6. Формируем массив всех пиков
+    const allPicks = [];
+// В функции loadDraftPicksHistory() находим часть с расчетом пиков и заменяем:
+for (let pickNumber = 1; pickNumber <= totalPicks; pickNumber++) {
+  // Определяем менеджера для текущего пика с правильной логикой змейки
+  const round = Math.floor((pickNumber - 1) / userLeagues.length);
+  let managerIndex;
+  
+  if (draftType === 'snake') {
+    // Правильная логика змейки: четные раунды - прямой порядок, нечетные - обратный
+    const positionInRound = (pickNumber - 1) % userLeagues.length;
+    managerIndex = round % 2 === 0 ? positionInRound : (userLeagues.length - 1 - positionInRound);
+  } else {
+    // Линейный драфт
+    managerIndex = (pickNumber - 1) % userLeagues.length;
+  }
+
+  // Проверяем, что индекс менеджера корректен
+  if (managerIndex >= userLeagues.length) {
+    console.warn(`Некорректный индекс менеджера: ${managerIndex} для пика ${pickNumber}`);
+    continue;
+  }
+
+  const manager = userLeagues[managerIndex];
+  if (!manager) continue;
+
+  // Ищем сделанный пик
+  const existingPick = madePicks.find(pick => pick.pick_number === pickNumber);
+  allPicks.push({
+    pick_number: pickNumber,
+    user_id: manager.user_id,
+    team_name: teamNamesMap[manager.user_id] || 'Без названия',
+    player: existingPick ? existingPick.players : null,
+    is_current: isDraftStarted && (pickNumber === (maxMadePick + 1))
+  });
+}
+
+    // 7. Отображаем пики на драфт-борде
+    renderDraftBoard(allPicks);
+  } catch (e) {
+    console.error('Ошибка при загрузке истории пиков:', e);
+    showDraftBoardError('Ошибка загрузки данных: ' + e.message);
+  }
+}
+    // Проверка, начался ли драфт
+    function checkIfDraftStarted(draftDateTime) {
+      if (!draftDateTime) return false;
+
+      try {
+        const now = new Date();
+        const draftDate = new Date(draftDateTime);
+        return draftDate <= now;
+      } catch (e) {
+        console.error('Ошибка проверки времени драфта:', e);
+        return false;
+      }
+    }
+
+    // Функция для отображения ошибки в драфт-борде
+    function showDraftBoardError(message) {
+      const draftPicksGrid = document.getElementById('draft-picks-grid');
+      if (draftPicksGrid) {
+        draftPicksGrid.innerHTML = `
+          <div style="text-align: center; grid-column: 1 / -1; padding: 20px; color: var(--yellow);">
+            ${message}
+          </div>
+        `;
+      } else {
+        console.error('Элемент draft-picks-grid не найден');
+      }
+    }
+// Функция для отрисовки драфт-борда с реальными названиями команд
+function renderDraftBoard(picks) {
+  const draftPicksGrid = document.getElementById('draft-picks-grid');
+  if (!draftPicksGrid) {
+    console.error('Элемент draft-picks-grid не найден');
+    return;
+  }
+  draftPicksGrid.innerHTML = '';
+  
+  if (!picks || picks.length === 0) {
+    showDraftBoardError('Нет данных о пиках');
+    return;
+  }
+
+  console.log('Отрисовка пиков:', picks.length);
+  
+  // Собираем уникальные user_id для получения информации о командах
+  const uniqueUserIds = [...new Set(picks.map(p => p.user_id))];
+  
+  // Получаем информацию о командах с логотипами
+  getTeamsInfo(uniqueUserIds).then(teamsInfo => {
+    // Определяем количество менеджеров
+    const managersCount = uniqueUserIds.length;
+    const rounds = 10;
+
+    console.log('Менеджеров:', managersCount, 'Раундов:', rounds);
+
+    // Создаем таблицу
+    const table = document.createElement('div');
+    table.style.display = 'grid';
+    table.style.gridTemplateColumns = `auto repeat(${managersCount}, 1fr)`;
+    table.style.gap = '10px';
+    table.style.marginTop = '15px';
+
+    // Заголовок с реальными названиями команд
+    const headerRow = document.createElement('div');
+    headerRow.style.display = 'contents';
+    
+    // Пустая ячейка для угла таблицы
+    const cornerCell = document.createElement('div');
+    cornerCell.style.padding = '8px';
+    cornerCell.style.textAlign = 'center';
+    cornerCell.style.backgroundColor = 'var(--purple)';
+    cornerCell.style.borderRadius = '5px';
+    cornerCell.style.fontWeight = 'bold';
+    headerRow.appendChild(cornerCell);
+
+    // Заголовки команд
+    for (let i = 0; i < managersCount; i++) {
+      const userId = uniqueUserIds[i];
+      const teamInfo = teamsInfo[userId] || { team_name: `Менеджер ${i + 1}`, logo_url: null };
+      
+      const headerCell = document.createElement('div');
+      headerCell.style.padding = '8px';
+      headerCell.style.textAlign = 'center';
+      headerCell.style.backgroundColor = 'var(--purple)';
+      headerCell.style.borderRadius = '5px';
+      headerCell.style.fontWeight = 'bold';
+      headerCell.style.display = 'flex';
+      headerCell.style.flexDirection = 'column';
+      headerCell.style.alignItems = 'center';
+      headerCell.style.gap = '5px';
+      
+	if (teamInfo.logo_url) {  // Эта проверка теперь всегда будет false
+	  headerCell.innerHTML = `
+		<img src="${teamInfo.logo_url}" alt="${teamInfo.team_name}"
+			 style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;"
+			 onerror="this.style.display='none'">
+		<div style="font-size: 12px;">${teamInfo.team_name}</div>
+	  `;
+	} else {
+	  headerCell.textContent = teamInfo.team_name;  // Всегда будет выполняться этот блок
+	}
+
+      
+      headerRow.appendChild(headerCell);
+    }
+    table.appendChild(headerRow);
+
+    // Заполняем пики по раундам
+    for (let round = 0; round < rounds; round++) {
+      const roundRow = document.createElement('div');
+      roundRow.style.display = 'contents';
+      
+      // Заголовок раунда
+      const roundHeader = document.createElement('div');
+      roundHeader.style.padding = '8px';
+      roundHeader.style.textAlign = 'center';
+      roundHeader.style.backgroundColor = 'var(--orange)';
+      roundHeader.style.borderRadius = '5px';
+      roundHeader.style.fontWeight = 'bold';
+      roundHeader.textContent = `Раунд ${round + 1}`;
+      roundRow.appendChild(roundHeader);
+
+      // Пики в раунде
+      for (let managerIndex = 0; managerIndex < managersCount; managerIndex++) {
+        const pickNumber = round * managersCount + managerIndex + 1;
+        const pick = picks.find(p => p.pick_number === pickNumber);
+        const teamInfo = pick ? teamsInfo[pick.user_id] : null;
+        
+        const pickCell = document.createElement('div');
+        pickCell.className = `draft-pick-card ${pick?.is_current ? 'current-pick' : ''}`;
+        pickCell.style.minHeight = '80px';
+        pickCell.style.display = 'flex';
+        pickCell.style.flexDirection = 'column';
+        pickCell.style.alignItems = 'center';
+        pickCell.style.justifyContent = 'center';
+        pickCell.style.padding = '8px';
+        pickCell.style.textAlign = 'center';
+        pickCell.style.position = 'relative';
+
+        if (pick && pick.player) {
+          pickCell.innerHTML = `
+            <div class="pick-number">${pick.pick_number}</div>
+            <img src="${pick.player.photo_url || 'https://via.placeholder.com/40'}" 
+                 alt="${pick.player.first_name} ${pick.player.last_name}"
+                 onerror="this.src='https://via.placeholder.com/40'"
+                 style="width: 40px; height: 40px; border-radius: 50%; margin-bottom: 5px;">
+            <div class="player-name" style="font-size: 11px; margin-bottom: 3px;">${pick.player.first_name} ${pick.player.last_name}</div>
+            <div class="team-name" style="font-size: 10px; color: var(--yellow);">${teamInfo?.team_name || pick.team_name}</div>
+          `;
+        } else {
+          const teamName = teamInfo?.team_name || pick?.team_name || 'Ожидание';
+          
+          pickCell.innerHTML = `
+            <div class="pick-number">${pickNumber}</div>
+            <div class="empty-pick-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+              <div class="empty-pick-icon" style="width: 30px; height: 30px; background-color: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; font-size: 16px; color: #666; border: 1px dashed #555;">?</div>
+              <div class="empty-pick-team" style="font-size: 10px; color: #ccc; font-style: italic; text-align: center;">${teamName}</div>
+            </div>
+          `;
+        }
+        
+        roundRow.appendChild(pickCell);
+      }
+      
+      table.appendChild(roundRow);
+    }
+
+    draftPicksGrid.appendChild(table);
+  });
+}
+
+// Функция для получения информации о командах
+async function getTeamsInfo(userIds) {
+  try {
+    if (!userIds || userIds.length === 0) {
+      console.warn('Пустой список userIds, возвращаем пустой объект');
+      return {};
+    }
+
+    const { data: teams, error } = await supabase
+      .from('user_teams')
+      .select('user_id, team_name')  // Убрали logo_url
+      .in('user_id', userIds)
+      .eq('league_id', leagueId);
+
+    if (error) {
+      console.error('Ошибка загрузки информации о командах:', error);
+      return {};
+    }
+
+    const teamsInfo = {};
+    if (teams) {
+      teams.forEach(team => {
+        teamsInfo[team.user_id] = {
+          team_name: team.team_name || 'Без названия',
+          logo_url: null  // Теперь всегда null
+        };
+      });
+    }
+    return teamsInfo;
+  } catch (e) {
+    console.error('Ошибка при загрузке информации о командах:', e);
+    return {};
+  }
+}
+
+    // Загрузка информации о лиге
+    async function loadLeagueInfo() {
+      try {
+        const { data: league, error } = await supabase
+          .from('leagues')
+          .select('*')
+          .eq('id', leagueId)
+          .single();
+
+        if (error) {
+          console.error('Ошибка загрузки лиги:', error);
+          return;
+        }
+
+        document.getElementById('league-name').textContent = league.name;
+        document.getElementById('league-code').textContent = `Код лиги: ${league.code}`;
+        
+        const { data: leagueSettings, error: settingsError } = await supabase
+          .from('leagues')
+          .select('draft_time_limit')
+          .eq('id', leagueId)
+          .single();
+
+        if (!settingsError && leagueSettings.draft_time_limit) {
+          pickTimeLimit = leagueSettings.draft_time_limit;
+        }
+        
+        let descriptionText = league.description || 'Описание отсутствует';
+        if (league.draft_datetime) {
+          const draftDateUTC = new Date(league.draft_datetime);
+          const draftDateMoscow = new Date(draftDateUTC.getTime() + 3 * 60 * 60 * 1000);
+          const formattedDate = draftDateMoscow.toLocaleString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+          descriptionText += `\nВремя драфта: ${formattedDate}`;
+        }
+
+        document.getElementById('league-description').textContent = descriptionText;
+
+        const leagueLogo = document.getElementById('league-logo');
+        if (league.logo_url) {
+          leagueLogo.innerHTML = `<img src="${league.logo_url}" alt="${league.name}">`;
+        } else {
+          leagueLogo.textContent = league.name.charAt(0).toUpperCase();
+        }
+
+        // Сохраняем время начала драфта
+        draftDateTime = league.draft_datetime;
+
+        // Проверка прав создателя лиги
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          currentUserId = user.id;
+          isLeagueCreator = league.creator_id === user.id;
+          document.getElementById('settings-tab').style.display = isLeagueCreator ? 'block' : 'none';
+        }
+      } catch (e) {
+        console.error('Ошибка в loadLeagueInfo:', e);
+      }
+    }
+
+// Инициализация фильтров
+function initFilters() {
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+
+      // Загружаем игроков с новым фильтром
+      loadDraftPlayers();
+    });
+  });
+
+  // Устанавливаем фильтр "Доступные" активным по умолчанию
+  document.querySelector('.filter-btn[data-filter="available"]').classList.add('active');
+  currentFilter = 'available';
+}
+// Обновленная инициализация сортировки
+// Обновленная инициализация сортировки
+function initSorting() {
+  document.querySelectorAll('.draft-table th[data-sort]').forEach(th => {
+    th.addEventListener('click', () => {
+      document.querySelectorAll('.draft-table th[data-sort]').forEach(header => {
+        header.classList.remove('sort-asc', 'sort-desc');
+      });
+
+      if (sortColumn === th.dataset.sort) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortColumn = th.dataset.sort;
+        // Для драфт позиции сортировка по возрастанию по умолчанию
+        sortDirection = th.dataset.sort === 'draft_position' ? 'asc' : 'desc';
+      }
+
+      th.classList.add(sortDirection === 'asc' ? 'sort-asc' : 'sort-desc');
+
+      // Пересортировываем и показываем первую страницу
+      sortPlayers();
+      renderPlayersPage(1); // Убрал await, так как функция теперь async
+    });
+  });
+
+  // Устанавливаем сортировку по драфт позиции по умолчанию
+  const draftPositionHeader = document.querySelector('.draft-table th[data-sort="draft_position"]');
+  if (draftPositionHeader) {
+    draftPositionHeader.classList.add('sort-asc');
+  }
+}
+// Обновленная функция сортировки
+function sortPlayers() {
+  filteredPlayersData.sort((a, b) => {
+    let aValue, bValue;
+
+    switch (sortColumn) {
+      case 'draft_position':
+        aValue = a.draftPosition;
+        bValue = b.draftPosition;
+        break;
+      case 'fantasy_points':
+        aValue = a.fantasyPoints;
+        bValue = b.fantasyPoints;
+        break;
+      case 'name':
+        aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
+        bValue = `${b.first_name} ${b.last_name}`.toLowerCase();
+        break;
+      default:
+        // Для статистических колонок
+        aValue = a.avgStats[sortColumn] || 0;
+        bValue = b.avgStats[sortColumn] || 0;
+    }
+
+    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+  });
+}
+// Инициализация модальных окон
+function initModal() {
+  const modals = document.querySelectorAll('.modal');
+  
+  modals.forEach(modal => {
+    // Закрытие по кнопке X
+    const closeButtons = modal.querySelectorAll('.close-modal, .cancel-btn');
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+    });
+  });
+
+  // Закрытие по клику вне модального окна
+  document.addEventListener('click', (event) => {
+    if (event.target.classList.contains('modal')) {
+      event.target.style.display = 'none';
+    }
+  });
+
+  // Закрытие по клавише ESC
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      document.querySelectorAll('.modal').forEach(modal => {
+        modal.style.display = 'none';
+      });
+    }
+  });
+}
+    // Загрузка лиг пользователя
+    async function loadUserLeagues() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: leagues, error } = await supabase
+        .from('user_leagues')
+        .select(`
+          leagues (
+            id,
+            name,
+            code,
+            logo_url
+          )
+        `)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Ошибка загрузки лиг пользователя:', error);
+        return;
+      }
+
+      const userLeaguesList = document.getElementById('user-leagues-list');
+      userLeaguesList.innerHTML = '';
+
+      if (leagues && leagues.length > 0) {
+        leagues.forEach(({ leagues: league }) => {
+          const leagueItem = document.createElement('div');
+          leagueItem.className = 'sidebar-item';
+          leagueItem.innerHTML = `
+            <img src="${league.logo_url || 'https://via.placeholder.com/24'}" alt="${league.name}">
+            <span>${league.name}</span>
+          `;
+          leagueItem.onclick = () => window.location.href = `league.html?id=${league.id}`;
+          userLeaguesList.appendChild(leagueItem);
+        });
+      }
+    }
+/**
+ * Добавляет свободного агента в команду менеджера (замена игрока).
+ * Используется в модальном окне замены игрока.
+ * @param {number} playerId - ID игрока, которого хотим добавить в команду.
+ */
+async function addFreeAgent(playerId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    alert('Ошибка: Пользователь не авторизован!');
+    return;
+  }
+
+  try {
+    // 1. Проверяем, что игрок не выбран в этой лиге
+    const draftedPlayerIds = await getDraftedPlayers();
+    if (draftedPlayerIds.includes(playerId)) {
+      alert('Этот игрок уже занят в этой лиге!');
+      return;
+    }
+
+    // 2. Получаем ID команды текущего менеджера
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('league_id', leagueId)
+      .single();
+
+    if (teamError || !userTeam) {
+      console.error('Ошибка получения команды менеджера:', teamError);
+      alert('Не удалось определить вашу команду. Обратитесь к администратору.');
+      return;
+    }
+
+    // 3. Проверяем лимит игроков в команде (например, 15)
+    const { count: rosterCount, error: rosterError } = await supabase
+      .from('team_players3')
+      .select('*', { count: 'exact', head: true })
+      .eq('league_id', leagueId)
+      .eq('team_id', userTeam.id);
+
+    if (rosterError) {
+      console.error('Ошибка проверки состава:', rosterError);
+      alert('Не удалось проверить состав команды.');
+      return;
+    }
+
+    // Пример: ограничение в 15 игроков
+    if (rosterCount >= 15) {
+      alert('В вашей команде уже максимальное количество игроков (15)!');
+      return;
+    }
+
+    // 4. Добавляем нового игрока в команду (team_players3)
+    const { error: insertError } = await supabase
+      .from('team_players3')
+      .insert({
+        league_id: leagueId,
+        team_id: userTeam.id,
+        player_id: playerId,
+        tour_id: null, // или текущий тур, если нужно
+        created_at: new Date().toISOString()
+      });
+
+    if (insertError) {
+      console.error('Ошибка добавления игрока в команду:', insertError);
+      alert('Не удалось добавить игрока в команду. Попробуйте позже.');
+      return;
+    }
+
+    // 5. Добавляем пик в draft_picks (если драфт уже завершён)
+    const { data: lastPick, error: pickError } = await supabase
+      .from('draft_picks')
+      .select('pick_number')
+      .eq('league_id', leagueId)
+      .order('pick_number', { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextPickNumber = lastPick ? lastPick.pick_number + 1 : 1;
+
+    const { error: draftError } = await supabase
+      .from('draft_picks')
+      .insert({
+        league_id: leagueId,
+        user_id: user.id,
+        player_id: playerId,
+        pick_number: nextPickNumber
+      });
+
+    if (draftError) {
+      console.error('Ошибка добавления пика в draft_picks:', draftError);
+      // Не прерываем выполнение, так как игрок уже добавлен в команду
+    }
+
+    // 6. Закрываем модальное окно и обновляем данные
+    const modal = document.getElementById('replacePlayerModal');
+    modal.style.display = 'none';
+
+    alert('Игрок успешно добавлен в команду!');
+    await loadUserRoster();    // Обновляем состав команды
+    await loadDraftPlayers();  // Обновляем список доступных игроков
+    await loadFreeAgents();    // Обновляем список свободных агентов
+  } catch (e) {
+    console.error('Непредвиденная ошибка в addFreeAgent:', e);
+    alert('Произошла ошибка при добавлении игрока. Проверьте консоль для деталей.');
+  }
+}
+
+// Загрузка текущего хода
+async function loadCurrentPick() {
+  if (!leagueId) return;
+  
+  try {
+    // Получаем последний пик в лиге
+    const { data: lastPick, error } = await supabase
+      .from('draft_picks')
+      .select('user_id, pick_number')
+      .eq('league_id', leagueId)
+      .order('pick_number', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Ошибка загрузки последнего пика:', error);
+      return;
+    }
+
+    // Определяем, чей ход следующий
+    const { data: league, error: leagueError } = await supabase
+      .from('leagues')
+      .select('draft_type, max_managers')
+      .eq('id', leagueId)
+      .single();
+
+    if (leagueError) {
+      console.error('Ошибка загрузки настроек лиги:', leagueError);
+      return;
+    }
+
+    const { data: userLeagues, error: userLeaguesError } = await supabase
+      .from('user_leagues')
+      .select('user_id')
+      .eq('league_id', leagueId)
+      .order('joined_at', { ascending: true });
+
+    if (userLeaguesError) {
+      console.error('Ошибка загрузки участников лиги:', userLeaguesError);
+      return;
+    }
+
+    const managers = userLeagues.map(ul => ul.user_id);
+    let nextPickIndex = 0;
+    
+// В функции loadCurrentPick() исправляем логику змейки:
+if (lastPick) {
+  const round = Math.floor((lastPick.pick_number - 1) / managers.length);
+  const isEvenRound = round % 2 === 0;
+
+  if (league.draft_type === 'snake') {
+    if (isEvenRound) {
+      // прямой порядок
+      nextPickIndex = lastPick.pick_number % managers.length;
+    } else {
+      // обратный порядок
+      nextPickIndex = managers.length - (lastPick.pick_number % managers.length) - 1;
+    }
+  } else {
+    // линейный драфт
+    nextPickIndex = lastPick.pick_number % managers.length;
+  }
+}
+
+
+    currentPickUserId = managers[nextPickIndex];
+
+    // Получаем ник менеджера (исправленный запрос - убираем single())
+    const { data: managerData, error: managerError } = await supabase
+      .from('user_teams')
+      .select('team_name')
+      .eq('user_id', currentPickUserId)
+      .eq('league_id', leagueId);
+
+    if (managerError) {
+      console.error('Ошибка загрузки имени менеджера:', managerError);
+      document.getElementById('current-pick-user').textContent = 'Без названия';
+      return;
+    }
+
+    const teamName = managerData && managerData.length > 0 
+      ? managerData[0].team_name 
+      : 'Без названия';
+    
+    document.getElementById('current-pick-user').textContent = teamName;
+
+    // Запускаем таймер хода, если драфт начался
+    if (isDraftStarted()) {
+      startPickTimer();
+    }
+
+  } catch (e) {
+    console.error('Ошибка в loadCurrentPick:', e);
+    document.getElementById('current-pick-user').textContent = 'Ошибка загрузки';
+  }
+}
+    // Проверка, начался ли драфт
+    function isDraftStarted() {
+      if (!draftDateTime) return false;
+
+      const now = new Date();
+      const nowMoscow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+      const draftDateUTC = new Date(draftDateTime);
+      const draftDateMoscow = new Date(draftDateUTC.getTime() + 3 * 60 * 60 * 1000);
+
+      return draftDateMoscow <= nowMoscow;
+    }
+
+    // Запуск таймера на ход
+function startPickTimer() {
+  if (pickTimerInterval) {
+    clearInterval(pickTimerInterval);
+  }
+
+  const timerEl = document.getElementById('draft-pick-timer');
+  const countdownEl = document.getElementById('pick-countdown');
+  timerEl.style.display = 'block';
+
+  let timeLeft = pickTimeLimit;
+  countdownEl.textContent = `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`;
+
+  pickTimerInterval = setInterval(() => {
+    timeLeft--;
+    countdownEl.textContent = `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`;
+
+    if (timeLeft <= 0) {
+      clearInterval(pickTimerInterval);
+      timerEl.style.display = 'none';
+      alert('⏰ Время на ход истекло! Ход переходит к следующему менеджеру.');
+      loadCurrentPick();
+    }
+  }, 1000);
+}
+
+function stopPickTimer() {
+  if (pickTimerInterval) {
+    clearInterval(pickTimerInterval);
+    pickTimerInterval = null;
+  }
+  document.getElementById('draft-pick-timer').style.display = 'none';
+}
+
+
+    // Таймер обратного отсчета до начала драфта
+// Таймер обратного отсчета до начала драфта
+function startDraftCountdown() {
+  if (!draftDateTime) {
+    document.getElementById('draft-timer').innerHTML = 'Время драфта не установлено';
+    return;
+  }
+
+  // Очищаем предыдущий интервал, если он был
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+  }
+
+  const updateTimer = () => {
+    const now = new Date();
+    const nowMoscow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    const draftDateUTC = new Date(draftDateTime);
+    const draftDateMoscow = new Date(draftDateUTC.getTime() + 3 * 60 * 60 * 1000);
+    const distance = draftDateMoscow - nowMoscow;
+
+    if (distance < 0) {
+      clearInterval(countdownInterval);
+      document.getElementById('draft-timer').innerHTML = 'Драфт начался!';
+      document.getElementById('draft-timer').style.backgroundColor = 'green';
+      
+      // Если драфт начался, запускаем таймер хода
+      if (currentPickUserId) {
+        startPickTimer();
+      }
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('countdown').innerHTML =
+      `${days > 0 ? `${days}д ` : ''}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  // Сразу обновляем таймер
+  updateTimer();
+  
+  // Запускаем интервал обновления
+  countdownInterval = setInterval(updateTimer, 1000);
+}
+// Получаем IDs всех уже выбранных игроков
+async function getDraftedPlayers() {
+  try {
+    // 1. Игроки из draft_picks
+    const { data: draftPicks, error: draftError } = await supabase
+      .from('draft_picks')
+      .select('player_id')
+      .eq('league_id', leagueId);
+
+    // 2. Игроки из team_players3
+    const { data: teamPlayers, error: teamError } = await supabase
+      .from('team_players3')
+      .select('player_id')
+      .eq('league_id', leagueId);
+
+    if (draftError || teamError) {
+      console.error('Ошибка загрузки выбранных игроков:', draftError || teamError);
+      return [];
+    }
+
+    // Объединяем и убираем дубликаты
+    const allPlayerIds = [
+      ...(draftPicks || []).map(p => p.player_id),
+      ...(teamPlayers || []).map(p => p.player_id)
+    ];
+
+    return [...new Set(allPlayerIds)];
+
+  } catch (e) {
+    console.error('Ошибка в getDraftedPlayers:', e);
+    return [];
+  }
+}
+// Обновленная функция обновления пагинации
+function updatePagination() {
+  const totalPages = Math.ceil(filteredPlayersData.length / rowsPerPage);
+  const pageInfo = document.getElementById('page-info');
+  const prevBtn = document.getElementById('prev-page');
+  const nextBtn = document.getElementById('next-page');
+
+  if (pageInfo) {
+    pageInfo.textContent = `Стр. ${currentPage} из ${totalPages || 1}`;
+  }
+
+  if (prevBtn && nextBtn) {
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= totalPages || totalPages === 0;
+  }
+}
+// Обновленная функция отображения игроков
+// Обновленная функция отображения игроков
+// Обновленная функция отображения игроков
+// Обновленная функция отображения игроков
+async function renderPlayersPage(page) {
+  currentPage = page;
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const playersToShow = filteredPlayersData.slice(startIndex, endIndex);
+
+  const draftPlayersContainer = document.getElementById('draft-players');
+  if (!draftPlayersContainer) return;
+
+  draftPlayersContainer.innerHTML = '';
+
+  if (playersToShow.length === 0) {
+    draftPlayersContainer.innerHTML = `
+      <tr>
+        <td colspan="12" style="text-align: center; padding: 20px;">
+          Нет доступных игроков
+        </td>
+      </tr>
+    `;
+    updatePagination();
+    return;
+  }
+
+  // Получаем IDs выбранных игроков ПЕРЕД циклом
+  const draftedPlayerIds = await getDraftedPlayers();
+
+  playersToShow.forEach(player => {
+    const isDrafted = draftedPlayerIds.includes(player.id);
+    const row = document.createElement('tr');
+    if (isDrafted) {
+      row.classList.add('player-drafted');
+    }
+
+    row.innerHTML = `
+      <td class="player-name-cell">
+        <button class="add-player-btn" ${isDrafted ? 'disabled' : `onclick="draftPlayer(${player.id})"`}>
+          ${isDrafted ? '✓' : '+'}
+        </button>
+        <div class="player-info">
+          <div class="player-main-info">
+            <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
+                 alt="${player.first_name} ${player.last_name}"
+                 class="player-photo"
+                 onerror="this.src='https://via.placeholder.com/40'">
+            <span class="player-name-text">${player.first_name} ${player.last_name}</span>
+          </div>
+          ${player.teams?.logo_url ? `
+            <img src="${player.teams.logo_url}" 
+                 alt="${player.teams.name}" 
+                 class="team-logo"
+                 onerror="this.style.display='none'">
+          ` : ''}
+        </div>
+      </td>
+      <td>${player.position || '-'}</td>
+      <td>${player.avgStats.points ? player.avgStats.points.toFixed(1) : '0'}</td>
+      <td>${player.avgStats.threes ? player.avgStats.threes.toFixed(1) : '0'}</td>
+      <td>${player.avgStats.assists ? player.avgStats.assists.toFixed(1) : '0'}</td>
+      <td>${player.avgStats.rebounds ? player.avgStats.rebounds.toFixed(1) : '0'}</td>
+      <td>${player.avgStats.blocks ? player.avgStats.blocks.toFixed(1) : '0'}</td>
+      <td>${player.avgStats.steals ? player.avgStats.steals.toFixed(1) : '0'}</td>
+      <td>${player.avgStats.turnovers ? player.avgStats.turnovers.toFixed(1) : '0'}</td>
+      <td>${player.fantasyPoints.toFixed(1)}</td>
+      <td>${player.draftPosition}</td>
+    `;
+
+    draftPlayersContainer.appendChild(row);
+  });
+
+  updatePagination();
+}
+// Загрузка игроков для драфта с улучшенными данными
+async function loadDraftPlayers() {
+  try {
+    console.log('Загрузка игроков для драфта, фильтр:', currentFilter);
+
+    const { data: players, error } = await supabase
+      .from('players')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        position,
+        photo_url,
+        price,
+        team_id,
+        teams (id, name, logo_url),
+        player_stats (*)
+      `)
+      .order('price', { ascending: false });
+
+    if (error) {
+      console.error('Ошибка загрузки игроков:', error);
+      showErrorMessage('Ошибка загрузки игроков');
+      return;
+    }
+
+    // Находим максимальную цену для расчета позиций
+    const maxPrice = Math.max(...players.map(p => p.price || 0), 1000);
+
+    // Получаем IDs уже выбранных игроков
+    const draftedPlayerIds = await getDraftedPlayers();
+
+    // Фильтруем игроков и добавляем расчетные данные
+    filteredPlayersData = players.filter(player => {
+      if (currentFilter === 'available') {
+        return !draftedPlayerIds.includes(player.id);
+      }
+      return true;
+    }).map(player => {
+      const avgStats = calculateAverageStats(player.player_stats || []);
+      const fantasyPoints = calculateFantasyPoints(avgStats);
+      const draftPosition = priceToDraftPosition(player.price, maxPrice);
+      
+      return {
+        ...player,
+        avgStats,
+        fantasyPoints,
+        draftPosition
+      };
+    });
+
+    // Сортируем и отображаем
+    sortPlayers();
+    renderPlayersPage(1); // Добавил await
+
+  } catch (e) {
+    console.error('Ошибка при загрузке игроков:', e);
+    showErrorMessage('Ошибка загрузки игроков');
+  }
+}
+// Новая функция для отрисовки таблицы игроков (без последних двух столбцов)
+function renderDraftPlayersTable(players, draftedPlayerIds) {
+  const draftPlayersContainer = document.getElementById('draft-players');
+  draftPlayersContainer.innerHTML = '';
+
+  if (players.length === 0) {
+    draftPlayersContainer.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align: center; padding: 20px;">
+          Нет доступных игроков
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  players.forEach(player => {
+    const isDrafted = draftedPlayerIds.includes(player.id);
+    const stats = player.stats && player.stats.length > 0 ? player.stats[0] : {
+      points: 0, threes: 0, assists: 0, rebounds: 0,
+      blocks: 0, steals: 0, turnovers: 0
+    };
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="player-name-cell">
+        <button class="add-player-btn" ${isDrafted ? 'disabled' : `onclick="draftPlayer(${player.id})"`}>
+          ${isDrafted ? '✓' : '+'}
+        </button>
+        <img src="${player.photo_url || 'https://via.placeholder.com/30'}"
+             alt="${player.first_name} ${player.last_name}"
+             class="player-photo"
+             onerror="this.src='https://via.placeholder.com/30'">
+        <span>${player.first_name} ${player.last_name}</span>
+      </td>
+      <td>${player.position || '-'}</td>
+      <td>${stats.points || 0}</td>
+      <td>${stats.threes || 0}</td>
+      <td>${stats.assists || 0}</td>
+      <td>${stats.rebounds || 0}</td>
+      <td>${stats.blocks || 0}</td>
+      <td>${stats.steals || 0}</td>
+      <td>${stats.turnovers || 0}</td>
+      <!-- Удалены последние два столбца -->
+    `;
+
+    // Добавляем класс для выбранных игроков
+    if (isDrafted) {
+      row.classList.add('player-drafted');
+    }
+
+    draftPlayersContainer.appendChild(row);
+  });
+}
+
+
+// Функция для отображения сообщений об ошибках
+function showErrorMessage(message) {
+  const draftPlayersContainer = document.getElementById('draft-players');
+  if (draftPlayersContainer) {
+    draftPlayersContainer.innerHTML = `
+      <tr>
+        <td colspan="10" style="text-align: center; padding: 20px; color: var(--yellow);">
+          ${message}
+        </td>
+      </tr>
+    `;
+  }
+
+  // Сбрасываем пагинацию
+  const pageInfo = document.getElementById('page-info');
+  const prevBtn = document.getElementById('prev-page');
+  const nextBtn = document.getElementById('next-page');
+
+  if (pageInfo) pageInfo.textContent = 'Стр. 1 из 1';
+  if (prevBtn) prevBtn.disabled = true;
+  if (nextBtn) nextBtn.disabled = true;
+}
+
+
+
+// Загрузка состава пользователя
+async function loadUserRoster() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  try {
+    // Получаем формат лиги
+    const { data: league, error: leagueError } = await supabase
+      .from('leagues')
+      .select('type')
+      .eq('id', leagueId)
+      .single();
+
+    if (leagueError) {
+      console.error('Ошибка загрузки формата лиги:', leagueError);
+      return;
+    }
+
+    // Получаем ID команды текущего менеджера
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('league_id', leagueId)
+      .single();
+
+    if (teamError) {
+      console.error('Ошибка загрузки команды менеджера:', teamError);
+      return;
+    }
+
+    // ИСПРАВЛЕННЫЙ ЗАПРОС - правильный синтаксис для вложенных данных
+    const { data: rosterPlayers, error } = await supabase
+      .from('team_players3')
+      .select(`
+        player_id,
+        players (
+          id, first_name, last_name, position, photo_url, stats
+        )
+      `)
+      .eq('league_id', leagueId)
+      .eq('team_id', userTeam.id);
+
+    if (error) {
+      console.error('Ошибка загрузки состава:', error);
+      return;
+    }
+
+    const rosterBody = document.getElementById('roster-body');
+    rosterBody.innerHTML = '';
+
+    if (rosterPlayers && rosterPlayers.length > 0) {
+      rosterPlayers.forEach(({ players }) => {
+        if (!players) return; // Добавляем проверку на существование players
+        
+        const stats = players.stats || {
+          points: 0, threes: 0, assists: 0, rebounds: 0,
+          blocks: 0, steals: 0, turnover: 0
+        };
+        const fantasyPoints = calculateFantasyPoints(stats, league.type);
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="player-name-cell">
+            <img src="${players.photo_url || 'https://via.placeholder.com/30'}"
+                 alt="${players.first_name} ${players.last_name}"
+                 class="player-photo">
+            ${players.first_name} ${players.last_name}
+          </td>
+          <td>${players.position || '-'}</td>
+          <td>${stats.points || 0}</td>
+          <td>${stats.threes || 0}</td>
+          <td>${stats.assists || 0}</td>
+          <td>${stats.rebounds || 0}</td>
+          <td>${stats.blocks || 0}</td>
+          <td>${stats.steals || 0}</td>
+          <td>${stats.turnover || 0}</td>
+          <td>${fantasyPoints}</td>
+          <td>
+            <button class="player-action-btn" onclick="releasePlayer(${players.id})">Отпустить</button>
+          </td>
+        `;
+        rosterBody.appendChild(row);
+      });
+    } else {
+      rosterBody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Ваш состав пуст</td></tr>';
+    }
+  } catch (e) {
+    console.error('Ошибка при загрузке состава:', e);
+  }
+}
+// Расчет фэнтези очков игрока
+// Расчет фэнтези очков игрока
+function calculateFantasyPoints(stats) {
+  if (!stats) return 0;
+
+  // Если stats - массив, берем среднее значение
+  if (Array.isArray(stats)) {
+    const avgStats = calculateAverageStats(stats);
+    return (
+      (avgStats.points || 0) * 1 +
+      (avgStats.assists || 0) * 1.5 +
+      (avgStats.rebounds || 0) * 1.3 +
+      (avgStats.blocks || 0) * 3 +
+      (avgStats.steals || 0) * 3 -
+      (avgStats.turnovers || 0) * 2
+    );
+  }
+
+  // Если stats - объект
+  return (
+    (stats.points || 0) * 1 +
+    (stats.assists || 0) * 1.5 +
+    (stats.rebounds || 0) * 1.3 +
+    (stats.blocks || 0) * 3 +
+    (stats.steals || 0) * 3 -
+    (stats.turnovers || 0) * 2
+  );
+}
+
+// Расчет средних статистик
+function calculateAverageStats(statsArray) {
+  if (!statsArray || statsArray.length === 0) return {
+    points: 0, threes: 0, assists: 0, rebounds: 0,
+    blocks: 0, steals: 0, turnovers: 0
+  };
+  
+  const sum = statsArray.reduce((acc, stat) => ({
+    points: (acc.points || 0) + (stat.points || 0),
+    threes: (acc.threes || 0) + (stat.threes || 0),
+    assists: (acc.assists || 0) + (stat.assists || 0),
+    rebounds: (acc.rebounds || 0) + (stat.rebounds || 0),
+    blocks: (acc.blocks || 0) + (stat.blocks || 0),
+    steals: (acc.steals || 0) + (stat.steals || 0),
+    turnovers: (acc.turnovers || 0) + (stat.turnovers || 0)
+  }), {});
+
+  const count = statsArray.length;
+  return {
+    points: sum.points / count,
+    threes: sum.threes / count,
+    assists: sum.assists / count,
+    rebounds: sum.rebounds / count,
+    blocks: sum.blocks / count,
+    steals: sum.steals / count,
+    turnovers: sum.turnovers / count
+  };
+}
+
+// Конвертация цены в драфт-позицию
+function priceToDraftPosition(price, maxPrice = 1000) {
+  if (!price) return 160; // Последнее место если цена не указана
+  const normalizedPrice = Math.min(100, Math.max(1, Math.round((price / maxPrice) * 100)));
+  return Math.max(1, 101 - normalizedPrice); // От 1 до 100 места
+}
+
+
+// Загрузка свободных агентов
+// Загрузка свободных агентов
+async function loadFreeAgents() {
+  try {
+    // Получаем всех игроков в лиге (из draft_picks И team_players3)
+    const draftedPlayerIds = await getDraftedPlayers();
+
+    // Получаем всех игроков СО СТАТИСТИКОЙ И КОМАНДАМИ
+    const { data: players, error } = await supabase
+      .from('players')
+      .select(`
+        id,
+        first_name,
+        last_name,
+        position,
+        photo_url,
+        price,
+        team_id,
+        teams (id, name, logo_url),
+        player_stats (*)
+      `);
+
+    if (error) {
+      console.error('Ошибка загрузки игроков:', error);
+      return;
+    }
+
+    // Находим максимальную цену для расчета позиций
+    const maxPrice = Math.max(...players.map(p => p.price || 0), 1000);
+
+    // Фильтруем - только те, кого НЕТ в draftedPlayerIds
+    const freeAgents = players.filter(player => 
+      !draftedPlayerIds.includes(player.id)
+    ).map(player => {
+      const avgStats = calculateAverageStats(player.player_stats || []);
+      const fantasyPoints = calculateFantasyPoints(avgStats);
+      const draftPosition = priceToDraftPosition(player.price, maxPrice);
+      
+      return {
+        ...player,
+        avgStats,
+        fantasyPoints,
+        draftPosition
+      };
+    });
+
+    const freeAgentsBody = document.getElementById('free-agents-body');
+    freeAgentsBody.innerHTML = '';
+
+    if (freeAgents.length > 0) {
+      freeAgents.forEach(player => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="player-name-cell">
+            <div class="player-info">
+              <div class="player-main-info">
+                <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
+                     alt="${player.first_name} ${player.last_name}"
+                     class="player-photo"
+                     onerror="this.src='https://via.placeholder.com/40'">
+                <span class="player-name-text">${player.first_name} ${player.last_name}</span>
+              </div>
+              ${player.teams?.logo_url ? `
+                <img src="${player.teams.logo_url}" 
+                     alt="${player.teams.name}" 
+                     class="team-logo"
+                     onerror="this.style.display='none'">
+              ` : ''}
+            </div>
+          </td>
+          <td>${player.position || '-'}</td>
+          <td>${player.avgStats.points ? player.avgStats.points.toFixed(1) : '0'}</td>
+          <td>${player.avgStats.threes ? player.avgStats.threes.toFixed(1) : '0'}</td>
+          <td>${player.avgStats.assists ? player.avgStats.assists.toFixed(1) : '0'}</td>
+          <td>${player.avgStats.rebounds ? player.avgStats.rebounds.toFixed(1) : '0'}</td>
+          <td>${player.avgStats.blocks ? player.avgStats.blocks.toFixed(1) : '0'}</td>
+          <td>${player.avgStats.steals ? player.avgStats.steals.toFixed(1) : '0'}</td>
+          <td>${player.avgStats.turnovers ? player.avgStats.turnovers.toFixed(1) : '0'}</td>
+          <td>${player.fantasyPoints.toFixed(1)}</td>
+          <td>
+            <button class="add-player-btn" onclick="addFreeAgent(${player.id})">+</button>
+          </td>
+        `;
+        freeAgentsBody.appendChild(row);
+      });
+    } else {
+      freeAgentsBody.innerHTML = '<tr><td colspan="11" style="text-align: center;">Нет свободных агентов</td></tr>';
+    }
+  } catch (e) {
+    console.error('Ошибка при загрузке свободных агентов:', e);
+  }
+}
+// Загрузка таблицы лиги
+async function loadStandings() {
+  // 1. Получаем список участников лиги
+  const { data: userLeagues, error: userLeaguesError } = await supabase
+    .from('user_leagues')
+    .select('user_id')
+    .eq('league_id', leagueId);
+
+  if (userLeaguesError) {
+    console.error('Ошибка загрузки участников лиги:', userLeaguesError);
+    return;
+  }
+
+  // 2. Получаем названия команд и статистику
+  const userIds = userLeagues.map(ul => ul.user_id);
+  const { data: userTeams, error: userTeamsError } = await supabase
+    .from('user_teams')
+    .select('team_name, user_id')
+    .in('user_id', userIds);
+
+  if (userTeamsError) {
+    console.error('Ошибка загрузки команд:', userTeamsError);
+    return;
+  }
+
+  // 3. Формируем таблицу лиги
+  const standingsBody = document.getElementById('standings-body');
+  standingsBody.innerHTML = '';
+
+  if (userTeams.length > 0) {
+    userTeams.forEach((team, index) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${team.team_name || 'Без названия'}</td>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+      `;
+      standingsBody.appendChild(row);
+    });
+  } else {
+    standingsBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Нет данных</td></tr>';
+  }
+}
+
+// Загрузка настроек лиги
+async function loadLeagueSettings() {
+  const { data: league, error } = await supabase
+    .from('leagues')
+    .select('*')
+    .eq('id', leagueId)
+    .single();
+
+  if (error) {
+    console.error('Ошибка загрузки настроек лиги:', error);
+    return;
+  }
+
+  // Заполняем существующие поля
+  document.getElementById('league-name-setting').value = league.name;
+  document.getElementById('league-description-setting').value = league.description || '';
+  document.getElementById('league-format-setting').value = league.type || 'scoring';
+  document.getElementById('league-type-setting').value = league.draft_type || 'snake';
+  document.getElementById('max-managers-setting').value = league.max_managers || 10;
+  document.getElementById('draft-time-limit-setting').value = league.draft_time_limit || 60;
+
+  // Конвертируем UTC в московское время для отображения
+  if (league.draft_datetime) {
+    const draftDateUTC = new Date(league.draft_datetime);
+    const draftDateMoscow = new Date(draftDateUTC.getTime() + 3 * 60 * 60 * 1000);
+    const localDateTime = draftDateMoscow.toISOString().slice(0, 16);
+    document.getElementById('draft-datetime-setting').value = localDateTime;
+  }
+}
+
+// Сохранение настроек лиги
+// Сохранение настроек лиги
+async function saveLeagueSettings() {
+  const leagueName = document.getElementById('league-name-setting').value;
+  const leagueDescription = document.getElementById('league-description-setting').value;
+  const leagueFormat = document.getElementById('league-format-setting').value;
+  const leagueType = document.getElementById('league-type-setting').value;
+  const maxManagers = document.getElementById('max-managers-setting').value;
+  const draftDatetimeInput = document.getElementById('draft-datetime-setting').value;
+  const draftTimeLimit = document.getElementById('draft-time-limit-setting').value;
+
+  if (!isLeagueCreator) {
+    alert('Только создатель лиги может изменять настройки!');
+    return;
+  }
+
+  let draftDatetimeUTC = null; // Объявляем переменную
+
+  // Валидация времени драфта
+  if (draftDatetimeInput) {
+    const selectedLocal = new Date(draftDatetimeInput);
+    const now = new Date();
+
+    if (selectedLocal < new Date(now.getTime() + 5 * 60 * 1000)) {
+      alert('Время драфта должно быть минимум через 5 минут!');
+      return;
+    }
+    
+    // Конвертируем московское время в UTC
+    const localDateMoscow = new Date(draftDatetimeInput);
+    draftDatetimeUTC = new Date(localDateMoscow.getTime() - 3 * 60 * 60 * 1000).toISOString();
+  }
+
+  const updateData = {
+    name: leagueName,
+    type: leagueFormat,
+    draft_type: leagueType,
+    max_managers: parseInt(maxManagers),
+    draft_datetime: draftDatetimeUTC,
+    draft_time_limit: parseInt(draftTimeLimit)
+  };
+
+  if (leagueDescription.trim() !== '') {
+    updateData.description = leagueDescription;
+  }
+
+  const { error } = await supabase
+    .from('leagues')
+    .update(updateData)
+    .eq('id', leagueId);
+
+  if (error) {
+    console.error('Ошибка сохранения настроек:', error);
+    alert('Ошибка сохранения настроек!');
+    return;
+  }
+
+  alert('Настройки успешно сохранены!');
+  await loadLeagueInfo();
+}
+// Выбор игрока на драфте
+async function draftPlayer(playerId) {
+  const now = new Date();
+  const nowMoscow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const draftDateUTC = new Date(draftDateTime);
+  const draftDateMoscow = new Date(draftDateUTC.getTime() + 3 * 60 * 60 * 1000);
+
+  if (draftDateMoscow > nowMoscow) {
+    alert('Драфт ещё не начался!');
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  // Проверяем, что ход принадлежит текущему пользователю
+  if (user.id !== currentPickUserId) {
+    alert('Сейчас ходит другой менеджер!');
+    return;
+  }
+
+  try {
+    // Проверяем, что игрок свободен
+    const { count, error: checkError } = await supabase
+      .from('draft_picks')
+      .select('id', { count: 'exact', head: true })
+      .eq('league_id', leagueId)
+      .eq('player_id', playerId);
+
+    if (checkError) {
+      console.error('Ошибка проверки игрока:', checkError);
+      return;
+    }
+
+    if (count > 0) {
+      alert('Этот игрок уже выбран!');
+      return;
+    }
+
+    // Получаем следующий номер пика
+    const { data: lastPick, error: pickError } = await supabase
+      .from('draft_picks')
+      .select('pick_number')
+      .eq('league_id', leagueId)
+      .order('pick_number', { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextPickNumber = lastPick ? lastPick.pick_number + 1 : 1;
+
+    // Добавляем игрока в драфт
+    const { error: draftError } = await supabase
+      .from('draft_picks')
+      .insert({
+        league_id: leagueId,
+        user_id: user.id,
+        player_id: playerId,
+        pick_number: nextPickNumber
+      });
+
+    if (draftError) {
+      console.error('Ошибка выбора игрока:', draftError);
+      alert('Не удалось выбрать игрока. Возможно, он уже был выбран другим менеджером.');
+      return;
+    }
+
+    // Получаем ID команды текущего менеджера
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('league_id', leagueId)
+      .single();
+
+    if (teamError) {
+      console.error('Ошибка получения команды менеджера:', teamError);
+      alert('Не удалось определить вашу команду.');
+      return;
+    }
+
+    // Добавляем игрока в команду (team_players3)
+    const { error: teamPlayerError } = await supabase
+      .from('team_players3')
+      .insert({
+        league_id: leagueId,
+        team_id: userTeam.id,
+        player_id: playerId,
+        tour_id: null,  // или текущий тур, если нужно
+        created_at: new Date().toISOString()
+      });
+
+    if (teamPlayerError) {
+      console.error('Ошибка добавления игрока в команду:', teamPlayerError);
+      alert('Игрок выбран на драфте, но не добавлен в команду. Обратитесь к администратору.');
+      return;
+    }
+
+    alert('Игрок успешно выбран!');
+    await loadUserRoster();
+    await loadDraftPlayers();
+    await loadFreeAgents();
+    await loadCurrentPick();
+    await loadDraftPicksHistory();
+  } catch (e) {
+    console.error('Ошибка при выборе игрока:', e);
+  }
+}
+async function addFreeAgent(playerId) {
+  const now = new Date();
+  const nowMoscow = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+  const draftDateUTC = new Date(draftDateTime);
+  const draftDateMoscow = new Date(draftDateUTC.getTime() + 3 * 60 * 60 * 1000);
+
+  if (draftDateMoscow > nowMoscow) {
+    alert('Драфт ещё не начался!');
+    return;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  try {
+    // Проверяем, что игрок не выбран в этой лиге
+    const { count, error: checkError } = await supabase
+      .from('draft_picks')
+      .select('id', { count: 'exact', head: true })
+      .eq('league_id', leagueId)
+      .eq('player_id', playerId);
+
+    if (checkError) {
+      console.error('Ошибка проверки игрока:', checkError);
+      return;
+    }
+
+    if (count > 0) {
+      alert('Этот игрок уже выбран в этой лиге!');
+      return;
+    }
+
+    // Получаем ID команды текущего менеджера
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('league_id', leagueId)
+      .single();
+
+    if (teamError) {
+      console.error('Ошибка получения команды менеджера:', teamError);
+      alert('Не удалось определить вашу команду.');
+      return;
+    }
+
+    // Проверяем, что в команде есть свободное место (если нужно)
+    const { count: rosterCount, error: rosterError } = await supabase
+      .from('team_players3')
+      .select('id', { count: 'exact', head: true })
+      .eq('league_id', leagueId)
+      .eq('team_id', userTeam.id);
+
+    if (rosterError) {
+      console.error('Ошибка проверки состава:', rosterError);
+      return;
+    }
+
+    // Пример: ограничение в 15 игроков в команде
+    if (rosterCount >= 15) {
+      alert('В вашей команде уже максимальное количество игроков!');
+      return;
+    }
+
+    // Добавляем игрока в команду (team_players3)
+    const { error: teamPlayerError } = await supabase
+      .from('team_players3')
+      .insert({
+        league_id: leagueId,
+        team_id: userTeam.id,
+        player_id: playerId,
+        tour_id: null,
+        created_at: new Date().toISOString()
+      });
+
+    if (teamPlayerError) {
+      console.error('Ошибка добавления игрока в команду:', teamPlayerError);
+      alert('Не удалось добавить игрока в команду.');
+      return;
+    }
+
+    // Добавляем пик в draft_picks (если драфт уже завершён)
+    const { data: lastPick, error: pickError } = await supabase
+      .from('draft_picks')
+      .select('pick_number')
+      .eq('league_id', leagueId)
+      .order('pick_number', { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextPickNumber = lastPick ? lastPick.pick_number + 1 : 1;
+
+    const { error: draftError } = await supabase
+      .from('draft_picks')
+      .insert({
+        league_id: leagueId,
+        user_id: user.id,
+        player_id: playerId,
+        pick_number: nextPickNumber
+      });
+
+    if (draftError) {
+      console.error('Ошибка добавления пика:', draftError);
+      // Не прерываем выполнение, так как игрок уже добавлен в команду
+    }
+
+    alert('Игрок успешно добавлен в команду!');
+    await loadUserRoster();
+    await loadDraftPlayers();
+    await loadFreeAgents();
+  } catch (e) {
+    console.error('Ошибка при добавлении свободного агента:', e);
+  }
+}
+
+// Отпустить игрока
+async function releasePlayer(playerId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  if (!confirm("Вы уверены, что хотите отпустить этого игрока?")) return;
+
+  try {
+    // Получаем ID команды текущего менеджера
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('league_id', leagueId)
+      .single();
+
+    if (teamError) {
+      console.error('Ошибка загрузки команды менеджера:', teamError);
+      alert('Не удалось определить вашу команду.');
+      return;
+    }
+
+    // Удаляем игрока из команды (team_players3)
+    const { error: teamPlayerError } = await supabase
+      .from('team_players3')
+      .delete()
+      .eq('league_id', leagueId)
+      .eq('team_id', userTeam.id)
+      .eq('player_id', playerId);
+
+    if (teamPlayerError) {
+      console.error('Ошибка удаления игрока из команды:', teamPlayerError);
+      alert('Не удалось отпустить игрока.');
+      return;
+    }
+
+    // Удаляем пик из draft_picks (если нужно)
+    const { error: draftError } = await supabase
+      .from('draft_picks')
+      .delete()
+      .eq('league_id', leagueId)
+      .eq('user_id', user.id)
+      .eq('player_id', playerId);
+
+    if (draftError) {
+      console.error('Ошибка удаления пика:', draftError);
+      // Не прерываем выполнение, так как игрок уже удалён из команды
+    }
+
+    alert('Игрок успешно отпущен!');
+    await loadUserRoster();
+    await loadDraftPlayers();
+    await loadFreeAgents();
+  } catch (e) {
+    console.error('Ошибка при удалении игрока:', e);
+  }
+}
+// Открытие редактора пиков
+function openPickEditor() {
+  if (!isLeagueCreator) {
+    alert('Только комиссионер лиги может редактировать пики!');
+    return;
+  }
+
+  if (isDraftStarted()) {
+    alert('Нельзя редактировать пики после начала драфта!');
+    return;
+  }
+
+  loadPickEditorData();
+  document.getElementById('pickEditorModal').style.display = 'block';
+}
+
+// Закрытие редактора пиков
+function closePickEditor() {
+  document.getElementById('pickEditorModal').style.display = 'none';
+}
+
+// Загрузка данных в редактор пиков
+// Загрузка данных в редактор пиков
+async function loadPickEditorData() {
+  try {
+    // ПРАВИЛЬНЫЙ запрос - убираем вложенный select
+    const { data: userLeagues, error: userLeaguesError } = await supabase
+      .from('user_leagues')
+      .select('user_id')
+      .eq('league_id', leagueId)
+      .order('joined_at', { ascending: true });
+
+    if (userLeaguesError) {
+      console.error('Ошибка загрузки участников лиги:', userLeaguesError);
+      return;
+    }
+
+    // Теперь отдельно получаем названия команд
+    const userIds = userLeagues.map(ul => ul.user_id);
+    const { data: userTeams, error: teamsError } = await supabase
+      .from('user_teams')
+      .select('user_id, team_name')
+      .in('user_id', userIds)
+      .eq('league_id', leagueId);
+
+    if (teamsError) {
+      console.error('Ошибка загрузки команд:', teamsError);
+      return;
+    }
+
+    // Создаем мапу для быстрого доступа
+    const teamNamesMap = {};
+    userTeams.forEach(team => {
+      teamNamesMap[team.user_id] = team.team_name || 'Без названия';
+    });
+
+    const { data: draftPicks, error: draftPicksError } = await supabase
+      .from('draft_picks')
+      .select('id, pick_number, user_id, player_id, players(first_name, last_name)')
+      .eq('league_id', leagueId)
+      .order('pick_number', { ascending: true });
+
+    if (draftPicksError) {
+      console.error('Ошибка загрузки пиков:', draftPicksError);
+      return;
+    }
+
+    const pickEditorBody = document.getElementById('pick-editor-body');
+    pickEditorBody.innerHTML = '';
+
+    // Если пиков ещё нет, создаём пустые строки для каждого менеджера
+    if (!draftPicks || draftPicks.length === 0) {
+      userLeagues.forEach((userLeague, index) => {
+        const teamName = teamNamesMap[userLeague.user_id] || 'Без названия';
+        const options = userLeagues.map(ul => {
+          const isSelected = ul.user_id === userLeague.user_id;
+          const ulTeamName = teamNamesMap[ul.user_id] || 'Без названия';
+          return `
+            <option value="${ul.user_id}" ${isSelected ? 'selected' : ''}>
+              ${ulTeamName}
+            </option>
+          `;
+        }).join('');
+
+        const row = document.createElement('tr');
+        row.innerHTML =
+          `<td>${index + 1}</td>` +
+          `<td>${teamName}</td>` +
+          `<td>-</td>` +
+          `<td>` +
+            `<select class="pick-manager-select" data-pick-number="${index + 1}">` +
+              options +
+            `</select>` +
+          `</td>`;
+        pickEditorBody.appendChild(row);
+      });
+    }
+    // Если пики уже есть, отображаем их
+    else {
+      draftPicks.forEach(pick => {
+        const teamName = teamNamesMap[pick.user_id] || 'Без названия';
+        const options = userLeagues.map(ul => {
+          const isSelected = ul.user_id === pick.user_id;
+          const ulTeamName = teamNamesMap[ul.user_id] || 'Без названия';
+          return `
+            <option value="${ul.user_id}" ${isSelected ? 'selected' : ''}>
+              ${ulTeamName}
+            </option>
+          `;
+        }).join('');
+
+        const row = document.createElement('tr');
+        row.innerHTML =
+          `<td>${pick.pick_number}</td>` +
+          `<td>${teamName}</td>` +
+          `<td>${pick.players ? `${pick.players.first_name} ${pick.players.last_name}` : '-'}</td>` +
+          `<td>` +
+            `<select class="pick-manager-select" data-pick-id="${pick.id}" data-pick-number="${pick.pick_number}">` +
+              options +
+            `</select>` +
+          `</td>`;
+        pickEditorBody.appendChild(row);
+      });
+    }
+  } catch (e) {
+    console.error('Ошибка в loadPickEditorData:', e);
+  }
+}
+// Сохранение изменённых пиков
+async function saveEditedPicks() {
+  const pickRows = document.querySelectorAll('#pick-editor-body tr');
+  const updates = [];
+
+  for (const row of pickRows) {
+    const select = row.querySelector('.pick-manager-select');
+    const pickId = select.dataset.pickId;
+    const pickNumber = parseInt(select.dataset.pickNumber);
+    const newUserId = select.value;
+
+    // Если это новый пик (ещё не сохранённый)
+    if (!pickId) {
+      updates.push({
+        league_id: leagueId,
+        user_id: newUserId,
+        pick_number: pickNumber,
+        type: 'insert'
+      });
+    }
+    // Если пик уже существует, проверяем, изменился ли менеджер
+    else {
+      const currentUserId = row.querySelector('td:nth-child(2)').textContent;
+      const isChanged = select.options[select.selectedIndex].text !== row.querySelector('td:nth-child(2)').textContent;
+      if (isChanged) {
+        updates.push({
+          id: pickId,
+          user_id: newUserId,
+          type: 'update'
+        });
+      }
+    }
+  }
+
+  // Выполняем обновления
+  for (const update of updates) {
+    if (update.type === 'insert') {
+      const { error } = await supabase
+        .from('draft_picks')
+        .insert({
+          league_id: update.league_id,
+          user_id: update.user_id,
+          pick_number: update.pick_number
+        });
+
+      if (error) {
+        console.error('Ошибка добавления пика:', error);
+        alert('Не удалось сохранить изменения пиков!');
+        return;
+      }
+    } else if (update.type === 'update') {
+      const { error } = await supabase
+        .from('draft_picks')
+        .update({ user_id: update.user_id })
+        .eq('id', update.id);
+
+      if (error) {
+        console.error('Ошибка обновления пика:', error);
+        alert('Не удалось сохранить изменения пиков!');
+        return;
+      }
+    }
+  }
+
+  alert('Изменения успешно сохранены!');
+  closePickEditor();
+  await loadCurrentPick();
+  await loadDraftPicksHistory();
+}
+</script>
+</body>
+</html>

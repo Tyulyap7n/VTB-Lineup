@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Лига — Fantasy</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg:#0f1724;--card:#0b1220;--accent:#633EDC;--accent-2:#FE641C;--muted:#9aa4b2;
+    --success:#16a34a;--danger:#dc2626;--white:#ffffff;
+  }
+  *{box-sizing:border-box;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif}
+  body{margin:0;background:linear-gradient(180deg,#071026 0%,#0f1724 100%);color:var(--white);min-height:100vh}
+  header{height:64px;background:linear-gradient(90deg,var(--accent),#3b2bbd);display:flex;align-items:center;justify-content:space-between;padding:8px 16px;box-shadow:0 6px 24px rgba(0,0,0,.5)}
+  .brand{display:flex;gap:12px;align-items:center}
+  .brand img{height:44px}
+  .league-code{font-weight:700;color:var(--accent-2)}
+  main{display:flex;gap:16px;padding:16px;margin-top:8px}
+  aside{width:72px;background:#071029;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center}
+  aside .item{width:48px;height:48px;border-radius:10px;background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;cursor:pointer}
+  section{flex:1;min-height:70vh}
+  .league-header{display:flex;align-items:center;gap:16px;margin-bottom:12px}
+  .logo{width:68px;height:68px;border-radius:14px;background:var(--accent-2);display:flex;align-items:center;justify-content:center;font-weight:800;color:#000}
+  .league-info h1{margin:0;font-size:20px}
+  .league-info p{margin:4px 0 0;color:var(--muted);font-size:13px}
+  .tabs{display:flex;gap:8px;margin:12px 0 18px}
+  .tab{background:rgba(255,255,255,.03);padding:8px 12px;border-radius:10px;cursor:pointer}
+  .tab.active{background:linear-gradient(90deg,var(--accent),#4b39c7)}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));padding:12px;border-radius:12px}
+  .grid{display:grid;gap:12px}
+  .two-cols{grid-template-columns:1fr 360px}
+  .draft-list{max-height:56vh;overflow:auto;border-radius:8px}
+  table{width:100%;border-collapse:collapse;color:var(--white)}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid rgba(255,255,255,.03);font-size:13px}
+  .player-photo{width:34px;height:34px;border-radius:50%;object-fit:cover;margin-right:8px}
+  .btn{background:var(--accent);border:none;padding:8px 12px;border-radius:10px;color:var(--white);cursor:pointer}
+  .btn.alt{background:var(--accent-2)}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.06)}
+  .small{padding:6px 8px;font-size:13px}
+  .draft-board{max-height:52vh;overflow:auto;padding:8px;border-radius:8px;background:rgba(255,255,255,.02)}
+  .pick-card{background:rgba(255,255,255,.02);padding:8px;border-radius:8px;display:flex;align-items:center;gap:8px;min-height:68px}
+  .pick-card.current{outline:2px solid var(--accent-2);box-shadow:0 6px 22px rgba(254,100,28,.08)}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:2000}
+  .modal.show{display:flex}
+  .modal-card{background:var(--card);padding:16px;border-radius:12px;min-width:320px;max-width:900px}
+  .toast-holder{position:fixed;right:20px;top:20px;z-index:3000;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+  .toast{background:#111827;padding:10px 12px;border-radius:8px;color:var(--white);box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  .danger{background:linear-gradient(90deg,var(--danger),#b91c1c)}
+  .success{background:linear-gradient(90deg,var(--success),#059669)}
+  .muted{color:var(--muted);font-size:13px}
+  .timer{font-weight:800}
+  .timer.warn{color:var(--danger)}
+  .setting-row{display:flex;gap:8px;align-items:center;margin-top:8px}
+  input,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.06);background:transparent;color:var(--white);width:100%}
+  footer{height:52px;background:rgba(255,255,255,.02);display:flex;align-items:center;justify-content:center;margin-top:12px;border-radius:8px;color:var(--muted)}
+  @media(max-width:1000px){main{flex-direction:column} .two-cols{grid-template-columns:1fr} aside{display:none}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/FIBA_logo.svg/1200px-FIBA_logo.svg.png" alt="logo" style="height:44px">
+    <div>
+      <div class="league-code" id="league-code">Лига — загрузка...</div>
+      <div class="muted" id="league-sub">Информация о лиге</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:12px;align-items:center">
+    <div id="user-info" class="muted">Неавторизован</div>
+    <button class="btn small" id="btn-profile" onclick="window.location.href='profile.html'">Профиль</button>
+  </div>
+</header>
+
+<main>
+  <aside>
+    <div class="item" title="Лиги" onclick="window.location.href='index.html'">🏠</div>
+    <div class="item" title="Скаут" onclick="window.location.href='scout.html'">🔎</div>
+    <div class="item" title="Выход" onclick="window.location.href='logout.html'">⎋</div>
+  </aside>
+
+  <section>
+    <div class="league-header">
+      <div class="logo" id="league-logo">Л</div>
+      <div class="league-info">
+        <h1 id="league-name">Загрузка...</h1>
+        <p id="league-desc" class="muted">Описание...</p>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
+        <div class="muted">Драфт: <span id="draft-datetime">—</span></div>
+        <div class="muted">Менеджеров: <strong id="managers-count">—</strong></div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="draft" onclick="switchTab('draft')">Драфт</div>
+      <div class="tab" data-tab="roster" onclick="switchTab('roster')">Мой состав</div>
+      <div class="tab" data-tab="freeagents" onclick="switchTab('freeagents')">Свободные агенты</div>
+      <div class="tab" data-tab="favorites" onclick="switchTab('favorites')">Избранное</div>
+      <div class="tab" data-tab="standings" onclick="switchTab('standings')">Таблица</div>
+      <div class="tab" data-tab="settings" id="settings-tab" onclick="switchTab('settings')" style="display:none">Настройки</div>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="grid two-cols">
+      <!-- LEFT: main panel (changes per tab) -->
+      <div id="left-panel" class="panel">
+        <!-- DRAFT -->
+        <div id="tab-draft" class="tab-panel active">
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+            <div>До старта: <span id="draft-countdown" class="timer">—</span></div>
+            <div>Текущий ход: <strong id="current-pick-user">—</strong></div>
+            <div id="pick-timer-wrap" style="display:none">Время хода: <span id="pick-timer" class="timer">00:00</span></div>
+          </div>
+
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+            <button class="btn small" onclick="changeFilter('available')" id="btn-filter-available">Доступные</button>
+            <button class="btn small ghost" onclick="changeFilter('all')" id="btn-filter-all">Все</button>
+            <div style="flex:1"></div>
+            <div class="muted">Поиск</div>
+            <input type="search" id="search-player" placeholder="Имя игрока..." style="width:220px" oninput="debouncedLoadPlayers()">
+          </div>
+
+          <div style="display:flex;gap:12px">
+            <div style="flex:1">
+              <div class="draft-list panel" style="padding:8px">
+                <table id="players-table">
+                  <thead>
+                    <tr><th>Игрок</th><th>Позиция</th><th>ФП</th><th>Статус</th><th></th></tr>
+                  </thead>
+                  <tbody id="players-body">
+                    <tr><td colspan="5" class="muted">Загрузка...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div style="width:360px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                <div><strong>Доска драфта</strong></div>
+                <div class="muted" id="draft-type-indicator">—</div>
+              </div>
+              <div class="draft-board panel" id="draft-board"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROSTER -->
+        <div id="tab-roster" class="tab-panel" style="display:none">
+          <div class="setting-row" style="align-items:center">
+            <label class="muted">Тур</label>
+            <select id="tour-selector" style="width:160px;margin-left:6px" onchange="loadUserRoster()"></select>
+          </div>
+          <div style="margin-top:12px" class="panel">
+            <table>
+              <thead><tr><th>Игрок</th><th>Позиция</th><th>ФП</th><th>Действия</th></tr></thead>
+              <tbody id="roster-body"><tr><td colspan="4" class="muted">Загрузка...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FREE AGENTS -->
+        <div id="tab-freeagents" class="tab-panel" style="display:none">
+          <div class="panel">
+            <table>
+              <thead><tr><th>Игрок</th><th>Позиция</th><th>ФП</th><th></th></tr></thead>
+              <tbody id="freeagents-body"><tr><td colspan="4" class="muted">Загрузка...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- FAVORITES -->
+        <div id="tab-favorites" class="tab-panel" style="display:none">
+          <div class="panel" id="favorites-panel" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px"></div>
+        </div>
+
+        <!-- STANDINGS -->
+        <div id="tab-standings" class="tab-panel" style="display:none">
+          <div class="setting-row">
+            <label class="muted">Тур (для подсчёта)</label>
+            <select id="standings-tour" style="width:160px;margin-left:6px"></select>
+            <button class="btn small" style="margin-left:8px" onclick="loadStandings()">Пересчитать</button>
+          </div>
+          <div style="margin-top:12px" class="panel">
+            <table>
+              <thead><tr><th>Поз</th><th>Команда</th><th>ФП</th><th>Игроки</th></tr></thead>
+              <tbody id="standings-body"><tr><td colspan="4" class="muted">Загрузка...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="tab-settings" class="tab-panel" style="display:none">
+          <div class="panel">
+            <div class="setting-row"><label>Название</label><input id="league-name-input"></div>
+            <div class="setting-row" style="margin-top:8px"><label>Описание</label><textarea id="league-desc-input" rows="3"></textarea></div>
+            <div class="setting-row"><label>Тип лиги</label><select id="league-type-input"><option value="scoring">Скоринг</option><option value="h2h_points">H2H очки</option></select></div>
+            <div class="setting-row"><label>Тип драфта</label><select id="draft-type-input"><option value="snake">snake</option><option value="auction">auction</option></select></div>
+            <div class="setting-row"><label>Дата/время драфта (UTC)</label><input id="draft-datetime-input" type="datetime-local"></div>
+            <div class="setting-row"><label>Время на ход (сек)</label><input id="pick-time-input" type="number" min="10" value="60"></div>
+            <div class="setting-row"><label>Макс менеджеров</label><input id="max-managers-input" type="number" min="2" value="10"></div>
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <button class="btn" onclick="saveLeagueSettings()">Сохранить</button>
+              <button class="btn ghost" onclick="openPickEditor()">Редактировать пики</button>
+            </div>
+            <div id="settings-warning" class="muted" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: info / small widgets -->
+      <div>
+        <div class="panel" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Информация лиги</strong></div>
+            <div class="muted" id="league-id">ID: —</div>
+          </div>
+          <div style="margin-top:8px" class="muted">Создатель: <span id="league-creator">—</span></div>
+          <div style="margin-top:8px" class="muted">Макс менеджеров: <strong id="max-managers">—</strong></div>
+        </div>
+
+        <div class="panel" style="margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div><strong>Мой менеджер</strong></div>
+            <div><button class="btn small" onclick="loadUserTeams()">Обновить</button></div>
+          </div>
+          <div id="my-team-area" class="muted">Загрузка...</div>
+        </div>
+
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div><strong>Поиск/фильтры</strong></div>
+            <div class="muted">Фильтр: <span id="current-filter">available</span></div>
+          </div>
+          <div class="muted" style="font-size:13px">Кнопки: Добавить — доступно только при вашем ходе и если игрок свободен.</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<footer>© Fantasy League</footer>
+
+<!-- Replace modal -->
+<div class="modal" id="replace-modal"><div class="modal-card">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <strong>Заменить игрока</strong><button class="btn small" onclick="closeReplaceModal()">Закрыть</button>
+  </div>
+  <div id="replace-modal-body" style="margin-top:12px"></div>
+</div></div>
+
+<!-- Pick editor modal -->
+<div class="modal" id="pick-editor-modal"><div class="modal-card">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <strong>Редактировать пики</strong><button class="btn small" onclick="closePickEditor()">Закрыть</button>
+  </div>
+  <div id="pick-editor-body" style="margin-top:12px"></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+    <button class="btn ghost" onclick="closePickEditor()">Отмена</button>
+    <button class="btn" onclick="saveEditedPicks()">Сохранить</button>
+  </div>
+</div></div>
+
+<!-- Toast holder -->
+<div class="toast-holder" id="toast-holder"></div>
+
+<script>
+/* =========================================================
+   Полный скрипт: подключение Supabase, real-time, логика
+   ========================================================= */
+
+const SUPABASE_URL = 'https://svnnneohwcuxirsximkp.supabase.co'; // замените на ваш
+const SUPABASE_ANON_KEY = 'REPLACE_WITH_YOUR_ANON_KEY_IF_NEEDED'; // замените
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// globals
+const urlParams = new URLSearchParams(window.location.search);
+const leagueId = urlParams.get('id');
+let currentUser = null;
+let league = null;
+let userLeagues = []; // participants
+let draftPicks = []; // loaded picks
+let playersCache = []; // players list
+let toursCache = [];
+let currentFilter = 'available';
+let searchTerm = '';
+let draftChannel = null;
+let pickTimeLimit = 60;
+let pickTimerInterval = null;
+let pickTimeLeft = 0;
+let draftCountdownInterval = null;
+let draftStarted = false;
+
+// ---- Utility helpers ----
+function el(q){ return document.querySelector(q); }
+function formatDateISOLocal(dt){ if(!dt) return '—'; const d = new Date(dt); return d.toISOString().replace('T',' ').slice(0,19) + ' UTC'; }
+function toast(msg, type='info', timeout=4000){
+  const holder = el('#toast-holder');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type==='danger' ? 'danger' : (type==='success'? 'success':'' ));
+  t.textContent = msg;
+  holder.appendChild(t);
+  setTimeout(()=>{ t.style.opacity=0; setTimeout(()=>t.remove(),400); }, timeout);
+}
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+// debounce
+let debounceTimer = null;
+function debounce(fn, ms=300){ clearTimeout(debounceTimer); debounceTimer = setTimeout(fn, ms); }
+
+// ----- Fantasy formula (везде используется) -----
+function calculateFantasyPoints(stats){
+  // stats: { points, assists, rebounds, steals, blocks, turnover }
+  const pts = Number(stats.points || 0);
+  const ast = Number(stats.assists || 0);
+  const reb = Number(stats.rebounds || 0);
+  const stl = Number(stats.steals || 0);
+  const blk = Number(stats.blocks || 0);
+  const tov = Number(stats.turnover || 0);
+  const result = pts + 1.5*ast + 1.3*reb + 3*stl + 3*blk - 2*tov;
+  return Number(result.toFixed(1));
+}
+
+// ----- Init on load -----
+document.addEventListener('DOMContentLoaded', async ()=>{
+  if(!leagueId){ toast('ID лиги не указан в параметрах URL', 'danger'); return; }
+  await loadAuthInfo();
+  await loadLeague();
+  await loadTours();
+  await loadPlayers();            // load players into cache
+  await loadUserLeagues();        // participants
+  await loadDraftPicks();         // current picks
+  renderAll();
+  initRealtime();                 // REaltime subscription
+  startDraftCountdown();
+  initUIActions();
+});
+
+// ----- Auth info -----
+async function loadAuthInfo(){
+  try{
+    const { data } = await supabase.auth.getUser();
+    if(data && data.user){
+      currentUser = data.user;
+      el('#user-info').textContent = data.user.email || data.user.id;
+      el('#btn-profile').style.display = 'inline-block';
+    } else {
+      el('#user-info').textContent = 'Неавторизован';
+    }
+  }catch(e){ console.error(e); }
+}
+
+// ----- Load league -----
+async function loadLeague(){
+  try{
+    const { data, error } = await supabase.from('leagues').select('*').eq('id', leagueId).maybeSingle();
+    if(error) throw error;
+    league = data;
+    el('#league-name').textContent = league.name || 'Лига';
+    el('#league-desc').textContent = league.description || '';
+    el('#league-logo').textContent = league.name ? league.name.charAt(0).toUpperCase() : 'Л';
+    el('#league-code').textContent = `Код: ${league.code || '—'}`;
+    el('#league-sub').textContent = `Создано: ${formatDateISOLocal(league.created_at)}`;
+    el('#draft-datetime').textContent = league.draft_datetime ? new Date(league.draft_datetime).toISOString().slice(0,16).replace('T',' ') + ' UTC' : '—';
+    el('#draft-type-indicator').textContent = league.draft_type || 'snake';
+    el('#managers-count').textContent = league.max_managers || '—';
+    el('#league-id').textContent = `ID: ${league.id}`;
+    el('#league-creator').textContent = league.creator_id || '—';
+    el('#max-managers').textContent = league.max_managers || '—';
+    pickTimeLimit = league.draft_time_limit || pickTimeLimit;
+    // show settings tab only if current user is creator
+    if(currentUser && currentUser.id === league.creator_id) el('#settings-tab').style.display = 'inline-block';
+    // prefill settings inputs
+    el('#league-name-input').value = league.name || '';
+    el('#league-desc-input').value = league.description || '';
+    el('#league-type-input').value = league.type || 'scoring';
+    el('#draft-type-input').value = league.draft_type || 'snake';
+    el('#pick-time-input').value = pickTimeLimit;
+    el('#max-managers-input').value = league.max_managers || 10;
+    if(league.draft_datetime){
+      // convert to local datetime-local value (ISO slice)
+      const dtLocal = new Date(league.draft_datetime);
+      const iso = new Date(dtLocal.getTime() - dtLocal.getTimezoneOffset()*60000).toISOString().slice(0,16);
+      el('#draft-datetime-input').value = iso;
+    }
+    // determine draft started
+    draftStarted = league.draft_datetime ? (new Date(league.draft_datetime).getTime() <= Date.now()) : false;
+  }catch(e){ console.error(e); toast('Ошибка загрузки лиги','danger'); }
+}
+
+// ----- Load players (cache) -----
+async function loadPlayers(){
+  try{
+    const { data, error } = await supabase.from('players').select('id,first_name,last_name,position,photo_url,stats,team_id,team_name').limit(1000);
+    if(error) throw error;
+    playersCache = data || [];
+  }catch(e){ console.error(e); toast('Ошибка загрузки игроков','danger'); }
+}
+
+// ----- Load tours -----
+async function loadTours(){
+  try{
+    const { data, error } = await supabase.from('tours').select('id,round_number').order('round_number',{ascending:true});
+    if(error) throw error;
+    toursCache = data || [];
+    const sel = el('#tour-selector'); const sel2 = el('#standings-tour');
+    sel.innerHTML = ''; sel2.innerHTML = '';
+    (toursCache||[]).forEach(t=>{
+      const opt = document.createElement('option'); opt.value=t.id; opt.textContent=`Тур ${t.round_number}`; sel.appendChild(opt);
+      const opt2 = document.createElement('option'); opt2.value=t.id; opt2.textContent=`Тур ${t.round_number}`; sel2.appendChild(opt2);
+    });
+    if((toursCache||[]).length===0){
+      sel.innerHTML = '<option value="">Тур 1</option>';
+      sel2.innerHTML = '<option value="">Тур 1</option>';
+    }
+  }catch(e){ console.error(e); }
+}
+
+// ----- Load participants (user_leagues) -----
+async function loadUserLeagues(){
+  try{
+    const { data, error } = await supabase.from('user_leagues').select('user_id,joined_at,user_teams(team_name)').eq('league_id', leagueId).order('joined_at',{ascending:true});
+    if(error) throw error;
+    userLeagues = data || [];
+    el('#managers-count').textContent = (userLeagues.length || league.max_managers || 0);
+  }catch(e){ console.error(e); }
+}
+
+// ----- Load draft picks -----
+async function loadDraftPicks(){
+  try{
+    const { data, error } = await supabase.from('draft_picks').select('id,pick_number,user_id,player_id,created_at,players(id,first_name,last_name,position,photo_url,stats)').eq('league_id', leagueId).order('pick_number',{ascending:true});
+    if(error) throw error;
+    draftPicks = data || [];
+  }catch(e){ console.error(e); }
+}
+
+// ----- Render everything -----
+async function renderAll(){
+  await renderPlayersTable();
+  renderDraftBoard();
+  await renderCurrentPick();
+  await renderMyTeam();
+  await renderFreeAgents();
+  await renderFavorites();
+  await loadStandings();
+}
+
+// ----- Players table (Draft list) -----
+function changeFilter(f){
+  currentFilter = f;
+  el('#current-filter').textContent = f;
+  el('#btn-filter-available').classList.toggle('active', f==='available');
+  el('#btn-filter-all').classList.toggle('active', f==='all');
+  renderPlayersTable();
+}
+function debouncedLoadPlayers(){ debounce(()=>renderPlayersTable(), 300); }
+
+async function renderPlayersTable(){
+  const tbody = el('#players-body'); tbody.innerHTML = '';
+  // compute drafted player ids
+  const draftedIds = (draftPicks||[]).map(p=>p.player_id).filter(Boolean);
+  const qTerm = el('#search-player').value.trim().toLowerCase(); searchTerm = qTerm;
+  let list = playersCache.slice();
+  // filter by search
+  if(searchTerm){
+    list = list.filter(p => (`${p.first_name} ${p.last_name}`.toLowerCase().includes(searchTerm)));
+  }
+  if(currentFilter === 'available'){
+    list = list.filter(p => !draftedIds.includes(p.id));
+  }
+  // sort by name
+  list.sort((a,b)=>(`${a.first_name} ${a.last_name}`).localeCompare(`${b.first_name} ${b.last_name}`));
+  if(!list.length){ tbody.innerHTML = '<tr><td colspan="5" class="muted">Нет игроков</td></tr>'; return; }
+  for(const p of list){
+    const st = p.stats || {};
+    const fp = calculateFantasyPoints(st);
+    const isDrafted = draftedIds.includes(p.id);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="display:flex;align-items:center">
+        <img class="player-photo" src="${p.photo_url||'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'">
+        <div>
+          <div style="font-weight:700">${p.first_name} ${p.last_name}</div>
+          <div class="muted" style="font-size:12px">${p.team_name || ''}</div>
+        </div>
+      </td>
+      <td>${p.position || '-'}</td>
+      <td>${fp}</td>
+      <td>${isDrafted ? '<span class="muted">Выбран</span>' : '<span class="muted">Свободен</span>'}</td>
+      <td style="text-align:right">
+        <button class="btn small" ${isDrafted ? 'disabled' : ''} onclick="attemptDraft(${p.id})">Добавить</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+// ----- Attempt draft (checks, then draftPlayer) -----
+async function attemptDraft(playerId){
+  try{
+    // must be authenticated
+    if(!currentUser){ toast('Авторизуйтесь чтобы делать выбор', 'danger'); return; }
+    // draft must be started
+    if(!league || !league.draft_datetime){ toast('Драфт не назначен', 'danger'); return; }
+    if(new Date(league.draft_datetime).getTime() > Date.now()){ toast('Драфт ещё не начался', 'danger'); return; }
+    // determine current pick user
+    const next = await computeNextPick();
+    if(!next){ toast('Не удалось определить текущий пик', 'danger'); return; }
+    if(next.user_id !== currentUser.id){ toast('Сейчас не ваш ход', 'danger'); return; }
+    // check if player already taken (race condition safety)
+    const { data: exists } = await supabase.from('draft_picks').select('id').eq('league_id', leagueId).eq('player_id', playerId).maybeSingle();
+    if(exists){ toast('Игрок уже выбран', 'danger'); await reloadAfterDelay(); return; }
+    // determine next pick number
+    const nextPickNumber = next.pick_number;
+    // insert
+    const { error } = await supabase.from('draft_picks').insert([{
+      league_id: leagueId,
+      user_id: currentUser.id,
+      player_id: playerId,
+      pick_number: nextPickNumber
+    }]);
+    if(error) throw error;
+    toast('Игрок выбран', 'success');
+    // local refresh will be triggered via realtime, but refresh now for immediate UX
+    await loadDraftPicks();
+    await renderAll();
+  }catch(e){ console.error(e); toast('Ошибка при выборе игрока','danger'); }
+}
+
+// ----- Compute next pick (uses user_leagues order and snake logic) -----
+async function computeNextPick(){
+  // load participants if empty
+  if(!userLeagues || !userLeagues.length) await loadUserLeagues();
+  // load picks
+  await loadDraftPicks();
+  const participants = (userLeagues||[]).map(u => u.user_id);
+  if(!participants.length) return null;
+  const made = draftPicks || [];
+  const maxManagers = participants.length;
+  // number of rounds - if max_managers known via league.max_managers it's different; we compute nextPickNumber = made.length + 1
+  const nextPickNumber = (made.length ? Math.max(...made.map(p=>p.pick_number)) : 0) + 1;
+  // compute manager index for this pick number
+  const round = Math.floor((nextPickNumber - 1) / maxManagers);
+  const posInRound = (nextPickNumber - 1) % maxManagers;
+  let managerIndex;
+  if((league?.draft_type || 'snake') === 'snake'){
+    if(round % 2 === 0) managerIndex = posInRound;
+    else managerIndex = (maxManagers - 1 - posInRound);
+  } else {
+    managerIndex = posInRound;
+  }
+  const user_id = participants[managerIndex];
+  return { user_id, pick_number: nextPickNumber, manager_index: managerIndex };
+}
+
+// ----- Render draft board (grid by rounds x managers) -----
+function renderDraftBoard(){
+  const container = el('#draft-board'); container.innerHTML = '';
+  if(!userLeagues || !userLeagues.length){ container.innerHTML = '<div class="muted">Нет менеджеров</div>'; return; }
+  const participants = userLeagues.map(u=>({ user_id:u.user_id, team_name: (u.user_teams && u.user_teams.team_name) || 'Без названия' }));
+  const managers = participants;
+  const made = draftPicks || [];
+  // estimate rounds: compute by max pick number or default 10
+  const maxPickNumber = made.length ? Math.max(...made.map(p=>p.pick_number)) : 0;
+  const rounds = Math.max( Math.ceil((league.max_managers || managers.length) * 10 / managers.length), Math.ceil(maxPickNumber / managers.length), 10);
+  // Build simple table: rows rounds, columns managers
+  // Header row
+  const header = document.createElement('div'); header.style.display='grid'; header.style.gridTemplateColumns = `120px repeat(${managers.length},1fr)`; header.style.gap='8px';
+  header.style.marginBottom='8px';
+  header.appendChild(document.createElement('div')); // corner
+  for(const m of managers){
+    const h = document.createElement('div'); h.style.padding='6px'; h.style.background='rgba(255,255,255,.02)'; h.style.borderRadius='8px'; h.style.textAlign='center';
+    h.innerHTML = `<div style="font-weight:700">${m.team_name}</div>`;
+    header.appendChild(h);
+  }
+  container.appendChild(header);
+
+  // rounds
+  for(let r=0;r<rounds;r++){
+    const row = document.createElement('div'); row.style.display='grid'; row.style.gridTemplateColumns = `120px repeat(${managers.length},1fr)`; row.style.gap='8px'; row.style.marginBottom='8px';
+    const roundCell = document.createElement('div'); roundCell.style.padding='8px'; roundCell.style.background='rgba(255,255,255,.03)'; roundCell.style.borderRadius='8px'; roundCell.style.fontWeight='700'; roundCell.textContent = `Раунд ${r+1}`;
+    row.appendChild(roundCell);
+    for(let m=0;m<managers.length;m++){
+      const pickNumber = r*managers.length + m + 1;
+      // find which manager assigned to this pick number by draft rules
+      // compute manager index for display purpose to align snake pattern visually
+      let managerIndex;
+      if((league?.draft_type || 'snake') === 'snake'){
+        managerIndex = (r % 2 === 0) ? m : (managers.length - 1 - m);
+      } else {
+        managerIndex = m;
+      }
+      const manager = managers[managerIndex];
+      // find pick record
+      const pick = (draftPicks || []).find(p=>p.pick_number === pickNumber);
+      const cell = document.createElement('div'); cell.style.padding='8px'; cell.style.background='rgba(255,255,255,.02)'; cell.style.borderRadius='8px';
+      if(pick && pick.players){
+        cell.innerHTML = `<div style="display:flex;align-items:center;gap:8px">
+          <img src="${pick.players.photo_url||'https://via.placeholder.com/40'}" style="width:36px;height:36px;border-radius:50%;object-fit:cover">
+          <div><div style="font-weight:700">${pick.players.first_name} ${pick.players.last_name}</div><div class="muted" style="font-size:12px">${manager.team_name||''}</div></div>
+        </div><div style="font-size:11px;margin-top:6px" class="muted">#${pickNumber}</div>`;
+      } else {
+        // check if this is the current pick
+        const maxMade = (draftPicks && draftPicks.length) ? Math.max(...draftPicks.map(p=>p.pick_number)) : 0;
+        const isCurrent = (pickNumber === maxMade+1);
+        cell.innerHTML = `<div style="height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-size:12px" class="muted">${manager.team_name||'Ожидание'}</div>
+          <div style="font-size:11px;margin-top:6px" class="muted">#${pickNumber}</div>
+        </div>`;
+        if(isCurrent) cell.classList.add('current');
+      }
+      row.appendChild(cell);
+    }
+    container.appendChild(row);
+  }
+}
+
+// ----- Render current pick (who now) -----
+async function renderCurrentPick(){
+  const next = await computeNextPick();
+  if(!next){ el('#current-pick-user').textContent = '—'; el('#pick-timer-wrap').style.display='none'; return; }
+  // find team name
+  const participant = userLeagues.find(u=>u.user_id===next.user_id);
+  const teamName = (participant && participant.user_teams && participant.user_teams.team_name) ? participant.user_teams.team_name : (participant? participant.user_id : '—');
+  el('#current-pick-user').textContent = teamName;
+  // if it's our turn, visually highlight
+  if(currentUser && next.user_id === currentUser.id){
+    el('#current-pick-user').style.color = 'var(--accent-2)';
+  } else {
+    el('#current-pick-user').style.color = '';
+  }
+  // start pick timer if draft started
+  if(draftStarted){
+    startPickTimer();
+  } else {
+    el('#pick-timer-wrap').style.display = 'none';
+    stopPickTimer();
+  }
+}
+
+// ----- Pick timer -----
+function startPickTimer(){
+  stopPickTimer();
+  el('#pick-timer-wrap').style.display = 'inline-block';
+  pickTimeLeft = pickTimeLimit;
+  updatePickTimerUI();
+  pickTimerInterval = setInterval(async ()=>{
+    pickTimeLeft--;
+    updatePickTimerUI();
+    if(pickTimeLeft <= 0){
+      stopPickTimer();
+      toast('Время хода истекло. Переход к следующему менеджеру.', 'danger', 5000);
+      // Optionally: auto-pass or auto-pick; here просто advance by not inserting pick — next pick computed by others.
+      await loadDraftPicks();
+      await renderAll();
+    }
+  },1000);
+}
+function stopPickTimer(){ if(pickTimerInterval) clearInterval(pickTimerInterval); pickTimerInterval=null; }
+function updatePickTimerUI(){
+  const mm = Math.floor(pickTimeLeft/60).toString().padStart(2,'0');
+  const ss = (pickTimeLeft%60).toString().padStart(2,'0');
+  el('#pick-timer').textContent = `${mm}:${ss}`;
+  if(pickTimeLeft <= 10) el('#pick-timer').classList.add('warn'); else el('#pick-timer').classList.remove('warn');
+}
+
+// ----- Draft countdown (until start) -----
+function startDraftCountdown(){
+  if(draftCountdownInterval) clearInterval(draftCountdownInterval);
+  if(!league || !league.draft_datetime){ el('#draft-countdown').textContent = '—'; return; }
+  draftCountdownInterval = setInterval(()=>{
+    const now = Date.now();
+    const draftTs = new Date(league.draft_datetime).getTime();
+    const diff = draftTs - now;
+    if(diff <= 0){
+      el('#draft-countdown').textContent = 'Драфт начался';
+      draftStarted = true;
+      clearInterval(draftCountdownInterval);
+      renderAll();
+      return;
+    }
+    const days = Math.floor(diff / (1000*60*60*24));
+    const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+    const seconds = Math.floor((diff % (1000*60)) / 1000);
+    const display = `${days>0?days+'д ':''}${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    el('#draft-countdown').textContent = display;
+  }, 1000);
+}
+
+// ----- Render my team (draft_picks by current user) -----
+async function renderMyTeam(){
+  if(!currentUser) { el('#my-team-area').textContent = 'Авторизуйтесь'; return; }
+  await loadDraftPicks();
+  const myPicks = (draftPicks||[]).filter(p=>p.user_id === currentUser.id);
+  const area = el('#my-team-area');
+  area.innerHTML = '';
+  if(!myPicks.length){ area.textContent = 'У вас нет игроков в лиге'; return; }
+  for(const p of myPicks){
+    const name = p.players ? `${p.players.first_name} ${p.players.last_name}` : `#${p.player_id}`;
+    const div = document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center'; div.style.marginBottom='6px';
+    div.innerHTML = `<div>${name}</div><div style="display:flex;gap:6px"><button class="btn small ghost" onclick="openReplaceModal(${p.id}, ${p.player_id})">Заменить</button></div>`;
+    area.appendChild(div);
+  }
+}
+
+// ----- Load user teams info (small) -----
+async function loadUserTeams(){
+  if(!currentUser) return;
+  try{
+    const { data } = await supabase.from('user_teams').select('id,team_name,manager_name').eq('user_id', currentUser.id).eq('league_id', leagueId).maybeSingle();
+    if(!data) el('#my-team-area').textContent = 'У вас нет команды в этой лиге';
+    else el('#my-team-area').innerHTML = `<div><strong>${data.team_name||'Моя команда'}</strong><div class="muted">${data.manager_name||''}</div></div>`;
+  }catch(e){ console.error(e); }
+}
+
+// ----- Free agents rendering -----
+async function renderFreeAgents(){
+  await loadPlayers();
+  await loadDraftPicks();
+  const draftedIds = (draftPicks||[]).map(p=>p.player_id).filter(Boolean);
+  const free = playersCache.filter(p => !draftedIds.includes(p.id));
+  const tbody = el('#freeagents-body'); tbody.innerHTML = '';
+  if(!free.length){ tbody.innerHTML = '<tr><td colspan="4" class="muted">Нет свободных агентов</td></tr>'; return; }
+  for(const p of free){
+    const fp = calculateFantasyPoints(p.stats || {});
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="display:flex;align-items:center"><img class="player-photo" src="${p.photo_url||'https://via.placeholder.com/40'}">${p.first_name} ${p.last_name}</td>
+      <td>${p.position||'-'}</td>
+      <td>${fp}</td>
+      <td style="text-align:right"><button class="btn small" onclick="attemptDraft(${p.id})">Добавить</button></td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// ----- Favorites rendering -----
+async function renderFavorites(){
+  if(!currentUser) return;
+  const { data } = await supabase.from('user_favorites').select('player_id').eq('user_id', currentUser.id);
+  const favIds = (data||[]).map(x=>x.player_id);
+  const panel = el('#favorites-panel'); panel.innerHTML = '';
+  if(!favIds.length){ panel.innerHTML = '<div class="muted">Нет избранных</div>'; return; }
+  const { data: players } = await supabase.from('players').select('id,first_name,last_name,position,photo_url,stats').in('id', favIds);
+  (players||[]).forEach(p=>{
+    const fp = calculateFantasyPoints(p.stats||{});
+    const card = document.createElement('div'); card.style.padding='8px'; card.style.borderRadius='8px'; card.style.background='rgba(255,255,255,.02)';
+    card.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-weight:700">${p.first_name} ${p.last_name}</div><div class="muted" style="font-size:12px">${p.position||''}</div></div><div style="text-align:right"><div style="font-weight:700">${fp}</div><div class="muted" style="font-size:12px">ФП</div></div></div>
+      <div style="display:flex;gap:6px;margin-top:8px"><button class="btn small" onclick="attemptDraft(${p.id})">Добавить</button><button class="btn small ghost" onclick="toggleFavorite(${p.id})">Убрать</button></div>`;
+    panel.appendChild(card);
+  });
+}
+
+// ----- Toggle favorite -----
+async function toggleFavorite(playerId){
+  if(!currentUser){ toast('Авторизуйтесь', 'danger'); return; }
+  try{
+    const { data: exists } = await supabase.from('user_favorites').select('id').eq('user_id', currentUser.id).eq('player_id', playerId).maybeSingle();
+    if(exists){ await supabase.from('user_favorites').delete().eq('id', exists.id); toast('Убрано из избранного', 'success'); }
+    else { await supabase.from('user_favorites').insert({ user_id: currentUser.id, player_id: playerId }); toast('Добавлено в избранное', 'success'); }
+    await renderFavorites();
+    await renderPlayersTable();
+  }catch(e){ console.error(e); toast('Ошибка', 'danger'); }
+}
+
+// ----- Replace modal: open & execute replacement -----
+// We'll update the draft_picks row for this user: change player_id -> newPlayerId
+let activeReplacePickId = null;
+let activeReplaceOldPlayerId = null;
+async function openReplaceModal(pickId, oldPlayerId){
+  activeReplacePickId = pickId;
+  activeReplaceOldPlayerId = oldPlayerId;
+  // choose position of old player to filter replacements
+  const oldPlayer = playersCache.find(x=>x.id===oldPlayerId);
+  const pos = oldPlayer ? oldPlayer.position : null;
+  // list free agents with same position (optional) or all free agents
+  await loadPlayers();
+  await loadDraftPicks();
+  const draftedIds = (draftPicks||[]).map(p=>p.player_id).filter(Boolean);
+  let free = playersCache.filter(p=>!draftedIds.includes(p.id));
+  if(pos) free = free.filter(p=>p.position === pos);
+  const body = el('#replace-modal-body'); body.innerHTML = '';
+  if(!free.length){ body.innerHTML = '<div class="muted">Нет доступных игроков для замены</div>'; openReplaceModalUI(); return; }
+  for(const p of free){
+    const fp = calculateFantasyPoints(p.stats || {});
+    const div = document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center'; div.style.padding='6px'; div.style.borderBottom='1px solid rgba(255,255,255,.02)';
+    div.innerHTML = `<div style="display:flex;align-items:center"><img class="player-photo" src="${p.photo_url||'https://via.placeholder.com/40'}"><div style="margin-left:8px"><div style="font-weight:700">${p.first_name} ${p.last_name}</div><div class="muted" style="font-size:12px">${p.position || ''}</div></div></div><div style="display:flex;gap:6px;align-items:center"><div class="muted">${fp}</div><button class="btn small" onclick="confirmReplace(${p.id})">Заменить</button></div>`;
+    body.appendChild(div);
+  }
+  openReplaceModalUI();
+}
+function openReplaceModalUI(){ el('#replace-modal').classList.add('show'); }
+function closeReplaceModal(){ el('#replace-modal').classList.remove('show'); activeReplacePickId=null; activeReplaceOldPlayerId=null; }
+
+// perform replacement: update draft_picks row with new player_id
+async function confirmReplace(newPlayerId){
+  if(!activeReplacePickId){ toast('Ошибочный запрос', 'danger'); return; }
+  try{
+    // prevent replacing with already-taken
+    const { data: exists } = await supabase.from('draft_picks').select('id').eq('league_id', leagueId).eq('player_id', newPlayerId).maybeSingle();
+    if(exists){ toast('Игрок уже выбран кем-то', 'danger'); await reloadAfterDelay(); return; }
+    // perform update
+    const { error } = await supabase.from('draft_picks').update({ player_id: newPlayerId }).eq('id', activeReplacePickId);
+    if(error) throw error;
+    toast('Замена выполнена', 'success');
+    closeReplaceModal();
+    await loadDraftPicks();
+    await renderAll();
+  }catch(e){ console.error(e); toast('Ошибка при замене','danger'); }
+}
+
+// ----- Pick editor (only for league creator) -----
+async function openPickEditor(){
+  if(!currentUser || currentUser.id !== league.creator_id){ toast('Только создатель лиги может редактировать пики', 'danger'); return; }
+  // don't allow edit if draft started
+  if(league.draft_datetime && new Date(league.draft_datetime).getTime() <= Date.now()){ toast('Нельзя редактировать пики после старта драфта','danger'); return; }
+  // prepare editor body
+  await loadUserLeagues();
+  const body = el('#pick-editor-body'); body.innerHTML = '';
+  // build select for each expected pick number up to participants.length * 10 (or current picks)
+  const managers = userLeagues.map(u=>u.user_id);
+  const rounds = 10;
+  const totalPicks = managers.length * rounds;
+  for(let i=1;i<=totalPicks;i++){
+    const row = document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.style.marginBottom='6px';
+    const label = document.createElement('div'); label.textContent = `#${i}`; label.style.width='40px';
+    const sel = document.createElement('select'); sel.style.flex='1';
+    managers.forEach(uid=>{
+      const opt = document.createElement('option'); opt.value = uid;
+      const ul = userLeagues.find(x=>x.user_id===uid);
+      opt.text = (ul && ul.user_teams && ul.user_teams.team_name) ? ul.user_teams.team_name : uid;
+      sel.appendChild(opt);
+    });
+    row.appendChild(label); row.appendChild(sel);
+    body.appendChild(row);
+  }
+  el('#pick-editor-modal').classList.add('show');
+}
+function closePickEditor(){ el('#pick-editor-modal').classList.remove('show'); }
+
+// Save edited picks: this will insert placeholder picks for pick numbers that don't exist yet.
+// NOTE: This function creates draft_picks if not exist and assigns user_id. It will NOT touch already assigned player_id.
+async function saveEditedPicks(){
+  try{
+    const selects = el('#pick-editor-body').querySelectorAll('select');
+    const upserts = [];
+    for(let i=0;i<selects.length;i++){
+      const pickNumber = i+1;
+      const user_id = selects[i].value;
+      upserts.push({ pick_number: pickNumber, user_id });
+    }
+    // for each upsert, if pick exists update user_id, else insert new record (without player_id)
+    for(const u of upserts){
+      const { data: exists } = await supabase.from('draft_picks').select('id').eq('league_id', leagueId).eq('pick_number', u.pick_number).maybeSingle();
+      if(exists){
+        await supabase.from('draft_picks').update({ user_id: u.user_id }).eq('id', exists.id);
+      } else {
+        await supabase.from('draft_picks').insert({ league_id: leagueId, user_id: u.user_id, pick_number: u.pick_number });
+      }
+    }
+    toast('Пики сохранены', 'success');
+    closePickEditor();
+    await loadDraftPicks();
+    await renderAll();
+  }catch(e){ console.error(e); toast('Ошибка сохранения', 'danger'); }
+}
+
+// ----- Standings: calculate team FP sum for selected tour (or all if none) -----
+async function loadStandings(){
+  try{
+    // get tour selected
+    const tourId = el('#standings-tour').value;
+    // get current picks mapping user -> players
+    await loadDraftPicks();
+    const byUser = {};
+    (draftPicks || []).forEach(p=>{
+      if(!byUser[p.user_id]) byUser[p.user_id] = [];
+      if(p.player_id) byUser[p.user_id].push(p.player_id);
+    });
+    // for each player, sum stats from player_stats for selected tour or overall
+    const standings = [];
+    for(const u of Object.keys(byUser)){
+      const playerIds = byUser[u];
+      let totalFP = 0;
+      const playerNames = [];
+      for(const pid of playerIds){
+        // fetch aggregated stats for player
+        const { data: stats } = await supabase.from('player_stats').select('points,assists,rebounds,steals,blocks,turnover,tour').in('player_id', [pid]);
+        let relevant = stats || [];
+        if(tourId) relevant = relevant.filter(s=>String(s.tour) === String(tourId));
+        // aggregate numeric fields
+        const sum = relevant.reduce((acc,s)=>{
+          acc.points += Number(s.points||0);
+          acc.assists += Number(s.assists||0);
+          acc.rebounds += Number(s.rebounds||0);
+          acc.steals += Number(s.steals||0);
+          acc.blocks += Number(s.blocks||0);
+          acc.turnover += Number(s.turnover||0);
+          return acc;
+        }, {points:0,assists:0,rebounds:0,steals:0,blocks:0,turnover:0});
+        const fp = calculateFantasyPoints(sum);
+        totalFP += fp;
+        // player name
+        const pl = playersCache.find(x=>x.id===pid);
+        if(pl) playerNames.push(`${pl.first_name} ${pl.last_name}`);
+      }
+      // team name
+      const ul = userLeagues.find(x=>x.user_id===u);
+      standings.push({ user_id: u, team_name: ul && ul.user_teams && ul.user_teams.team_name ? ul.user_teams.team_name : u, fp: Number(totalFP.toFixed(1)), players: playerNames.join(', ') });
+    }
+    // sort
+    standings.sort((a,b)=>b.fp - a.fp);
+    const tbody = el('#standings-body'); tbody.innerHTML = '';
+    if(!standings.length){ tbody.innerHTML = '<tr><td colspan="4" class="muted">Нет данных</td></tr>'; return; }
+    standings.forEach((s,i)=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${i+1}</td><td>${s.team_name}</td><td>${s.fp}</td><td>${s.players}</td>`;
+      tbody.appendChild(tr);
+    });
+  }catch(e){ console.error(e); toast('Ошибка расчёта таблицы', 'danger'); }
+}
+
+// ----- Save league settings (with validation) -----
+async function saveLeagueSettings(){
+  try{
+    // only creator
+    if(!currentUser || currentUser.id !== league.creator_id){ toast('Только создатель может менять настройки', 'danger'); return; }
+    const name = el('#league-name-input').value.trim();
+    const description = el('#league-desc-input').value.trim();
+    const type = el('#league-type-input').value;
+    const draft_type = el('#draft-type-input').value;
+    const pick_time = Number(el('#pick-time-input').value) || 60;
+    const max_managers = Number(el('#max-managers-input').value) || 2;
+    const dtVal = el('#draft-datetime-input').value;
+    // validation
+    const warnings = [];
+    if(!name) warnings.push('Введите имя лиги');
+    if(max_managers < 2) warnings.push('Макс. менеджеров должно быть ≥ 2');
+    let dtIso = null;
+    if(dtVal){
+      // dtVal is local datetime string; convert to ISO UTC
+      const local = new Date(dtVal);
+      const iso = new Date(local.getTime() - local.getTimezoneOffset()*60000).toISOString();
+      dtIso = iso;
+      const minAllowed = Date.now() + 5*60*1000; // 5 minutes from now
+      if(new Date(dtIso).getTime() < minAllowed) warnings.push('Дата драфта должна быть минимум через 5 минут от текущего времени');
+    }
+    if(warnings.length){ el('#settings-warning').textContent = warnings.join('; '); return; } else el('#settings-warning').textContent = '';
+    // block editing if draft started
+    if(league.draft_datetime && new Date(league.draft_datetime).getTime() <= Date.now()){ toast('Нельзя менять настройки после старта драфта', 'danger'); return; }
+    // update DB
+    const payload = { name, description, type, draft_type, draft_time_limit: pick_time, max_managers, draft_datetime: dtIso };
+    const { error } = await supabase.from('leagues').update(payload).eq('id', leagueId);
+    if(error) throw error;
+    toast('Настройки сохранены', 'success');
+    await loadLeague();
+    await renderAll();
+  }catch(e){ console.error(e); toast('Ошибка сохранения настроек','danger'); }
+}
+
+// ----- Realtime integration -----
+function initRealtime(){
+  if(!leagueId) return;
+  // unsubscribe previous
+  try{ if(draftChannel) supabase.removeChannel(draftChannel); }catch(e){}
+  draftChannel = supabase.channel(`public:draft_picks:league_${leagueId}`);
+  draftChannel.on('postgres_changes', { event: '*', schema: 'public', table: 'draft_picks', filter: `league_id=eq.${leagueId}` }, async (payload) => {
+    console.log('Realtime draft_picks event', payload);
+    // react to payload: insert/update/delete
+    await loadDraftPicks();
+    await renderAll();
+    // small UX: if someone else picked show toast
+    if(payload.eventType === 'INSERT' && payload.record && payload.record.user_id !== (currentUser && currentUser.id)){
+      toast('Кто-то сделал выбор', 'muted', 2500);
+    }
+  });
+  draftChannel.subscribe((status) => {
+    if(status === 'SUBSCRIBED') console.log('Subscribed to draft_picks realtime');
+  });
+}
+
+// ----- Helper reload small delay (to avoid race) -----
+async function reloadAfterDelay(){ await sleep(600); await loadDraftPicks(); await renderAll(); }
+
+// ----- UI init (tab switching, buttons) -----
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+  document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+  const panel = el(`#tab-${tab}`);
+  if(panel) panel.style.display = 'block';
+  // lazy loads
+  if(tab==='roster') renderMyRoster();
+  if(tab==='freeagents') renderFreeAgents();
+  if(tab==='favorites') renderFavorites();
+  if(tab==='standings') loadStandings();
+  if(tab==='settings') loadLeagueSettingsUI();
+}
+function initUIActions(){
+  // search debounce handled above
+  el('#btn-filter-available').addEventListener('click', ()=>changeFilter('available'));
+  el('#btn-filter-all').addEventListener('click', ()=>changeFilter('all'));
+  // initial tab
+  switchTab('draft');
+}
+
+// ----- Roster panel (detailed) -----
+async function loadUserRoster(){
+  await renderMyRoster();
+}
+async function renderMyRoster(){
+  if(!currentUser){ el('#roster-body').innerHTML = '<tr><td colspan="4" class="muted">Авторизуйтесь</td></tr>'; return; }
+  await loadDraftPicks();
+  const tourId = el('#tour-selector').value;
+  const myPicks = (draftPicks||[]).filter(p=>p.user_id === currentUser.id);
+  const tbody = el('#roster-body'); tbody.innerHTML = '';
+  if(!myPicks.length){ tbody.innerHTML = '<tr><td colspan="4" class="muted">Состав пуст</td></tr>'; return; }
+  for(const p of myPicks){
+    const pl = p.players;
+    const stats = pl ? (pl.stats || {}) : {};
+    // If we want actual tour stats, we should query player_stats table; for now use players.stats as baseline, and optionally fetch tour-specific
+    let fp = calculateFantasyPoints(stats);
+    // if tour selected, try to get tour totals
+    if(tourId){
+      const { data: s } = await supabase.from('player_stats').select('points,assists,rebounds,steals,blocks,turnover').eq('player_id', pl.id).eq('tour', tourId);
+      if(s && s.length){
+        const agg = s.reduce((acc,x)=>{ acc.points+=Number(x.points||0); acc.assists+=Number(x.assists||0); acc.rebounds+=Number(x.rebounds||0); acc.steals+=Number(x.steals||0); acc.blocks+=Number(x.blocks||0); acc.turnover+=Number(x.turnover||0); return acc; }, {points:0,assists:0,rebounds:0,steals:0,blocks:0,turnover:0});
+        fp = calculateFantasyPoints(agg);
+      }
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="display:flex;align-items:center"><img class="player-photo" src="${pl.photo_url||'https://via.placeholder.com/40'}">${pl.first_name} ${pl.last_name}</td>
+      <td>${pl.position||''}</td><td>${fp}</td><td style="text-align:right"><button class="btn small ghost" onclick="openReplaceModal(${p.id}, ${pl.id})">Заменить</button></td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+// ----- Load settings UI (for creator) -----
+function loadLeagueSettingsUI(){
+  // inputs already prefetched in loadLeague; show message if draft started
+  if(league && league.draft_datetime && new Date(league.draft_datetime).getTime() <= Date.now()){
+    el('#settings-warning').textContent = 'Драфт начался — некоторые настройки нельзя менять';
+  } else {
+    el('#settings-warning').textContent = '';
+  }
+}
+
+// ----- small helper: reload caches -----
+async function reloadAllData(){
+  await loadPlayers();
+  await loadUserLeagues();
+  await loadDraftPicks();
+  await renderAll();
+}
+
+// ----- utils for developer/testing -----
+function openReplaceModalDev(pickId, playerId){ openReplaceModal(pickId, playerId); }
+
+// ----- Misc: handy reload button for dev -----
+window.reloadAllData = reloadAllData;
+window.attemptDraft = attemptDraft;
+window.openReplaceModal = openReplaceModal;
+window.closeReplaceModal = closeReplaceModal;
+window.openPickEditor = openPickEditor;
+window.closePickEditor = closePickEditor;
+window.saveEditedPicks = saveEditedPicks;
+window.saveLeagueSettings = saveLeagueSettings;
+window.toggleFavorite = toggleFavorite;
+window.loadStandings = loadStandings;
+window.changeFilter = changeFilter;
+
+/* End of script */
+</script>
+
+</body>
+</html>

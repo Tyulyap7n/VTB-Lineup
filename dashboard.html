@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Fantasy EuroBasket — Dashboard</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" href="image/img.jpg" type="image/jpg">
+  <!-- ВАЖНО: Supabase CDN → клиент, потом остальная логика -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabaseClient.js"></script>
+
+  <!-- guard + табы -->
+  <script src="app.js" defer></script>
+  <!-- логика UI/таблицы/ролей и сохранения в БД -->
+  <script src="script.js" defer></script>
+  <!-- no-op (оставлен) -->
+  <script src="dashboard.js" defer></script>
+  <style>
+  
+    .starting-vi-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+      .remove-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+  }
+  .role-slot:hover .remove-btn {
+    display: block;
+  }
+    /* Стили для уведомлений */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    
+    .notification.success {
+      background-color: #4CAF50;
+    }
+    
+    .notification.error {
+      background-color: #f44336;
+    }
+    
+    .notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Стили для кнопки сохранения */
+    .save-status {
+      margin-left: 15px;
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .saving {
+      color: #2196F3;
+    }
+    
+    .saved {
+      color: #4CAF50;
+    }
+    
+    .error-status {
+      color: #f44336;
+    }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="logo-container">
+    <a href="https://t.me/lineupfantasy"> <img src="image/logo.jpg" alt="logo"></a>
+  </div>
+  <nav class="header-links">
+	  <a href="https://www.fiba.basketball/en/events/fiba-eurobasket-2025"><img src="image/center_logo.png" alt="logo"></a>
+  </nav>
+  <div class="logo-container">
+    <a href="leaderboard.html"> <img src="image/right_logo.jpg" alt="logo"></a>
+  </div>
+</header>
+
+<!-- Контейнер для уведомлений -->
+<div id="notification" class="notification"></div>
+
+<main class="page">
+  <!-- RULES -->
+  <section class="row">
+    <div class="strip-wrapper">
+      <div class="strip"></div>
+      <button class="par-btn" data-target="rules-panel"><span>rules</span></button>
+    </div>
+    <div id="rules-panel" class="panel">
+      <img src="/image/rules.jpg" alt="Rules">
+    </div>
+  </section>
+
+  <!-- SCORING -->
+  <section class="row">
+    <div class="strip-wrapper">
+      <div class="strip"></div>
+      <button class="par-btn" data-target="scoring-panel"><span>scoring</span></button>
+    </div>
+    <div id="scoring-panel" class="panel">
+      <img src="/image/scoring.jpg" alt="Scoring">
+    </div>
+  </section>
+
+  <!-- ROSTER -->
+  <section class="row">
+    <div class="strip-wrapper">
+      <div class="strip"></div>
+      <button class="par-btn" data-target="roster-panel"><span>roster</span></button>
+    </div>
+
+    <div id="roster-panel" class="panel">
+      <div class="roster-top">
+        <div class="table-wrap">
+          <div class="table-controls">
+            <div class="filter-row">
+              <label>Country
+                <select id="filter-country"><option value="">All</option></select>
+              </label>
+              <label>Position
+                <select id="filter-pos">
+                  <option value="">All</option><option value="G">G</option><option value="F">F</option><option value="C">C</option>
+                </select>
+              </label>
+              <label>Sort
+                <select id="filter-sort">
+                  <option value="">Default</option>
+                  <option value="price-asc">Price ↑</option><option value="price-desc">Price ↓</option>
+                  <option value="avg-desc">AVG ↓</option><option value="avg-asc">AVG ↑</option>
+                </select>
+              </label>
+            </div>
+            <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
+          </div>
+
+          <table id="players-table">
+			<thead>
+			  <tr>
+				<th>Add</th>
+				<th>Photo</th>
+				<th>Player</th>
+				<th>Price</th>
+				<th>AVG</th>
+				<th>PTS</th>
+				<th>AST</th>
+				<th>REB</th>
+				<th>STL</th>
+				<th>BLK</th>
+				<th>TO</th>
+			  </tr>
+			</thead>
+			<tbody id="players-tbody"></tbody>
+          </table>
+
+          <div class="pagination">
+            <button id="prev-page" class="pg-btn">⬅</button>
+            <span id="page-info">1 / 1</span>
+            <button id="next-page" class="pg-btn">➡</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="starting-vi-container">
+        <div class="starting-vi">STARTING VI</div>
+      </div>
+	<div style="text-align: center;">
+	    <span style="color: white; font-style: italic; font-size: 14px;">
+	        Игроки не должны повторяться, ровно 6 игроков в состав! Иначе, состав будет удалён из базы и очки аннулируются
+	    </span>
+	</div>
+	<div class="roles-lineup">
+	  <div class="role-slot" id="slot-Scorer">
+	    <div class="empty-slot">—</div>
+	    <div class="role-name">SCORER</div>
+	    <button class="remove-btn" onclick="removePlayer('Scorer')">✕</button>
+	  </div>
+	
+	  <div class="role-slot" id="slot-Assistant">
+	    <div class="empty-slot">—</div>
+	    <div class="role-name">ASSISTANT</div>
+	    <button class="remove-btn" onclick="removePlayer('Assistant')">✕</button>
+	  </div>
+	
+	  <div class="role-slot" id="slot-Rebounder">
+	    <div class="empty-slot">—</div>
+	    <div class="role-name">REBOUNDER</div>
+	    <button class="remove-btn" onclick="removePlayer('Rebounder')">✕</button>
+	  </div>
+	
+	  <div class="role-slot" id="slot-Stopper">
+	    <div class="empty-slot">—</div>
+	    <div class="role-name">STOPPER</div>
+	    <button class="remove-btn" onclick="removePlayer('Stopper')">✕</button>
+	  </div>
+	
+	  <div class="role-slot" id="slot-Shooter">
+	    <div class="empty-slot">—</div>
+	    <div class="role-name">SHOOTER</div>
+	    <button class="remove-btn" onclick="removePlayer('Shooter')">✕</button>
+	  </div>
+	
+	  <div class="role-slot" id="slot-Young">
+	    <div class="empty-slot">—</div>
+	    <div class="role-name">SURPRISE</div>
+	    <button class="remove-btn" onclick="removePlayer('Young')">✕</button>
+	  </div>
+	</div>
+	
+	      
+      <div id="team-history"></div>
+      <div style="display: flex; align-items: center; margin-top: 20px;">
+        <button id="save-roster" class="btn-yellow">Save roster</button>
+        <span id="save-status" class="save-status"></span>
+      </div>
+    </div>
+  </section>
+	<a href="https://www.sports.ru/tribuna/blogs/beyondtheboxscore"> <img src="https://play-lh.googleusercontent.com/G0Y6QkQEkw94d_yN_eQ0beyoQrRzA2TcrhgX2pXi9TgreD7_7o1EmAGO1oC3REAIR98" alt="logo"></a>
+</main>
+
+<script>
+// Глобальные переменные для хранения данных
+let currentRoster = {
+  Scorer: null,
+  Assistant: null,
+  Rebounder: null,
+  Stopper: null,
+  Shooter: null,
+  Young: null
+};
+let autoSaveTimeout = null;
+
+// Функция для отображения уведомлений
+function showNotification(message, isSuccess = true) {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+  notification.classList.add('show');
+  
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 3000);
+}
+
+// Функция для обновления статуса сохранения
+function updateSaveStatus(message, status = '') {
+  const statusElement = document.getElementById('save-status');
+  statusElement.textContent = message;
+  statusElement.className = `save-status ${status}`;
+}
+
+// Функция для проверки дублирования игроков
+function hasDuplicatePlayers() {
+  const players = Object.values(currentRoster).filter(player => player !== null);
+  const playerIds = players.map(player => player.id);
+  
+  return new Set(playerIds).size !== players.length;
+}
+function removePlayer(role) {
+  const slot = document.getElementById(`slot-${role}`);
+  const emptySlot = slot.querySelector('.empty-slot');
+
+  // Обновляем текущий состав
+  currentRoster[role] = null;
+  emptySlot.textContent = '—';
+
+  // Пересчитываем бюджет
+  updateBudget();
+
+  // Показываем уведомление об удалении
+  showNotification(`Игрок удалён из позиции ${role}`);
+
+  console.log(`Игрок удалён из роли: ${role}`);
+}
+
+// Функция для сохранения состава в Supabase
+async function saveRosterToDatabase() {
+  try {
+    updateSaveStatus('Сохранение...', 'saving');
+
+    // Проверка на дублирование игроков
+    if (hasDuplicatePlayers()) {
+      showNotification('Ошибка: один игрок не может занимать несколько позиций', false);
+      updateSaveStatus('Ошибка: дублирование игроков', 'error-status');
+      return false;
+    }
+
+    // Получаем текущего пользователя
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      showNotification('Ошибка: пользователь не авторизован', false);
+      updateSaveStatus('Ошибка: не авторизован', 'error-status');
+      return false;
+    }
+
+    // Проверяем, существует ли команда пользователя
+    let teamId;
+    const { data: existingTeam, error: fetchTeamError } = await supabase
+      .from('user_teams')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (fetchTeamError) {
+      console.error('Ошибка получения команды:', fetchTeamError);
+      showNotification('Ошибка получения команды', false);
+      updateSaveStatus('Ошибка получения команды', 'error-status');
+      return false;
+    }
+
+    // Если команды нет, создаём её
+    if (!existingTeam) {
+      const { data: newTeam, error: createTeamError } = await supabase
+        .from('user_teams')
+        .insert([{ user_id: user.id, team_name: `Команда ${user.id}` }])
+        .select('id')
+        .single();
+
+      if (createTeamError) {
+        console.error('Ошибка создания команды:', createTeamError);
+        showNotification('Ошибка создания команды', false);
+        updateSaveStatus('Ошибка создания команды', 'error-status');
+        return false;
+      }
+
+      teamId = newTeam.id;
+    } else {
+      teamId = existingTeam.id;
+    }
+
+    // Получаем текущий тур
+    const { data: currentTour, error: fetchTourError } = await supabase
+      .from('tours')
+      .select('id')
+      .order('start_time', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (fetchTourError || !currentTour) {
+      console.error('Ошибка получения текущего тура:', fetchTourError);
+      showNotification('Ошибка получения текущего тура', false);
+      updateSaveStatus('Ошибка получения тура', 'error-status');
+      return false;
+    }
+
+    // Получаем все роли из таблицы roles
+    const { data: roles, error: fetchRolesError } = await supabase
+      .from('roles')
+      .select('id, name');
+
+    if (fetchRolesError || !roles) {
+      console.error('Ошибка получения ролей:', fetchRolesError);
+      showNotification('Ошибка получения ролей', false);
+      updateSaveStatus('Ошибка получения ролей', 'error-status');
+      return false;
+    }
+
+    // Очищаем старые связи для этой команды и тура
+    const { error: deleteError } = await supabase
+      .from('team_players')
+      .delete()
+      .eq('team_id', teamId)
+      .eq('tour_id', currentTour.id);
+
+    if (deleteError) {
+      console.error('Ошибка очистки старых связей:', deleteError);
+      showNotification('Ошибка очистки старых связей', false);
+      updateSaveStatus('Ошибка очистки связей', 'error-status');
+      return false;
+    }
+
+    // Формируем массив для новых связей
+    const teamPlayers = [];
+
+    // Проверяем каждую роль
+    const roleMappings = [
+      { roleName: 'Scorer', player: currentRoster.Scorer },
+      { roleName: 'Assistant', player: currentRoster.Assistant },
+      { roleName: 'Rebounder', player: currentRoster.Rebounder },
+      { roleName: 'Stopper', player: currentRoster.Stopper },
+      { roleName: 'Shooter', player: currentRoster.Shooter },
+      { roleName: 'Young', player: currentRoster.Young },
+    ];
+
+    for (const { roleName, player } of roleMappings) {
+      if (!player) continue;
+
+      // Находим ID роли по её имени
+      const role = roles.find(r => r.name === roleName);
+      if (!role) {
+        console.error(`Роль ${roleName} не найдена в базе данных`);
+        continue;
+      }
+
+      // Проверяем, что игрок существует в базе данных
+      const { data: playerExists, error: playerError } = await supabase
+        .from('players')
+        .select('id')
+        .eq('id', player.id)
+        .maybeSingle();
+
+      if (playerError || !playerExists) {
+        console.error(`Игрок с ID ${player.id} не найден в базе данных`);
+        continue;
+      }
+
+      // Добавляем связь в массив
+      teamPlayers.push({
+        team_id: teamId,
+        player_id: player.id,
+        role_id: role.id,
+        tour_id: currentTour.id,
+      });
+    }
+
+    // Проверяем, что массив не пустой
+    if (teamPlayers.length === 0) {
+      showNotification('Ошибка: нет игроков для сохранения', false);
+      updateSaveStatus('Ошибка: нет игроков', 'error-status');
+      return false;
+    }
+
+    // Сохраняем новые связи
+    const { error: insertError } = await supabase
+      .from('team_players')
+      .insert(teamPlayers);
+
+    if (insertError) {
+      console.error('Ошибка сохранения связей:', insertError);
+      showNotification(`Ошибка сохранения: ${insertError.message}`, false);
+      updateSaveStatus('Ошибка сохранения', 'error-status');
+      return false;
+    }
+
+    // Успешное сохранение
+    showNotification('Состав успешно сохранен!');
+    updateSaveStatus('Сохранено', 'saved');
+
+    setTimeout(() => {
+      updateSaveStatus('', '');
+    }, 3000);
+
+    return true;
+  } catch (error) {
+    console.error('Непредвиденная ошибка:', error);
+    showNotification('Непредвиденная ошибка при сохранении', false);
+    updateSaveStatus('Ошибка сохранения', 'error-status');
+    return false;
+  }
+}
+
+
+    // Сохраняем новые связи
+    const { error: insertTeamPlayersError } = await supabase
+      .from('team_players')
+      .insert(teamPlayers);
+
+    if (insertTeamPlayersError) {
+      console.error('Ошибка сохранения связей:', insertTeamPlayersError);
+      showNotification('Ошибка сохранения связей', false);
+      updateSaveStatus('Ошибка сохранения связей', 'error-status');
+      return false;
+    }
+
+    showNotification('Состав успешно сохранен!');
+    updateSaveStatus('Сохранено', 'saved');
+
+    setTimeout(() => {
+      updateSaveStatus('', '');
+    }, 3000);
+
+    return true;
+  } catch (error) {
+    console.error('Ошибка при сохранении состава:', error);
+    showNotification('Ошибка сохранения состава', false);
+    updateSaveStatus('Ошибка сохранения', 'error-status');
+    return false;
+  }
+}
+
+
+// Функция для загрузки сохраненного состава
+async function loadSavedRoster() {
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) return;
+    
+    const { data: userTeam, error: teamError } = await supabase
+      .from('user_teams')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle(); // Используем maybeSingle для обработки случая, когда записи нет
+    
+    if (teamError || !userTeam) {
+      console.log('Сохраненный состав не найден');
+      return;
+    }
+    
+    // Заполняем текущий состав из базы данных
+    const roles = {
+      'Scorer': userTeam.scorer,
+      'Assistant': userTeam.assistant, 
+      'Rebounder': userTeam.rebounder,
+      'Stopper': userTeam.stopper,
+      'Shooter': userTeam.shooter,
+      'Young': userTeam.young
+    };
+    
+    for (const [role, playerId] of Object.entries(roles)) {
+      if (playerId) {
+        // Загружаем данные игрока
+        const { data: player, error: playerError } = await supabase
+          .from('players')
+          .select('*')
+          .eq('id', playerId)
+          .single();
+        
+        if (!playerError && player) {
+          assignPlayerToRole(player, role, false); // false - не сохранять автоматически
+        }
+      }
+    }
+    
+    console.log('Сохраненный состав загружен');
+  } catch (error) {
+    console.error('Ошибка загрузки состава:', error);
+  }
+}
+
+// Функция для отложенного автоматического сохранения
+function scheduleAutoSave() {
+  // Очищаем предыдущий таймер
+  if (autoSaveTimeout) {
+    clearTimeout(autoSaveTimeout);
+  }
+  
+  // Устанавливаем новый таймер на 2 секунды
+  autoSaveTimeout = setTimeout(() => {
+    saveRosterToDatabase();
+  }, 2000);
+  
+  updateSaveStatus('Сохранение через 2 сек...', 'saving');
+}
+
+// Модифицированная функция назначения игрока на роль
+function assignPlayerToRole(player, role, autoSave = true) {
+  // Проверка на дублирование игроков
+  for (const [r, p] of Object.entries(currentRoster)) {
+    if (p && p.id === player.id && r !== role) {
+      showNotification('Этот игрок уже выбран на другой позиции', false);
+      return false;
+    }
+  }
+
+  // Обновляем текущий состав
+  currentRoster[role] = player;
+
+  // Обновляем UI
+  const slot = document.getElementById(`slot-${role}`);
+  const emptySlot = slot.querySelector('.empty-slot');
+  emptySlot.textContent = `${player.first_name} ${player.last_name}`;
+
+  // Пересчитываем бюджет
+  updateBudget();
+
+  // Если autoSave=true, планируем автоматическое сохранение
+  if (autoSave) {
+    scheduleAutoSave();
+  }
+
+  return true;
+}
+
+
+// Функция для обновления отображения бюджета
+function updateBudget() {
+  let totalSpent = 0;
+  for (const player of Object.values(currentRoster)) {
+    if (player) {
+      totalSpent += player.price;
+    }
+  }
+  document.getElementById('spent-money').textContent = totalSpent;
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+  // Загружаем сохраненный состав
+  setTimeout(() => {
+    loadSavedRoster();
+  }, 1000);
+  
+  // Обработчик для кнопки ручного сохранения
+  document.getElementById('save-roster')?.addEventListener('click', function() {
+    saveRosterToDatabase().then(success => {
+      if (success) {
+        setTimeout(loadTournamentRank, 1000);
+      }
+    });
+  });
+});
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

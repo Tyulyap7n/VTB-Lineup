@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIBA Fantasy - Выбор лиги</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --purple: #633EDC;
+      --orange: #FE641C;
+      --yellow: #FDE600;
+      --black: #1c1c1c;
+      --white: #ffffff;
+    }
+
+    @font-face {
+      font-family: 'Petrov Sans';
+      src: url('/fonts/PetrovSans-Trial-Bold.otf') format('opentype');
+      font-weight: bold;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: var(--black);
+      color: var(--white);
+    }
+
+    /* Хэдер */
+    header {
+      width: 100%;
+      background-color: var(--purple);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      height: 80px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .header-logo img {
+      height: 50px;
+    }
+
+    .account-link {
+      color: var(--yellow);
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    /* Основной контейнер */
+    .main-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    /* Боковая панель (aside) */
+    aside {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5%;
+      height: 100%;
+      background-color: var(--orange);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: width 0.3s ease, padding 0.3s ease;
+    }
+
+    /* Состояние при наведении */
+    aside:hover {
+      width: 15%;
+      padding: 20px 1rem; 
+    }
+
+    .sidebar-item {
+      width: 100%;
+      padding: 12px;
+      text-align: center;
+      color: var(--white);
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .sidebar-item:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .sidebar-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+    }
+
+    .sidebar-item span {
+      font-size: 14px;
+      display: none;
+    }
+
+    aside:hover .sidebar-item span {
+      display: block;
+    }
+
+    /* Основной контент */
+    main {
+      margin-left: 5%;
+      width: 95%;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--black);
+      flex: 1;
+      transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+
+    aside:hover ~ main {
+      margin-left: 15%;
+      width: 85%;
+    }
+
+    /* Блоки лиг */
+    .league-blocks {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+      max-width: 800px;
+      margin-top: 30px;
+      perspective: 1000px;
+    }
+
+    .league-row {
+      display: flex;
+      gap: 30px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .league-block-container {
+      width: 300px;
+      height: 200px;
+      position: relative;
+      perspective: 1000px;
+    }
+
+    .league-block {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+    }
+
+    .league-block:hover {
+      transform: rotateY(180deg);
+    }
+
+    .league-block-front, .league-block-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      padding: 20px;
+      box-sizing: border-box;
+      font-weight: bold;
+      color: var(--white);
+    }
+
+    .league-block-front {
+      background-color: var(--purple);
+      font-size: 20px;
+    }
+
+    .league-block-back {
+      background-color: rgba(100, 60, 220, 0.8);
+      transform: rotateY(180deg);
+      font-size: 16px;
+      text-align: center;
+    }
+
+    /* Футер */
+    footer {
+      width: 100%;
+      background-color: var(--purple);
+      padding: 30px 20px;
+      text-align: center;
+      color: var(--white);
+      font-size: 16px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      position: relative;
+      z-index: 10;
+    }
+
+    footer a {
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Хэдер -->
+  <header>
+    <div class="header-logo">
+      <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="VTB Logo">
+    </div>
+    <a href="profile.html" class="account-link">Кабинет менеджера</a>
+  </header>
+
+  <!-- Основной контейнер -->
+  <div class="main-container">
+    <!-- Боковая панель -->
+    <aside id="leagues-sidebar">
+      <!-- Лиги пользователя будут загружены динамически -->
+      <div class="sidebar-item" onclick="window.location.href='scout.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <span>Скаут</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='index.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+        <span>Выход</span>
+      </div>
+    </aside>
+
+    <!-- Основной контент -->
+    <main>
+      <div class="league-blocks">
+        <div class="league-row">
+          <!-- Драфт -->
+          <div class="league-block-container">
+            <div class="league-block" onclick="window.location.href='draft.html'">
+              <div class="league-block-front">
+                Драфт
+              </div>
+              <div class="league-block-back">
+                В этом формате вы по очереди выбираете игроков для своей команды. Каждый игрок может быть выбран только один раз. Ваша цель — собрать самую сильную команду!
+              </div>
+            </div>
+          </div>
+          <!-- Фэнтези по ролям -->
+          <div class="league-block-container">
+            <div class="league-block" onclick="window.location.href='roles.html'">
+              <div class="league-block-front">
+                Фэнтези по ролям
+              </div>
+              <div class="league-block-back">
+                Здесь вы собираете команду с учетом ролей игроков (защитник, нападающий, центр). Очки начисляются за статистику игроков в реальных матчах.
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Фэнтези по очкам -->
+        <div class="league-block-container">
+          <div class="league-block" onclick="window.location.href='scoring.html'">
+            <div class="league-block-front">
+              Фэнтези по очкам
+            </div>
+            <div class="league-block-back">
+              Ваша задача — набрать максимальное количество очков за матчи ваших игроков. Очки начисляются за очки, подборы, передачи, перехваты и блок-шоты.
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Футер -->
+  <footer>
+    <a href="pick.html">Главная</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
+    <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
+    <a href="https://vtb-league.com/ru/standings/">Таблица</a>
+    <a href="#">Разработчик</a>
+  </footer>
+
+  <!-- Supabase Client -->
+  <script>
+    // Инициализация Supabase
+    const SUPABASE_URL = 'https://svnnneohwcuxirsximkp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bm5uZW9od2N1eGlyc3hpbWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjM0NTcsImV4cCI6MjA3MjYzOTQ1N30.9H5aI1gj0FHGAC6NM08BbMno26ZdueNg7G1PnTDItpA';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Получаем текущего пользователя
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert("Пожалуйста, авторизуйтесь.");
+        window.location.href = "index.html";
+        return;
+      }
+
+      // Загружаем лиги пользователя
+      const { data: userLeagues, error: userLeaguesError } = await supabase
+        .from('user_leagues')
+        .select('league_id')
+        .eq('user_id', user.id);
+
+      if (userLeaguesError) {
+        console.error("Ошибка загрузки лиг пользователя:", userLeaguesError);
+        return;
+      }
+
+      // Получаем информацию о лигах
+      const leagueIds = userLeagues.map(ul => ul.league_id);
+      const { data: leagues, error: leaguesError } = await supabase
+        .from('leagues')
+        .select('id, name, logo_url')
+        .in('id', leagueIds);
+
+      if (leaguesError) {
+        console.error("Ошибка загрузки лиг:", leaguesError);
+        return;
+      }
+
+      // Добавляем лиги в боковую панель
+      const sidebar = document.getElementById('leagues-sidebar');
+      leagues.forEach(league => {
+        const leagueItem = document.createElement('div');
+        leagueItem.className = 'sidebar-item';
+        leagueItem.innerHTML = `
+          <img src="${league.logo_url || 'https://via.placeholder.com/40'}" alt="${league.name}">
+          <span>${league.name}</span>
+        `;
+        leagueItem.onclick = () => {
+          // Переход на страницу лиги
+          window.location.href = `league.html?id=${league.id}`;
+        };
+        sidebar.insertBefore(leagueItem, sidebar.firstChild);
+      });
+    });
+  </script>
+</body>
+</html>

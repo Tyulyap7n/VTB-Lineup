@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LineUP Fantasy - Скаут</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="supabaseClient.js"></script>
+  <style>
+    :root {
+      --purple: #633EDC;
+      --purple-light: #7d5ce6;
+      --purple-dark: #4e32b0;
+      --orange: #FE641C;
+      --orange-light: #ff7d40;
+      --orange-dark: #d4530e;
+      --yellow: #FDE600;
+      --yellow-light: #ffeb33;
+      --yellow-dark: #e6cf00;
+      --black: #121212;
+      --black-light: #1c1c1c;
+      --white: #ffffff;
+      --gray: #888;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: var(--black);
+      color: var(--white);
+      background-image:
+        radial-gradient(circle at 15% 50%, rgba(99, 62, 220, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 85% 30%, rgba(254, 100, 28, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 50% 80%, rgba(253, 230, 0, 0.05) 0%, transparent 20%);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    header {
+      width: 100%;
+      background-color: var(--purple);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      height: 80px;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .header-logo img {
+      height: 50px;
+      transition: transform 0.3s ease;
+    }
+
+    .header-logo img:hover {
+      transform: scale(1.1);
+    }
+
+    .account-link {
+      color: var(--yellow);
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 18px;
+      transition: all 0.3s ease;
+      position: relative;
+      padding: 8px 16px;
+      border-radius: 20px;
+    }
+
+    .account-link:hover {
+      background-color: rgba(253, 230, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .main-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+    }
+
+    aside {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5%;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--orange), var(--orange-dark));
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: width 0.3s ease, padding 0.3s ease;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+    }
+
+    aside:hover {
+      width: 15%;
+      padding: 20px 1rem;
+    }
+
+    .sidebar-item {
+      width: 100%;
+      padding: 12px;
+      text-align: center;
+      color: var(--white);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar-item:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .sidebar-item:hover:before {
+      left: 100%;
+    }
+
+    .sidebar-item:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      transform: translateX(5px);
+    }
+
+    .sidebar-item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-item:hover img {
+      transform: scale(1.1);
+    }
+
+    .sidebar-item span {
+      font-size: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar-item:hover span {
+      transform: translateX(3px);
+    }
+
+    main {
+      margin-left: 7%;
+      width: 85%;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--black);
+      flex: 1;
+      max-width: none;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 11%;
+      padding: 10px 20px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      color: var(--black);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+      color: var(--white);
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+      position: relative;
+      display: inline-block;
+    }
+
+    h1:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, var(--orange), transparent);
+    }
+
+    /* Стили для блока выбора команды */
+    .team-selection {
+      width: 100%;
+      max-width: 1200px;
+      margin: 20px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .team-selection-title {
+      font-size: 24px;
+      color: var(--yellow);
+      text-shadow: 0 0 5px rgba(253, 230, 0, 0.5);
+    }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .team-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px;
+      background: rgba(100, 60, 220, 0.2);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .team-card:hover {
+      background: rgba(100, 60, 220, 0.4);
+      transform: translateY(-5px);
+      border-color: var(--yellow);
+    }
+
+    .team-logo {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: contain;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .team-card:hover .team-logo {
+      border-color: var(--yellow);
+      box-shadow: 0 0 10px rgba(253, 230, 0, 0.5);
+    }
+
+    .team-name {
+      margin-top: 8px;
+      font-size: 12px;
+      text-align: center;
+      color: var(--white);
+    }
+
+    /* Стили для блока игроков команды */
+    .players-section {
+      width: 100%;
+      max-width: 1200px;
+      margin: 30px 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .players-section.active {
+      display: flex;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      width: 100%;
+    }
+
+    .player-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .player-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--yellow);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .player-photo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--purple);
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .player-card:hover .player-photo {
+      border-color: var(--yellow);
+      box-shadow: 0 0 15px rgba(253, 230, 0, 0.5);
+    }
+
+    .player-info {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .player-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: var(--white);
+    }
+
+    .player-position {
+      font-size: 14px;
+      color: var(--gray);
+      margin-bottom: 5px;
+    }
+
+    .player-team {
+      font-size: 14px;
+      color: var(--yellow);
+      font-weight: bold;
+    }
+
+    .player-price {
+      font-size: 16px;
+      color: var(--orange);
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .scout-report {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 15px;
+      margin: 15px 0;
+      font-style: italic;
+      line-height: 1.5;
+      border-left: 4px solid var(--orange);
+    }
+
+    .player-stats {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+    }
+
+    .stat-value {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--yellow);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--gray);
+    }
+
+    /* Стили для кнопки возврата к командам */
+    .back-to-teams {
+      padding: 10px 20px;
+      background: linear-gradient(to right, var(--purple), var(--purple-dark));
+      color: var(--white);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .back-to-teams.active {
+      display: block;
+    }
+
+    .back-to-teams:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(to right, var(--purple-light), var(--purple));
+    }
+
+    /* Адаптивность */
+    @media (max-width: 1200px) {
+      .players-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      }
+    }
+
+    @media (max-width: 768px) {
+      .teams-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      }
+
+      .players-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .player-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-logo">
+      <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="FIBA Logo">
+    </div>
+    <a href="profile.html" class="account-link">Кабинет менеджера</a>
+  </header>
+
+  <div class="main-container">
+    <aside id="leagues-sidebar">
+      <div class="sidebar-item" onclick="window.location.href='pick.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <span>Главная</span>
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='index.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+        <span>Выход</span>
+      </div>
+    </aside>
+
+    <main>
+      <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
+      <h1 class="animate-fadeIn">Скаут</h1>
+
+      <!-- Блок выбора команды -->
+      <div class="team-selection">
+        <h2 class="team-selection-title">Выберите команду для просмотра игроков</h2>
+        <div class="teams-grid" id="teams-grid">
+          <!-- Команды будут загружены динамически -->
+        </div>
+      </div>
+
+      <!-- Кнопка возврата к командам -->
+      <button class="back-to-teams" id="back-to-teams" onclick="showTeams()">← Вернуться к командам</button>
+
+      <!-- Блок игроков команды -->
+      <div class="players-section" id="players-section">
+        <h2 class="team-selection-title" id="current-team-name">Игроки команды</h2>
+        <div class="players-grid" id="players-grid">
+          <!-- Игроки будут загружены динамически -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+
+
+    // Глобальные переменные
+    let teams = [];
+    let currentTeam = null;
+
+    // Функция загрузки команд
+    async function loadTeams() {
+      try {
+        const { data, error } = await supabase
+          .from('teams')
+          .select('*')
+          .order('name', { ascending: true });
+
+        if (error) throw error;
+
+        teams = data;
+        renderTeams();
+      } catch (error) {
+        console.error('Ошибка загрузки команд:', error);
+        showNotification('Ошибка загрузки команд', false);
+      }
+    }
+
+    // Функция отображения команд
+    function renderTeams() {
+      const teamsGrid = document.getElementById('teams-grid');
+      teamsGrid.innerHTML = '';
+
+      teams.forEach(team => {
+        const teamCard = document.createElement('div');
+        teamCard.className = 'team-card';
+        teamCard.onclick = () => selectTeam(team);
+
+        teamCard.innerHTML = `
+          <img src="${team.logo_url || 'https://via.placeholder.com/60'}" alt="${team.name}" class="team-logo">
+          <div class="team-name">${team.name}</div>
+        `;
+
+        teamsGrid.appendChild(teamCard);
+      });
+    }
+
+    // Функция выбора команды
+    function selectTeam(team) {
+      currentTeam = team;
+      document.getElementById('current-team-name').textContent = `Игроки команды ${team.name}`;
+      document.getElementById('back-to-teams').classList.add('active');
+      document.querySelector('.team-selection').style.display = 'none';
+      document.getElementById('players-section').classList.add('active');
+
+      loadTeamPlayers(team.id);
+    }
+
+    // Функция возврата к командам
+    function showTeams() {
+      document.querySelector('.team-selection').style.display = 'flex';
+      document.getElementById('players-section').classList.remove('active');
+      document.getElementById('back-to-teams').classList.remove('active');
+    }
+
+    // Функция загрузки игроков команды
+    async function loadTeamPlayers(teamId) {
+      try {
+        const { data: players, error: playersError } = await supabase
+          .from('players')
+          .select('*, player_stats(*)')
+          .eq('team_id', teamId);
+
+        if (playersError) throw playersError;
+
+        const { data: stats, error: statsError } = await supabase
+          .from('player_stats')
+          .select('*')
+          .in('player_id', players.map(p => p.id));
+
+        if (statsError) throw statsError;
+
+        // Группируем статистику по игрокам
+        const statsByPlayer = stats.reduce((acc, stat) => {
+          if (!acc[stat.player_id]) acc[stat.player_id] = [];
+          acc[stat.player_id].push(stat);
+          return acc;
+        }, {});
+
+        // Рассчитываем среднюю статистику для каждого игрока
+        const playersWithStats = players.map(player => {
+          const playerStats = statsByPlayer[player.id] || [];
+          const gamesCount = playerStats.length;
+
+          const avgStats = {
+            points: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : 0,
+            threes: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : 0,
+            assists: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : 0,
+            rebounds: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : 0,
+            steals: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : 0,
+            blocks: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : 0,
+            turnover: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : 0,
+            games: gamesCount
+          };
+
+          // Рассчитываем среднее значение по формуле
+          const avgValue = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) =>
+              sum + (
+                (s.points || 0) +
+                1.5 * (s.assists || 0) +
+                1.3 * (s.rebounds || 0) +
+                3 * (s.steals || 0) +
+                3 * (s.blocks || 0) -
+                2 * (s.turnover || 0)
+              ), 0) / gamesCount).toFixed(1) : 0;
+
+          return { ...player, stats: avgStats, avgValue };
+        });
+
+        renderPlayers(playersWithStats);
+      } catch (error) {
+        console.error('Ошибка загрузки игроков:', error);
+        showNotification('Ошибка загрузки игроков', false);
+      }
+    }
+
+    // Функция отображения игроков
+    function renderPlayers(players) {
+      const playersGrid = document.getElementById('players-grid');
+      playersGrid.innerHTML = '';
+
+      players.forEach(player => {
+        const playerCard = document.createElement('div');
+        playerCard.className = 'player-card';
+
+        playerCard.innerHTML = `
+          <img src="${player.photo_url || 'https://via.placeholder.com/100'}" alt="${player.first_name} ${player.last_name}" class="player-photo">
+
+          <div class="player-info">
+            <div class="player-name">${player.first_name} ${player.last_name}</div>
+            <div class="player-position">${player.position || 'Н/Д'}</div>
+            <div class="player-team">${currentTeam.name}</div>
+            <div class="player-price">${player.price || 0}$</div>
+          </div>
+
+          <div class="scout-report">
+            ${player.scout || 'Скаут отчёт отсутствует'}
+          </div>
+
+          <div class="player-stats">
+            <div class="stat-item">
+              <div class="stat-value">${player.avgValue}</div>
+              <div class="stat-label">Среднее</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${player.stats.points}</div>
+              <div class="stat-label">Очки</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${player.stats.assists}</div>
+              <div class="stat-label">Ассисты</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${player.stats.rebounds}</div>
+              <div class="stat-label">Подборы</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${player.stats.steals}</div>
+              <div class="stat-label">Перехваты</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">${player.stats.blocks}</div>
+              <div class="stat-label">Блоки</div>
+            </div>
+          </div>
+        `;
+
+        playersGrid.appendChild(playerCard);
+      });
+    }
+
+    // Функция отображения уведомлений
+    function showNotification(message, isSuccess = true) {
+      const notification = document.createElement('div');
+      notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+      notification.textContent = message;
+
+      document.body.appendChild(notification);
+
+      // Анимация появления
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateY(-20px)';
+
+      setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateY(0)';
+      }, 10);
+
+      // Удаление через 3 секунды
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+
+        setTimeout(() => {
+          document.body.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+
+    // Инициализация страницы
+    document.addEventListener('DOMContentLoaded', () => {
+      // Добавляем стили для уведомлений
+      const style = document.createElement('style');
+      style.textContent = `
+        .notification {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 15px 20px;
+          border-radius: 10px;
+          color: white;
+          font-weight: bold;
+          z-index: 1000;
+          transition: opacity 0.3s, transform 0.3s;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification.success {
+          background: linear-gradient(to right, #4CAF50, #2E7D32);
+        }
+
+        .notification.error {
+          background: linear-gradient(to right, #f44336, #c62828);
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Загружаем команды
+      loadTeams();
+    });
+  </script>
+</body>
+</html>
