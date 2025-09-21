@@ -1669,6 +1669,33 @@ main {
 .player-popup.hide {
   animation: popupFadeOut 0.2s ease forwards;
 }
+	  .th-tooltip {
+  position: relative;
+  cursor: pointer;
+}
+
+.th-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 100;
+}
+
+.th-tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
 .tooltip {
   position: relative;
   cursor: pointer;
@@ -1969,15 +1996,15 @@ main {
       <th data-sort="photo">Фото</th>
       <th data-sort="name">Игрок</th>
       <th data-sort="price">Цена</th>
-      <th data-sort="avgAvg" class="tooltip">Ср.<span class="tooltip-text">Среднее количество фэнтези очков</span></th>
-      <th data-sort="points" class="tooltip">Очки<span class="tooltip-text">Набранные очки</span></th>
-      <th data-sort="threes" class="tooltip">3-очк<span class="tooltip-text">Забитые трёхочковые</span></th>
-      <th data-sort="assists" class="tooltip">ПРД<span class="tooltip-text">Передачи</span></th>
-      <th data-sort="rebounds" class="tooltip">ПДБ<span class="tooltip-text">Подборы</span></th>
-      <th data-sort="steals" class="tooltip">ПРХ<span class="tooltip-text">Перехваты</span></th>
-      <th data-sort="blocks" class="tooltip">БЛК<span class="tooltip-text">Блоки</span></th>
-      <th data-sort="turnovers" class="tooltip">ПТР<span class="tooltip-text">Потери</span></th>
-      <th data-sort="selection" class="tooltip">%<span class="tooltip-text">% Выбора</span></th>
+      <th data-sort="avgAvg" class="th-tooltip" data-tooltip="Среднее количество фэнтези очков">Ср.</th>
+      <th data-sort="points" class="th-tooltip" data-tooltip="Набранные очки">Очки</th>
+      <th data-sort="threes" class="th-tooltip" data-tooltip="Забитые трёхочковые">3-очк</th>
+      <th data-sort="assists" class="th-tooltip" data-tooltip="Передачи">ПРД</th>
+      <th data-sort="rebounds" class="th-tooltip" data-tooltip="Подборы">ПДБ</th>
+      <th data-sort="steals" class="th-tooltip" data-tooltip="Перехваты">ПРХ</th>
+      <th data-sort="blocks" class="th-tooltip" data-tooltip="Блоки">БЛК</th>
+      <th data-sort="turnovers" class="th-tooltip" data-tooltip="Потери">ПТР</th>
+      <th data-sort="selection" class="th-tooltip" data-tooltip="% Выбора">%</th>
     </tr>
   </thead>
   <tbody id="players-table-body">
@@ -4169,6 +4196,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
