@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LineUP Fantasy - Моя команда</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></sctheript>
   <script src="supabaseClient.js"></script>
   <style>
     :root {
@@ -113,7 +113,46 @@
       z-index: 10;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-    
+    th[title] {
+  position: relative;
+  cursor: help;
+}
+
+th[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: var(--white);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  width: max-content;
+  max-width: 200px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* Анимация для плавного появления подсказки */
+th[title]:hover::after {
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
     .header-logo img {
       height: 50px;
       transition: transform 0.3s ease;
@@ -1951,23 +1990,24 @@ main {
       </div>
       
       <table style="width: 100%; min-width: 1300px;">
-        <thead>
-          <tr>
-            <th data-sort="add"></th>
-            <th data-sort="photo">Фото</th>
-            <th data-sort="name">Игрок</th>
-            <th data-sort="price">Цена</th>
-            <th data-sort="avg">AVG</th>
-            <th data-sort="points">Очки</th>
-            <th data-sort="threes">3-очк</th>
-            <th data-sort="assists">Ассисты</th>
-            <th data-sort="rebounds">Подборы</th>
-            <th data-sort="steals">Перехваты</th>
-            <th data-sort="blocks">Блоки</th>
-            <th data-sort="turnovers">Потери</th>
-            <th data-sort="selection">% Выбора</th>
-          </tr>
-        </thead>
+		<thead>
+		  <tr>
+		    <th data-sort="add" title="Добавить игрока"></th>
+		    <th data-sort="photo" title="Фото игрока">Фото</th>
+		    <th data-sort="name" title="Игрок">Игрок</th>
+		    <th data-sort="price" title="Стоимость игрока">Цена</th>
+		    <th data-sort="avg" title="Фэнтези очки">Ср.</th>
+		    <th data-sort="points" title="Количество набранных очков">Очк</th>
+		    <th data-sort="threes" title="Трёхочковые броски">3-очк</th>
+		    <th data-sort="assists" title="Результативные передачи">ПРД</th>
+		    <th data-sort="rebounds" title="Подборы">ПДБ</th>
+		    <th data-sort="steals" title="Перехваты">ПРХ</th>
+		    <th data-sort="blocks" title="Блокшоты">БЛК</th>
+		    <th data-sort="turnovers" title="Потери мяча">ПТР</th>
+		    <th data-sort="selection" title="Процент выбора игрока другими менеджерами">%</th>
+		  </tr>
+		</thead>
+
         <tbody id="players-table-body">
           <!-- Игроки будут добавлены динамически -->
         </tbody>
@@ -4158,4 +4198,5 @@ function calculateTotalStatsFromArray(stats) {
 
   </script>
 </body>
+
 </html>
