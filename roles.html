@@ -3573,67 +3573,66 @@ if (!window.supabase) {
   // Можно добавить уведомление пользователю
   alert('Ошибка инициализации базы данных. Пожалуйста, перезагрузите страницу.');
 }
-
-// Основной код приложения
+// ЗАМЕНИТЕ этот блок кода в DOMContentLoaded:
 document.addEventListener("DOMContentLoaded", async () => {
   try {
-    // Проверяем аутентификацию только если supabase доступен
-    if (window.supabase) {
-      const { data: { user }, error: userError } = await window.supabase.auth.getUser();
+    // Проверяем аутентификацию
+    const { data: { user }, error: userError } = await window.supabase.auth.getUser();
 
-      if (userError) {
-        console.error("Authentication error:", userError);
-        showNotification('Ошибка аутентификации', false);
-        return;
-      }
-
-      if (!user) {
-        showNotification('Пожалуйста, авторизуйтесь', false);
-        window.location.href = "index.html";
-        return;
-      }
-
-      // Загружаем роли
-      await loadRoles();
-      // Загружаем игроков
-      await loadPlayers();
-      // Загружаем количество менеджеров
-      await loadManagersCount();
-      // Загружаем текущую команду пользователя
-      await loadUserTeam(user.id);
-
-      // Отображаем таблицу игроков
-      renderPlayersTable();
-	// ДОБАВЬТЕ эту строку в функцию DOMContentLoaded:
-	document.getElementById('filter-team').addEventListener('change', renderPlayersTable);
-      // Обработчик для кнопки ручного сохранения
-      document.getElementById('save-roster')?.addEventListener('click', saveRosterToDatabase);
-
-      // Добавляем обработчики сортировки
-      document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
-        header.addEventListener('click', () => {
-          const column = header.getAttribute('data-sort');
-          sortTable(column);
-        });
-      });
-
-      // Анимация появления элементов
-      anime({
-        targets: '.animate-fadeIn',
-        opacity: [0, 1],
-        translateY: [20, 0],
-        delay: anime.stagger(100),
-        duration: 800,
-        easing: 'easeOutQuad'
-      });
+    if (userError) {
+      console.error("Authentication error:", userError);
+      showNotification('Ошибка аутентификации', false);
+      window.location.href = "index.html";
+      return;
     }
+
+    if (!user) {
+      showNotification('Пожалуйста, авторизуйтесь', false);
+      window.location.href = "index.html";
+      return;
+    }
+
+    // Загружаем роли
+    await loadRoles();
+    // Загружаем игроков
+    await loadPlayers();
+    // Загружаем количество менеджеров
+    await loadManagersCount();
+    // Загружаем текущую команду пользователя
+    await loadUserTeam(user.id);
+
+    // Отображаем таблицу игроков
+    renderPlayersTable();
+
+    // Обработчик для кнопки ручного сохранения
+    document.getElementById('save-roster')?.addEventListener('click', saveRosterToDatabase);
+
+    // Добавляем обработчики сортировки
+    document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.getAttribute('data-sort');
+        sortTable(column);
+      });
+    });
+
+    // Добавляем обработчик для фильтра команд
+    document.getElementById('filter-team')?.addEventListener('change', renderPlayersTable);
+
+    // Анимация появления элементов
+    anime({
+      targets: '.animate-fadeIn',
+      opacity: [0, 1],
+      translateY: [20, 0],
+      delay: anime.stagger(100),
+      duration: 800,
+      easing: 'easeOutQuad'
+    });
+
   } catch (error) {
     console.error("Initialization error:", error);
     showNotification('Ошибка инициализации приложения', false);
   }
 });
-
-
     // Функция сортировки таблицы
     function sortTable(column) {
       const tbody = document.getElementById('players-table-body');
@@ -4200,6 +4199,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
