@@ -1619,6 +1619,32 @@ main {
   background: linear-gradient(to right, var(--orange), var(--yellow));
   border-radius: 2px;
 }
+.tooltip {
+  position: relative;
+  cursor: pointer;
+}
+
+.tooltip-text {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  z-index: 100;
+}
+
+.tooltip:hover .tooltip-text {
+  opacity: 1;
+  visibility: visible;
+}
 
 .rules-list {
   margin-bottom: 30px;
@@ -1759,29 +1785,28 @@ main {
         <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
       </div>
       
-      <table style="width: 100%; min-width: 1300px;">
-		<thead>
-		  <tr>
-			<th data-sort="add"></th>
-			<th data-sort="photo">Фото</th>
-			<th data-sort="name">Игрок</th>
-			<th data-sort="price">Цена</th>
-			<th data-sort="avgAvg">Среднее</th>  <!-- Изменено с "avg" на "avgAvg" -->
-			<th data-sort="points">Очки</th>
-			<th data-sort="threes">3-очк</th>
-			<th data-sort="assists">Ассисты</th>
-			<th data-sort="rebounds">Подборы</th>
-			<th data-sort="steals">Перехваты</th>
-			<th data-sort="blocks">Блоки</th>
-			<th data-sort="turnovers">Потери</th>
-			<th data-sort="selection">% Выбора</th>
-		  </tr>
-		</thead>
-
-        <tbody id="players-table-body">
-          <!-- Игроки будут добавлены динамически -->
-        </tbody>
-      </table>
+<table style="width: 100%; min-width: 1300px;">
+  <thead>
+    <tr>
+      <th data-sort="add"></th>
+      <th data-sort="photo">Фото</th>
+      <th data-sort="name">Игрок</th>
+      <th data-sort="price">Цена</th>
+      <th data-sort="avgAvg" class="tooltip">Ср.<span class="tooltip-text">Среднее количество фэнтези очков</span></th>
+      <th data-sort="points" class="tooltip">Очки<span class="tooltip-text">Набранные очки</span></th>
+      <th data-sort="threes" class="tooltip">3-очк<span class="tooltip-text">Забитые трёхочковые</span></th>
+      <th data-sort="assists" class="tooltip">ПРД<span class="tooltip-text">Передачи</span></th>
+      <th data-sort="rebounds" class="tooltip">ПДБ<span class="tooltip-text">Подборы</span></th>
+      <th data-sort="steals" class="tooltip">ПРХ<span class="tooltip-text">Перехваты</span></th>
+      <th data-sort="blocks" class="tooltip">БЛК<span class="tooltip-text">Блоки</span></th>
+      <th data-sort="turnovers" class="tooltip">ПТР<span class="tooltip-text">Потери</span></th>
+      <th data-sort="selection" class="tooltip">%<span class="tooltip-text">% Выбора</span></th>
+    </tr>
+  </thead>
+  <tbody id="players-table-body">
+    <!-- Игроки будут добавлены динамически -->
+  </tbody>
+</table>
     </div>
   </div>
       
@@ -3875,5 +3900,6 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
