@@ -115,6 +115,12 @@
       transition: width 0.3s ease, padding 0.3s ease;
       box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
     }
+
+    aside:hover {
+      width: 15%;
+      padding: 20px 1rem;
+    }
+
     .sidebar-item {
       width: 100%;
       padding: 12px;
@@ -260,47 +266,7 @@
       transition: all 0.3s ease;
       border: 1px solid transparent;
     }
-    footer {
-      width: 100%;
-      background: linear-gradient(to right, var(--purple), var(--purple-dark));
-      padding: 30px 20px;
-      text-align: center;
-      color: var(--white);
-      font-size: 16px;
-      height: 80px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 30px;
-      position: relative;
-      z-index: 10;
-    }
-    
-    footer a {
-      color: var(--white);
-      text-decoration: none;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-    
-    footer a:after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--yellow);
-      transition: width 0.3s ease;
-    }
-    
-    footer a:hover {
-      color: var(--yellow);
-    }
-    
-    footer a:hover:after {
-      width: 100%;
-    }
+
     .team-card:hover {
       background: rgba(100, 60, 220, 0.4);
       transform: translateY(-5px);
@@ -504,13 +470,14 @@
     <div class="header-logo">
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="FIBA Logo">
     </div>
+    <a href="profile.html" class="account-link">Кабинет менеджера</a>
   </header>
 
   <div class="main-container">
-   <aside id="leagues-sidebar">
-      <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
-        <img src="https://cdn-icons-png.flaticon.com/512/3208/3208892.png" alt="Новости">
-        <span>Новости</span>
+    <aside id="leagues-sidebar">
+      <div class="sidebar-item" onclick="window.location.href='pick.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <span>Главная</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='index.html'">
         <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
@@ -520,7 +487,7 @@
 
     <main>
       <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
-      <h1 class="animate-fadeIn">Скаутский отчёт</h1>
+      <h1 class="animate-fadeIn">Скаут</h1>
 
       <!-- Блок выбора команды -->
       <div class="team-selection">
@@ -542,13 +509,7 @@
       </div>
     </main>
   </div>
-  <footer>
-    <a href="pick.html">Главная</a>
-    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
-    <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
-    <a href="https://vtb-league.com/ru/standings/">Таблица</a>
-    <a href="https://dm7try.netlify.app">Разработчик</a>
-  </footer>
+
   <script>
 
 
@@ -790,5 +751,3 @@
   </script>
 </body>
 </html>
-
-

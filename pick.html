@@ -83,7 +83,15 @@
       padding: 20px 0;
       overflow-y: auto;
       overflow-x: hidden;
+      transition: width 0.3s ease, padding 0.3s ease;
     }
+
+    /* Состояние при наведении */
+    aside:hover {
+      width: 15%;
+      padding: 20px 1rem; 
+    }
+
     .sidebar-item {
       width: 100%;
       padding: 12px;
@@ -129,6 +137,11 @@
       background-color: var(--black);
       flex: 1;
       transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+
+    aside:hover ~ main {
+      margin-left: 15%;
+      width: 85%;
     }
 
     /* Блоки лиг */
@@ -231,6 +244,7 @@
     <div class="header-logo">
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="VTB Logo">
     </div>
+    <a href="profile.html" class="account-link">Кабинет менеджера</a>
   </header>
 
   <!-- Основной контейнер -->
@@ -239,12 +253,8 @@
     <aside id="leagues-sidebar">
       <!-- Лиги пользователя будут загружены динамически -->
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/15189/15189295.png" alt="Скаут">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
         <span>Скаут</span>
-      </div>
-      <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
-        <img src="https://cdn-icons-png.flaticon.com/512/3208/3208892.png" alt="Новости">
-        <span>Новости</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='index.html'">
         <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
@@ -256,6 +266,17 @@
     <main>
       <div class="league-blocks">
         <div class="league-row">
+          <!-- Драфт -->
+          <div class="league-block-container">
+            <div class="league-block" onclick="window.location.href='draft.html'">
+              <div class="league-block-front">
+                Драфт
+              </div>
+              <div class="league-block-back">
+                В этом формате вы по очереди выбираете игроков для своей команды. Каждый игрок может быть выбран только один раз. Ваша цель — собрать самую сильную команду!
+              </div>
+            </div>
+          </div>
           <!-- Фэнтези по ролям -->
           <div class="league-block-container">
             <div class="league-block" onclick="window.location.href='roles.html'">
@@ -289,7 +310,7 @@
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
     <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
     <a href="https://vtb-league.com/ru/standings/">Таблица</a>
-    <a href="https://dm7try.netlify.app">Разработчик</a>
+    <a href="#">Разработчик</a>
   </footer>
 
   <!-- Supabase Client -->
@@ -350,7 +371,4 @@
     });
   </script>
 </body>
-
 </html>
-
-

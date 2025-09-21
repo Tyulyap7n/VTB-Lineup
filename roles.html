@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LineUP Fantasy - Моя команда</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></sctheript>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script src="supabaseClient.js"></script>
   <style>
     :root {
       --purple: #633EDC;
@@ -25,7 +26,7 @@
     
     @font-face {
       font-family: 'Petrov Sans';
-      src: url('PetrovSans-Trial-Bold.otf') format('opentype');
+      src: url('/fonts/PetrovSans-Trial-Bold.otf') format('opentype');
       font-weight: bold;
       font-style: normal;
       font-display: swap;
@@ -112,46 +113,7 @@
       z-index: 10;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-    th[title] {
-  position: relative;
-  cursor: help;
-}
-
-th[title]:hover::after {
-  content: attr(title);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.8);
-  color: var(--white);
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 100;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  width: max-content;
-  max-width: 200px;
-  text-align: center;
-  line-height: 1.3;
-}
-
-/* Анимация для плавного появления подсказки */
-th[title]:hover::after {
-  animation: tooltipFadeIn 0.2s ease-out;
-}
-
-@keyframes tooltipFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
+    
     .header-logo img {
       height: 50px;
       transition: transform 0.3s ease;
@@ -1989,24 +1951,23 @@ main {
       </div>
       
       <table style="width: 100%; min-width: 1300px;">
-		<thead>
-		  <tr>
-		    <th data-sort="add" title="Добавить игрока"></th>
-		    <th data-sort="photo" title="Фото игрока">Фото</th>
-		    <th data-sort="name" title="Игрок">Игрок</th>
-		    <th data-sort="price" title="Стоимость игрока">Цена</th>
-		    <th data-sort="avg" title="Фэнтези очки">Ср.</th>
-		    <th data-sort="points" title="Количество набранных очков">Очк</th>
-		    <th data-sort="threes" title="Трёхочковые броски">3-очк</th>
-		    <th data-sort="assists" title="Результативные передачи">ПРД</th>
-		    <th data-sort="rebounds" title="Подборы">ПДБ</th>
-		    <th data-sort="steals" title="Перехваты">ПРХ</th>
-		    <th data-sort="blocks" title="Блокшоты">БЛК</th>
-		    <th data-sort="turnovers" title="Потери мяча">ПТР</th>
-		    <th data-sort="selection" title="Процент выбора игрока другими менеджерами">%</th>
-		  </tr>
-		</thead>
-
+        <thead>
+          <tr>
+            <th data-sort="add"></th>
+            <th data-sort="photo">Фото</th>
+            <th data-sort="name">Игрок</th>
+            <th data-sort="price">Цена</th>
+            <th data-sort="avg">AVG</th>
+            <th data-sort="points">Очки</th>
+            <th data-sort="threes">3-очк</th>
+            <th data-sort="assists">Ассисты</th>
+            <th data-sort="rebounds">Подборы</th>
+            <th data-sort="steals">Перехваты</th>
+            <th data-sort="blocks">Блоки</th>
+            <th data-sort="turnovers">Потери</th>
+            <th data-sort="selection">% Выбора</th>
+          </tr>
+        </thead>
         <tbody id="players-table-body">
           <!-- Игроки будут добавлены динамически -->
         </tbody>
@@ -2255,11 +2216,6 @@ main {
   </footer>
   
 <script>
-	const SUPABASE_URL = 'https://svnnneohwcuxirsximkp.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bm5uZW9od2N1eGlyc3hpbWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjM0NTcsImV4cCI6MjA3MjYzOTQ1N30.9H5aI1gj0FHGAC6NM08BbMno26ZdueNg7G1PnTDItpA';
-
-    // Создаем клиент Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let selectedPlayers = {};
     let roles = [];
     let players = [];
@@ -2661,131 +2617,159 @@ function closeTourMatches() {
     });
 
     // Обновлённая функция загрузки матчей тура
-// ЗАМЕНИТЕ существующую функцию на эту:
 async function loadCurrentTourMatches() {
-  try {
-    // Проверяем инициализацию Supabase
-    if (!supabase) {
-      console.error('Supabase client not initialized');
-      showNotification('Ошибка подключения к базе данных', false);
-      return;
-    }
+    try {
+        // 1. Получаем текущий тур
+        const { data: currentTour, error: tourError } = await supabase
+            .from('tours')
+            .select('*')
+            .order('start_time', { ascending: false })
+            .limit(1)
+            .single();
 
-    // 1. Получаем текущий тур
-    const { data: currentTour, error: tourError } = await supabase
-      .from('tours')
-      .select('*')
-      .order('start_time', { ascending: false })
-      .limit(1)
-      .single();
+        if (tourError || !currentTour) {
+            console.error('Ошибка загрузки текущего тура:', tourError);
+            return;
+        }
 
-    if (tourError || !currentTour) {
-      console.error('Ошибка загрузки текущего тура:', tourError);
-      const matchesContainer = document.getElementById('matches-container');
-      if (matchesContainer) {
-        matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Не удалось загрузить матчи</p>';
-      }
-      return;
-    }
+        // 2. Получаем все матчи для текущего тура
+        const { data: matches, error: matchesError } = await supabase
+            .from('games')
+            .select(`
+                *,
+                home_team:teams!games_home_team_id_fkey(*),
+                away_team:teams!games_away_team_id_fkey(*)
+            `)
+            .eq('tour_id', currentTour.id);
 
-    // 2. Получаем все матчи для текущего тура
-    const { data: matches, error: matchesError } = await supabase
-      .from('games')
-      .select(`
-        *,
-        home_team:teams!games_home_team_id_fkey(*),
-        away_team:teams!games_away_team_id_fkey(*)
-      `)
-      .eq('tour_id', currentTour.id);
+        if (matchesError || !matches) {
+            console.error('Ошибка загрузки матчей:', matchesError);
+            return;
+        }
 
-    if (matchesError) {
-      console.error('Ошибка загрузки матчей:', matchesError);
-      const matchesContainer = document.getElementById('matches-container');
-      if (matchesContainer) {
-        matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
-      }
-      return;
-    }
+        // 3. Считаем количество игр для каждой команды в туре
+        const teamGameCounts = {};
 
-    // 3. Отображаем матчи
-    const matchesContainer = document.getElementById('matches-container');
-    if (matchesContainer) {
-      matchesContainer.innerHTML = '';
-
-      // Добавляем заголовок с номером тура
-      const tourHeader = document.createElement('div');
-      tourHeader.className = 'tour-header';
-      tourHeader.textContent = `Тур ${currentTour.round_number}`;
-      matchesContainer.appendChild(tourHeader);
-
-      // Отображаем матчи
-      if (matches && matches.length > 0) {
         matches.forEach(match => {
-          const matchRow = createMatchRow(match);
-          matchesContainer.appendChild(matchRow);
+            const homeTeamId = match.home_team.id;
+            const awayTeamId = match.away_team.id;
+
+            // Увеличиваем счётчик для домашней команды
+            if (!teamGameCounts[homeTeamId]) {
+                teamGameCounts[homeTeamId] = 0;
+            }
+            teamGameCounts[homeTeamId]++;
+
+            // Увеличиваем счётчик для гостевой команды
+            if (!teamGameCounts[awayTeamId]) {
+                teamGameCounts[awayTeamId] = 0;
+            }
+            teamGameCounts[awayTeamId]++;
         });
-      } else {
-        matchesContainer.innerHTML += '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
-      }
-    }
 
-  } catch (error) {
-    console.error('Ошибка загрузки матчей:', error);
-    const matchesContainer = document.getElementById('matches-container');
-    if (matchesContainer) {
-      matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Ошибка загрузки матчей</p>';
-    }
-  }
+        // 4. Отображаем матчи в контейнере
+        const matchesContainer = document.getElementById('matches-container');
+        matchesContainer.innerHTML = '';
+
+        if (!matches || matches.length === 0) {
+            matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
+            return;
+        }
+
+        // Добавляем заголовок с номером тура
+        const tourHeader = document.createElement('div');
+        tourHeader.className = 'tour-header';
+        tourHeader.textContent = `Тур ${currentTour.round_number}`;
+        matchesContainer.appendChild(tourHeader);
+
+        // Отображаем матчи
+        matches.forEach(match => {
+            const matchRow = document.createElement('div');
+            matchRow.className = 'match-row';
+
+            // Проверяем количество игр у команд
+            const homeTeamId = match.home_team.id;
+            const awayTeamId = match.away_team.id;
+
+            const homeMultipleGames = teamGameCounts[homeTeamId] > 1;
+            const awayMultipleGames = teamGameCounts[awayTeamId] > 1;
+
+            // Контейнер для домашней команды
+            const homeTeamContainer = document.createElement('div');
+            homeTeamContainer.className = 'team-container team-home';
+
+            const homeLogo = document.createElement('img');
+            homeLogo.src = match.home_team?.logo_url || 'https://via.placeholder.com/40';
+            homeLogo.alt = match.home_team?.name;
+            homeLogo.className = 'team-logo';
+
+            const homeName = document.createElement('div');
+            homeName.className = 'team-name';
+            homeName.textContent = match.home_team?.name;
+
+            
+            homeTeamContainer.appendChild(homeName);
+			homeTeamContainer.appendChild(homeLogo);
+
+            // Разделитель "VS"
+            const vsSeparator = document.createElement('div');
+            vsSeparator.className = 'vs-separator';
+            vsSeparator.textContent = '';
+            // Контейнер для гостевой команды
+            const awayTeamContainer = document.createElement('div');
+            awayTeamContainer.className = 'team-container team-away';
+
+            const awayLogo = document.createElement('img');
+            awayLogo.src = match.away_team?.logo_url || 'https://via.placeholder.com/40';
+            awayLogo.alt = match.away_team?.name;
+            awayLogo.className = 'team-logo';
+
+            const awayName = document.createElement('div');
+            awayName.className = 'team-name';
+            awayName.textContent = match.away_team?.name;
+
+            awayTeamContainer.appendChild(awayLogo);
+            awayTeamContainer.appendChild(awayName);
+            // Собираем строку матча
+<!-- Внутри функции loadCurrentTourMatches() -->
+// Собираем строку матча
+matchRow.appendChild(homeTeamContainer);
+matchRow.appendChild(vsSeparator);
+matchRow.appendChild(awayTeamContainer);
+
+// Добавляем бейджи для команд с несколькими играми
+if (homeMultipleGames) {
+    const badge = document.createElement('div');
+    badge.className = 'multiple-games-badge';
+    badge.title = 'У команды несколько игр в этом туре';
+    homeTeamContainer.style.position = 'relative';
+    homeTeamContainer.appendChild(badge);
+    // Позиционируем бейдж слева от текста
+    badge.style.left = '0%';
+    badge.style.top = '10%';
+    badge.style.transform = 'translateY(-50%)';
+    badge.style.marginRight = '8px';
 }
-function createMatchRow(match) {
-  const matchRow = document.createElement('div');
-  matchRow.className = 'match-row';
 
-  // Контейнер для домашней команды
-  const homeTeamContainer = document.createElement('div');
-  homeTeamContainer.className = 'team-container team-home';
-
-  const homeLogo = document.createElement('img');
-  homeLogo.src = match.home_team?.logo_url || 'https://via.placeholder.com/40';
-  homeLogo.alt = match.home_team?.name;
-  homeLogo.className = 'team-logo';
-
-  const homeName = document.createElement('div');
-  homeName.className = 'team-name';
-  homeName.textContent = match.home_team?.name;
-
-  homeTeamContainer.appendChild(homeName);
-  homeTeamContainer.appendChild(homeLogo);
-
-  // Разделитель "VS"
-  const vsSeparator = document.createElement('div');
-  vsSeparator.className = 'vs-separator';
-  vsSeparator.textContent = 'vs';
-
-  // Контейнер для гостевой команды
-  const awayTeamContainer = document.createElement('div');
-  awayTeamContainer.className = 'team-container team-away';
-
-  const awayLogo = document.createElement('img');
-  awayLogo.src = match.away_team?.logo_url || 'https://via.placeholder.com/40';
-  awayLogo.alt = match.away_team?.name;
-  awayLogo.className = 'team-logo';
-
-  const awayName = document.createElement('div');
-  awayName.className = 'team-name';
-  awayName.textContent = match.away_team?.name;
-
-  awayTeamContainer.appendChild(awayLogo);
-  awayTeamContainer.appendChild(awayName);
-
-  // Собираем строку матча
-  matchRow.appendChild(homeTeamContainer);
-  matchRow.appendChild(vsSeparator);
-  matchRow.appendChild(awayTeamContainer);
-
-  return matchRow;
+if (awayMultipleGames) {
+    const badge = document.createElement('div');
+    badge.className = 'multiple-games-badge';
+    badge.title = 'У команды несколько игр в этом туре';
+    awayTeamContainer.style.position = 'relative';
+    awayTeamContainer.appendChild(badge);
+    // Позиционируем бейдж справа от текста
+    badge.style.right = '0%';
+    badge.style.top = '10%';
+    badge.style.transform = 'translateY(-50%)';
+    badge.style.marginLeft = '8px';
 }
 
+            matchesContainer.appendChild(matchRow);
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки матчей:', error);
+    }
+}
 
 async function addPlayerStats(playerId, tourId, stats) {
   try {
@@ -3566,72 +3550,63 @@ function assignToRole(role) {
         startingViContainer.parentNode.insertBefore(warningElement, startingViContainer.nextSibling);
       }
     });
-// Проверяем, что supabase инициализирован
-if (!window.supabase) {
-  console.error('Supabase client not initialized!');
-  // Можно добавить уведомление пользователю
-  alert('Ошибка инициализации базы данных. Пожалуйста, перезагрузите страницу.');
-}
-// ЗАМЕНИТЕ этот блок кода в DOMContentLoaded:
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    // Проверяем аутентификацию
-    const { data: { user }, error: userError } = await window.supabase.auth.getUser();
+    // Инициализация страницы
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert("Пожалуйста, авторизуйтесь.");
+          window.location.href = "index.html";
+          return;
+        }
 
-    if (userError) {
-      console.error("Authentication error:", userError);
-      showNotification('Ошибка аутентификации', false);
-      window.location.href = "index.html";
-      return;
-    }
+        // Загружаем роли
+        await loadRoles();
 
-    if (!user) {
-      showNotification('Пожалуйста, авторизуйтесь', false);
-      window.location.href = "index.html";
-      return;
-    }
+        // Загружаем игроков
+        await loadPlayers();
 
-    // Загружаем роли
-    await loadRoles();
-    // Загружаем игроков
-    await loadPlayers();
-    // Загружаем количество менеджеров
-    await loadManagersCount();
-    // Загружаем текущую команду пользователя
-    await loadUserTeam(user.id);
+        // Загружаем количество менеджеров
+        await loadManagersCount();
 
-    // Отображаем таблицу игроков
-    renderPlayersTable();
+        // Загружаем текущую команду пользователя
+        await loadUserTeam(user.id);
 
-    // Обработчик для кнопки ручного сохранения
-    document.getElementById('save-roster')?.addEventListener('click', saveRosterToDatabase);
+        // Загружаем сохраненный состав
+        setTimeout(() => {
+          loadSavedRoster();
+        }, 1000);
 
-    // Добавляем обработчики сортировки
-    document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
-      header.addEventListener('click', () => {
-        const column = header.getAttribute('data-sort');
-        sortTable(column);
-      });
+        // Отображаем таблицу игроков
+        renderPlayersTable();
+
+        // Обработчик для кнопки ручного сохранения
+        document.getElementById('save-roster')?.addEventListener('click', function() {
+          saveRosterToDatabase();
+        });
+
+        // Добавляем обработчики сортировки для заголовков таблицы
+        document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+          header.addEventListener('click', () => {
+            const column = header.getAttribute('data-sort');
+            sortTable(column);
+          });
+        });
+
+        // Анимация появления элементов
+        anime({
+          targets: '.animate-fadeIn',
+          opacity: [0, 1],
+          translateY: [20, 0],
+          delay: anime.stagger(100),
+          duration: 800,
+          easing: 'easeOutQuad'
+        });
+      } catch (error) {
+        console.error("Ошибка инициализации:", error);
+      }
     });
 
-    // Добавляем обработчик для фильтра команд
-    document.getElementById('filter-team')?.addEventListener('change', renderPlayersTable);
-
-    // Анимация появления элементов
-    anime({
-      targets: '.animate-fadeIn',
-      opacity: [0, 1],
-      translateY: [20, 0],
-      delay: anime.stagger(100),
-      duration: 800,
-      easing: 'easeOutQuad'
-    });
-
-  } catch (error) {
-    console.error("Initialization error:", error);
-    showNotification('Ошибка инициализации приложения', false);
-  }
-});
     // Функция сортировки таблицы
     function sortTable(column) {
       const tbody = document.getElementById('players-table-body');
@@ -3708,28 +3683,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles = data;
     }
 
-// ЗАМЕНИТЕ существующую функцию на эту:
+// Исправленная функция загрузки игроков
 async function loadPlayers() {
   try {
-    // Проверяем инициализацию Supabase
-    if (!supabase) {
-      console.error('Supabase client not initialized');
-      showNotification('Ошибка подключения к базе данных', false);
-      return [];
-    }
-
     // 1. Загружаем игроков с данными о командах
     const { data: playersData, error: playersError } = await supabase
       .from('players')
       .select('*, teams(*)');
 
-    if (playersError) {
-      console.error("Ошибка загрузки игроков:", playersError);
-      showNotification('Ошибка загрузки игроков', false);
-      return [];
-    }
+    if (playersError) throw playersError;
 
-    players = playersData || [];
+    players = playersData;
 
     // 2. Получаем уникальные команды
     const teamsSet = new Set();
@@ -3741,32 +3705,30 @@ async function loadPlayers() {
 
     // 3. Заполняем фильтр командами
     const teamFilter = document.getElementById('filter-team');
-    if (teamFilter) {
-      // Очищаем существующие опции (кроме "Все")
-      while (teamFilter.options.length > 1) {
-        teamFilter.remove(1);
-      }
 
-      // Добавляем команды в фильтр в алфавитном порядке
-      Array.from(teamsSet).sort().forEach(teamName => {
-        const option = document.createElement('option');
-        option.value = teamName;
-        option.textContent = teamName;
-        teamFilter.appendChild(option);
-      });
-
-      // Добавляем обработчик изменения фильтра
-      teamFilter.addEventListener('change', renderPlayersTable);
+    // Очищаем существующие опции (кроме "Все")
+    while (teamFilter.options.length > 1) {
+      teamFilter.remove(1);
     }
 
-    return players;
+    // Добавляем команды в фильтр в алфавитном порядке
+    Array.from(teamsSet).sort().forEach(teamName => {
+      const option = document.createElement('option');
+      option.value = teamName;
+      option.textContent = teamName;
+      teamFilter.appendChild(option);
+    });
+
+    return playersData;
 
   } catch (error) {
     console.error("Ошибка загрузки игроков:", error);
-    showNotification('Ошибка загрузки игроков', false);
     return [];
   }
 }
+
+
+
     // Загрузка количества менеджеров
     async function loadManagersCount() {
       const { count, error } = await supabase
@@ -4196,9 +4158,4 @@ function calculateTotalStatsFromArray(stats) {
 
   </script>
 </body>
-
 </html>
-
-
-
-

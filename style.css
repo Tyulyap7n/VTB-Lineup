@@ -16,7 +16,7 @@
 
 @font-face {
   font-family: 'Petrov Sans';
-  src: url('PetrovSans-Trial-Bold.otf') format('opentype');
+  src: url('/fonts/PetrovSans-Trial-Bold.otf') format('opentype');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
@@ -614,7 +614,6 @@ input { padding: 10px; border-radius:5px; border: none; }
 button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(255,230,50,0.18); outline-offset: 2px; }
 
 /* End of file */
-
 
 
 
