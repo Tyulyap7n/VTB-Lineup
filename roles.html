@@ -26,7 +26,7 @@
     
     @font-face {
       font-family: 'Petrov Sans';
-      src: url('/fonts/PetrovSans-Trial-Bold.otf') format('opentype');
+      src: url('PetrovSans-Trial-Bold.otf') format('opentype');
       font-weight: bold;
       font-style: normal;
       font-display: swap;
@@ -39,7 +39,7 @@
     }
     
     body {
-      font-family: 'Inter', 'Petrov Sans', Arial, sans-serif;
+      font-family: 'Petrov Sans', Arial, sans-serif;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -86,7 +86,7 @@
     }
     
     .animate-pulse {
-      animation: pulse 2s infinite;
+      animation: none;
     }
     
     .animate-slideIn {
@@ -163,12 +163,6 @@
       --content-width: 15vw;
       box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
     }
-    
-    aside:hover {
-      width: 15%;
-      padding: 20px 1rem;
-    }
-    
     .sidebar-item {
       width: 100%;
       padding: 12px;
@@ -718,7 +712,48 @@ main {
       background-color: rgba(100, 60, 220, 0.3);
       transform: scale(1.01);
     }
-    
+    <!-- Добавьте этот стиль в секцию <style> -->
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 200px;
+  background-color: var(--purple-dark);
+  color: var(--white);
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s, visibility 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--purple-dark) transparent transparent transparent;
+}
+
     .players-table .select-button {
       padding: 8px 12px;
       background: linear-gradient(to right, var(--orange), var(--orange-dark));
@@ -885,10 +920,6 @@ main {
       
       aside {
         width: 60px;
-      }
-      
-      aside:hover {
-        width: 200px;
       }
       
       .back-button {
@@ -1913,17 +1944,20 @@ main {
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="VTB Logo">
     </div>
 	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
-    <a href="profile.html" class="account-link">Кабинет менеджера</a>
   </header>
   <div class="main-container">
      <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
         <span>Скаут</span>
       </div>
       <div class="sidebar-item" onclick="showLeaderboard()">
-        <img src="https://cdn-icons-png.flaticon.com/512/9297/9297853.png" alt="Лидерборд">
+        <img src="https://cdn-icons-png.flaticon.com/512/18911/18911539.png" alt="Лидерборд">
         <span>Лидерборд</span>
+      </div>
+	  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
+        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
+        <span>Новости</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='index.html'">
         <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
@@ -1933,9 +1967,6 @@ main {
     </aside>
     <main>
       <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
-      <h1 class="animate-fadeIn my-team-title">Моя команда</h1>
-
-      
 <div class="table-container animate-fadeIn fixed-width">
     <div class="players-table">
       <div class="table-controls">
@@ -1957,15 +1988,15 @@ main {
             <th data-sort="photo">Фото</th>
             <th data-sort="name">Игрок</th>
             <th data-sort="price">Цена</th>
-            <th data-sort="avg">AVG</th>
+            <th data-sort="avg">Ср.</th>
             <th data-sort="points">Очки</th>
             <th data-sort="threes">3-очк</th>
-            <th data-sort="assists">Ассисты</th>
-            <th data-sort="rebounds">Подборы</th>
-            <th data-sort="steals">Перехваты</th>
-            <th data-sort="blocks">Блоки</th>
-            <th data-sort="turnovers">Потери</th>
-            <th data-sort="selection">% Выбора</th>
+            <th data-sort="assists">ПРД</th>
+            <th data-sort="rebounds">ПДБ</th>
+            <th data-sort="steals">ПРХ</th>
+            <th data-sort="blocks">БЛК</th>
+            <th data-sort="turnovers">ПТР</th>
+            <th data-sort="selection">%</th>
           </tr>
         </thead>
         <tbody id="players-table-body">
@@ -1977,15 +2008,9 @@ main {
       
       <!-- Starting VI -->
       <div class="starting-vi-container animate-fadeIn">
-        <div class="starting-vi">STARTING VI</div>
+        <div class="starting-vi">СТАРТОВЫЕ 6</div>
         <div class="budget-info">Бюджет: <span id="spent-budget">0</span>$ / 70$</div>
-      </div>
-      <div style="text-align: center; width: 100%; max-width: 1000px; margin-bottom: 20px;">
-        <span style="color: white; font-style: italic; font-size: 14px;">
-          Игроки не должны повторяться, ровно 6 игроков в состав! Иначе, состав будет удалён из базы и очки аннулируются
-        </span>
-      </div>
-      
+      </div>      
       <div class="roles-lineup">
         <div class="role-slot animate-slideIn" id="slot-Scorer" style="animation-delay: 0.1s">
           <button class="remove-btn" onclick="removePlayer('Scorer')">✕</button>
@@ -2212,7 +2237,7 @@ main {
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
     <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
     <a href="https://vtb-league.com/ru/standings/">Таблица</a>
-    <a href="#">Разработчик</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Разработчик</a>
   </footer>
   
 <script>
@@ -3584,7 +3609,9 @@ function assignToRole(role) {
         document.getElementById('save-roster')?.addEventListener('click', function() {
           saveRosterToDatabase();
         });
-
+		  document.getElementById('filter-team').addEventListener('change', () => {
+			renderPlayersTable(); // Перерисовываем таблицу при изменении фильтра
+		  });
         // Добавляем обработчики сортировки для заголовков таблицы
         document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
           header.addEventListener('click', () => {
@@ -3839,110 +3866,179 @@ function filterPlayersByTeam() {
 }
 
 // Модифицированная функция renderPlayersTable
+/**
+ * Отображает таблицу игроков с учетом текущих фильтров и сортировки
+ */
 async function renderPlayersTable() {
   const tableBody = document.getElementById("players-table-body");
-  tableBody.innerHTML = "<tr></tr>";
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="13" class="loading-row">
+        <div class="spinner"></div>
+        Загрузка данных...
+      </td>
+    </tr>
+  `;
 
   try {
-    // Получаем текущее значение фильтра
+    // 1. Получаем текущие настройки фильтра и сортировки
     const teamFilterValue = document.getElementById('filter-team').value;
+    const { column: sortColumn, direction: sortDirection } = currentSort;
 
-    // 1. Загружаем игроков с данными о командах
+    // 2. Загружаем всех игроков с данными о командах (кешируем для повторных вызовов)
     const { data: players, error: playersError } = await supabase
       .from('players')
       .select('*, teams(*)');
 
     if (playersError) throw playersError;
+    if (!players || players.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="13" class="no-data">Нет доступных игроков</td></tr>';
+      return;
+    }
 
-    // 2. Загружаем статистику игроков
+    // 3. Фильтруем игроков по команде (если фильтр установлен)
+    let filteredPlayers = teamFilterValue
+      ? players.filter(player => player.teams?.name === teamFilterValue)
+      : [...players];
+
+    // 4. Если нет игроков после фильтрации - показываем сообщение
+    if (filteredPlayers.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="13" class="no-results">
+            Игроки команды "${teamFilterValue}" не найдены
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    // 5. Загружаем статистику ТОЛЬКО для отфильтрованных игроков
+    const playerIds = filteredPlayers.map(p => p.id);
     const { data: allStats, error: statsError } = await supabase
       .from('player_stats')
-      .select('player_id, points, threes, assists, rebounds, steals, blocks, turnover');
+      .select('player_id, points, threes, assists, rebounds, steals, blocks, turnover')
+      .in('player_id', playerIds);
 
     if (statsError) throw statsError;
 
-    // 3. Группируем статистику
+    // 6. Группируем статистику по игрокам
     const statsByPlayer = allStats.reduce((acc, stat) => {
       if (!acc[stat.player_id]) acc[stat.player_id] = [];
       acc[stat.player_id].push(stat);
       return acc;
     }, {});
 
-    // 4. Фильтруем игроков
-    const filteredPlayers = teamFilterValue
-      ? players.filter(player => player.teams?.name === teamFilterValue)
-      : players;
+    // 7. Применяем сортировку
+    filteredPlayers.sort((a, b) => {
+      const aStats = statsByPlayer[a.id] || [];
+      const bStats = statsByPlayer[b.id] || [];
 
-    // 5. Обрабатываем каждого игрока
-    filteredPlayers.forEach(player => {
-      const playerStats = statsByPlayer[player.id] || [];
-      const gamesCount = playerStats.length;
+      // Функция для получения значения сортировки
+      const getSortValue = (player, stats) => {
+        switch(sortColumn) {
+          case 'name':
+            return `${player.first_name} ${player.last_name}`.toLowerCase();
+          case 'price':
+            return player.price || 0;
+          case 'avg':
+            return stats.reduce((sum, s) => sum + (s.points || 0), 0) / Math.max(stats.length, 1);
+          case 'points':
+            return stats.reduce((sum, s) => sum + (s.points || 0), 0) / Math.max(stats.length, 1);
+          case 'threes':
+            return stats.reduce((sum, s) => sum + (s.threes || 0), 0) / Math.max(stats.length, 1);
+          case 'assists':
+            return stats.reduce((sum, s) => sum + (s.assists || 0), 0) / Math.max(stats.length, 1);
+          case 'rebounds':
+            return stats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / Math.max(stats.length, 1);
+          case 'steals':
+            return stats.reduce((sum, s) => sum + (s.steals || 0), 0) / Math.max(stats.length, 1);
+          case 'blocks':
+            return stats.reduce((sum, s) => sum + (s.blocks || 0), 0) / Math.max(stats.length, 1);
+          case 'turnovers':
+            return stats.reduce((sum, s) => sum + (s.turnover || 0), 0) / Math.max(stats.length, 1);
+          default:
+            return 0;
+        }
+      };
 
-      // Рассчитываем средние значения
-      const avgPoints = gamesCount > 0 ?
-        (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : 0;
-      const avgThrees = gamesCount > 0 ?
-        (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : 0;
-      const avgAssists = gamesCount > 0 ?
-        (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : 0;
-      const avgRebounds = gamesCount > 0 ?
-        (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : 0;
-      const avgSteals = gamesCount > 0 ?
-        (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : 0;
-      const avgBlocks = gamesCount > 0 ?
-        (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : 0;
-      const avgTurnover = gamesCount > 0 ?
-        (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : 0;
+      const aValue = getSortValue(a, aStats);
+      const bValue = getSortValue(b, bStats);
 
-      // Создаем строку таблицы
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>
-          <button class="select-button" onclick="openRoleSelector(${player.id}, '${player.first_name} ${player.last_name}', this)">+</button>
-        </td>
-        <td>
-          <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
-               alt="${player.first_name} ${player.last_name}"
-               width="40" height="40" style="border-radius: 50%;">
-        </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            ${player.teams?.logo_url ?
-              `<img src="${player.teams.logo_url}" alt="${player.teams.name}" width="24" height="24" style="border-radius: 50%;">` : ''}
-            <span class="player-name-cell" onclick="openPlayerPopup(${player.id})" style="cursor: pointer; color: var(--white); transition: color 0.3s ease;">
-              ${player.first_name} ${player.last_name}
-            </span>
-          </div>
-        </td>
-        <td>${player.price || 0}$</td>
-        <td>${avgPoints}</td>
-        <td>${avgThrees}</td>
-        <td>${avgAssists}</td>
-        <td>${avgRebounds}</td>
-        <td>${avgSteals}</td>
-        <td>${avgBlocks}</td>
-        <td>${avgTurnover}</td>
-        <td>${gamesCount > 0 ? Math.round((1 / gamesCount) * 100) : 0}%</td>
-      `;
-
-      // Добавляем обработчик наведения на имя игрока
-      const nameCell = row.querySelector('.player-name-cell');
-      nameCell.addEventListener('mouseenter', () => {
-        nameCell.style.color = 'var(--yellow)';
-        nameCell.style.textShadow = '0 0 5px rgba(253, 230, 0, 0.5)';
-      });
-
-      nameCell.addEventListener('mouseleave', () => {
-        nameCell.style.color = 'var(--white)';
-        nameCell.style.textShadow = 'none';
-      });
-
-      tableBody.appendChild(row);
+      // Сравнение значений
+      if (typeof aValue === 'string') {
+        return sortDirection === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === 'asc'
+          ? aValue - bValue
+          : bValue - aValue;
+      }
     });
 
+    // 8. Отрисовка отсортированных и отфильтрованных игроков
+    tableBody.innerHTML = filteredPlayers
+      .map(player => {
+        const playerStats = statsByPlayer[player.id] || [];
+        const gamesCount = playerStats.length;
+
+        // Вспомогательная функция для расчета средних значений
+        const calcAvg = (prop) => {
+          if (gamesCount === 0) return '0';
+          const sum = playerStats.reduce((sum, s) => sum + (s[prop] || 0), 0);
+          return (sum / gamesCount).toFixed(1);
+        };
+
+        return `
+          <tr>
+            <td>
+              <button class="select-button"
+                      onclick="openRoleSelector(${player.id}, '${player.first_name} ${player.last_name}', this)">
+                +
+              </button>
+            </td>
+            <td>
+              <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
+                   alt="${player.first_name} ${player.last_name}"
+                   width="40" height="40" style="border-radius: 50%;">
+            </td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                ${player.teams?.logo_url ?
+                  `<img src="${player.teams.logo_url}"
+                       alt="${player.teams.name}"
+                       width="24" height="24"
+                       style="border-radius: 50%;">` : ''}
+                <span class="player-name-cell"
+                      onclick="openPlayerPopup(${player.id})"
+                      style="cursor: pointer;">
+                  ${player.first_name} ${player.last_name}
+                </span>
+              </div>
+            </td>
+            <td>${player.price || 0}$</td>
+            <td>${calcAvg('points')}</td>
+            <td>${calcAvg('threes')}</td>
+            <td>${calcAvg('assists')}</td>
+            <td>${calcAvg('rebounds')}</td>
+            <td>${calcAvg('steals')}</td>
+            <td>${calcAvg('blocks')}</td>
+            <td>${calcAvg('turnover')}</td>
+            <td>${gamesCount > 0 ? Math.round((1 / gamesCount) * 100) : 0}%</td>
+          </tr>
+        `;
+      })
+      .join('');
   } catch (error) {
     console.error("Ошибка загрузки данных:", error);
-    tableBody.innerHTML = '<tr><td colspan="13" style="text-align: center; color: var(--gray);">Ошибка загрузки данных</td></tr>';
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="13" class="error-message">
+          Ошибка загрузки данных. Пожалуйста, попробуйте позже.
+        </td>
+      </tr>
+    `;
   }
 }
 

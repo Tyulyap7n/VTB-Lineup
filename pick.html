@@ -85,13 +85,6 @@
       overflow-x: hidden;
       transition: width 0.3s ease, padding 0.3s ease;
     }
-
-    /* Состояние при наведении */
-    aside:hover {
-      width: 15%;
-      padding: 20px 1rem; 
-    }
-
     .sidebar-item {
       width: 100%;
       padding: 12px;
@@ -121,11 +114,6 @@
       font-size: 14px;
       display: none;
     }
-
-    aside:hover .sidebar-item span {
-      display: block;
-    }
-
     /* Основной контент */
     main {
       margin-left: 5%;
@@ -138,12 +126,6 @@
       flex: 1;
       transition: margin-left 0.3s ease, width 0.3s ease;
     }
-
-    aside:hover ~ main {
-      margin-left: 15%;
-      width: 85%;
-    }
-
     /* Блоки лиг */
     .league-blocks {
       display: flex;
@@ -236,6 +218,87 @@
     footer a:hover {
       text-decoration: underline;
     }
+	/* Базовые стили для мобильных устройств */
+@media (max-width: 768px) {
+  /* Боковая панель */
+  aside {
+    width: 100%; /* Занимает всю ширину */
+    height: auto; /* Высота по содержимому */
+    position: relative;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+    gap: 10px;
+  }
+  .sidebar-item {
+    min-width: 80px; /* Фиксированная минимальная ширина для элементов */
+    flex-direction: column;
+    padding: 8px;
+  }
+  .sidebar-item span {
+    display: block; /* Показываем текст на мобильных */
+    font-size: 12px;
+  }
+  .sidebar-item img {
+    width: 30px;
+    height: 30px;
+  }
+
+  /* Основной контент */
+  main {
+    margin-left: 0; /* Убираем отступ */
+    width: 100%;
+    padding: 20px 10px;
+  }
+
+  /* Блоки лиг */
+  .league-blocks {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .league-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .league-block-container {
+    width: 100%; /* Полная ширина */
+    max-width: 300px;
+    height: 180px;
+  }
+
+  /* Футер */
+  footer {
+    flex-wrap: wrap;
+    gap: 15px;
+    padding: 15px;
+    height: auto;
+  }
+  footer a {
+    font-size: 14px;
+  }
+
+  /* Хэдер */
+  header {
+    height: 60px;
+    padding: 10px;
+  }
+  .header-logo img {
+    height: 40px;
+  }
+    .league-block {
+    transform: none !important; /* Отключаем 3D-эффект */
+    height: 200px;
+  }
+  .league-block-front, .league-block-back {
+    font-size: 18px;
+    padding: 15px;
+  }
+  .league-block-back {
+    display: none; /* Скрываем заднюю сторону или заменяем на модальное окно */
+  }
+}
+
   </style>
 </head>
 <body>
@@ -244,39 +307,30 @@
     <div class="header-logo">
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="VTB Logo">
     </div>
-    <a href="profile.html" class="account-link">Кабинет менеджера</a>
   </header>
 
   <!-- Основной контейнер -->
   <div class="main-container">
-    <!-- Боковая панель -->
-    <aside id="leagues-sidebar">
-      <!-- Лиги пользователя будут загружены динамически -->
+     <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
         <span>Скаут</span>
+      </div>
+	  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
+        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
+        <span>Новости</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='index.html'">
         <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
         <span>Выход</span>
       </div>
+      <div id="user-leagues"></div>
     </aside>
 
     <!-- Основной контент -->
     <main>
       <div class="league-blocks">
         <div class="league-row">
-          <!-- Драфт -->
-          <div class="league-block-container">
-            <div class="league-block" onclick="window.location.href='draft.html'">
-              <div class="league-block-front">
-                Драфт
-              </div>
-              <div class="league-block-back">
-                В этом формате вы по очереди выбираете игроков для своей команды. Каждый игрок может быть выбран только один раз. Ваша цель — собрать самую сильную команду!
-              </div>
-            </div>
-          </div>
           <!-- Фэнтези по ролям -->
           <div class="league-block-container">
             <div class="league-block" onclick="window.location.href='roles.html'">
@@ -303,14 +357,12 @@
       </div>
     </main>
   </div>
-
-  <!-- Футер -->
   <footer>
     <a href="pick.html">Главная</a>
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
     <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
     <a href="https://vtb-league.com/ru/standings/">Таблица</a>
-    <a href="#">Разработчик</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Разработчик</a>
   </footer>
 
   <!-- Supabase Client -->

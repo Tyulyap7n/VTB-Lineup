@@ -26,7 +26,7 @@
     
     @font-face {
       font-family: 'Petrov Sans';
-      src: url('/fonts/PetrovSans-Trial-Bold.otf') format('opentype');
+      src: url('PetrovSans-Trial-Bold.otf') format('opentype');
       font-weight: bold;
       font-style: normal;
       font-display: swap;
@@ -39,7 +39,7 @@
     }
     
     body {
-      font-family: 'Inter', 'Petrov Sans', Arial, sans-serif;
+      font-family: 'Petrov Sans', Arial, sans-serif;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -86,7 +86,7 @@
     }
     
     .animate-pulse {
-      animation: pulse 2s infinite;
+      animation: none;
     }
     
     .animate-slideIn {
@@ -162,11 +162,6 @@
       transition: width 0.3s ease, padding 0.3s ease;
       --content-width: 15vw;
       box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    aside:hover {
-      width: 15%;
-      padding: 20px 1rem;
     }
     
     .sidebar-item {
@@ -749,10 +744,6 @@ main {
       
       aside {
         width: 60px;
-      }
-      
-      aside:hover {
-        width: 200px;
       }
       
       .back-button {
@@ -1693,6 +1684,161 @@ main {
   color: var(--yellow);
   font-weight: bold;
 }
+/* Стили для тултипов */
+  .players-table th {
+    position: relative;
+  }
+
+  .players-table th .tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--purple-dark);
+    color: var(--white);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    z-index: 1000;
+    width: max-content;
+    max-width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+  }
+
+  .players-table th:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .players-table th .tooltip::after {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    margin-left: -8px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent transparent var(--purple-dark) transparent;
+  }
+
+  /* Стили для стрелочек сортировки */
+  .players-table th {
+    padding-right: 25px !important;
+  }
+
+  .players-table th.sortable {
+    cursor: pointer;
+  }
+
+  .players-table th.sortable::after {
+    content: "↕";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--gray);
+    opacity: 0.7;
+  }
+
+  .players-table th.sort-asc::after {
+    content: "↑";
+    color: var(--yellow);
+    opacity: 1;
+  }
+
+  .players-table th.sort-desc::after {
+    content: "↓";
+    color: var(--yellow);
+    opacity: 1;
+  }
+<!-- Добавьте этот стиль в секцию <style> -->
+<!-- Добавьте эти стили в секцию <style> -->
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: var(--purple-dark);
+  color: var(--white);
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1000;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s, visibility 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  font-size: 14px;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--purple-dark) transparent transparent transparent;
+}
+
+/* Стили для стрелочек сортировки */
+.players-table th {
+  position: relative;
+  padding-right: 20px; /* Место для стрелочки */
+}
+
+.players-table th.sortable {
+  cursor: pointer;
+}
+
+.players-table th.sort-asc::after {
+  content: "↑";
+  position: absolute;
+  right: 5px;
+  font-size: 12px;
+  color: var(--yellow);
+}
+
+.players-table th.sort-desc::after {
+  content: "↓";
+  position: absolute;
+  right: 5px;
+  font-size: 12px;
+  color: var(--yellow);
+}
+
+.players-table th::after {
+  content: "↕";
+  position: absolute;
+  right: 5px;
+  font-size: 10px;
+  color: var(--gray);
+  opacity: 0.7;
+}
+
 
 
     .rules-list li {
@@ -1731,20 +1877,23 @@ main {
 <body>
   <header>
     <div class="header-logo">
-      <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="FIBA Logo">
+      <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
     </div>
 	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
-    <a href="profile.html" class="account-link">Кабинет менеджера</a>
   </header>
   <div class="main-container">
      <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920229.png" alt="Скаут">
+        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
         <span>Скаут</span>
       </div>
       <div class="sidebar-item" onclick="showLeaderboard()">
-        <img src="https://cdn-icons-png.flaticon.com/512/9297/9297853.png" alt="Лидерборд">
+        <img src="https://cdn-icons-png.flaticon.com/512/18911/18911539.png" alt="Лидерборд">
         <span>Лидерборд</span>
+      </div>
+	  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
+        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
+        <span>Новости</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='index.html'">
         <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
@@ -1754,9 +1903,6 @@ main {
     </aside>
     <main>
       <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
-      <h1 class="animate-fadeIn my-team-title">Моя команда</h1>
-
-      
 <div class="table-container animate-fadeIn fixed-width">
     <div class="players-table">
       <div class="table-controls">
@@ -1770,26 +1916,25 @@ main {
         </div>
         <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
       </div>
-      
+<!-- Замените текущую таблицу на эту -->
       <table style="width: 100%; min-width: 1300px;">
-		<thead>
-		  <tr>
-			<th data-sort="add"></th>
-			<th data-sort="photo">Фото</th>
-			<th data-sort="name">Игрок</th>
-			<th data-sort="price">Цена</th>
-			<th data-sort="avgAvg">Среднее</th>  <!-- Изменено с "avg" на "avgAvg" -->
-			<th data-sort="points">Очки</th>
-			<th data-sort="threes">3-очк</th>
-			<th data-sort="assists">Ассисты</th>
-			<th data-sort="rebounds">Подборы</th>
-			<th data-sort="steals">Перехваты</th>
-			<th data-sort="blocks">Блоки</th>
-			<th data-sort="turnovers">Потери</th>
-			<th data-sort="selection">% Выбора</th>
-		  </tr>
-		</thead>
-
+        <thead>
+          <tr>
+            <th data-sort="add"></th>
+            <th data-sort="photo">Фото</th>
+            <th data-sort="name">Игрок</th>
+            <th data-sort="price">Цена</th>
+            <th data-sort="avg">Ср.</th>
+            <th data-sort="points">Очки</th>
+            <th data-sort="threes">3-очк</th>
+            <th data-sort="assists">ПРД</th>
+            <th data-sort="rebounds">ПДБ</th>
+            <th data-sort="steals">ПРХ</th>
+            <th data-sort="blocks">БЛК</th>
+            <th data-sort="turnovers">ПТР</th>
+            <th data-sort="selection">%</th>
+          </tr>
+        </thead>
         <tbody id="players-table-body">
           <!-- Игроки будут добавлены динамически -->
         </tbody>
@@ -1799,7 +1944,7 @@ main {
       
       <!-- Starting VI -->
       <div class="starting-vi-container animate-fadeIn">
-        <div class="starting-vi">STARTING VI</div>
+        <div class="starting-vi">СТАРТОВЫЕ 6</div>
         <div class="budget-info">Бюджет: <span id="spent-budget">0</span>$ / 70$</div>
       </div>
       
@@ -1827,24 +1972,20 @@ main {
       <div class="empty-slot-text">—</div>
     </div>
   </div>
-  <div style="text-align: center; width: 100%; max-width: 1000px; margin-bottom: 20px;">
-    <span style="color: white; font-style: italic; font-size: 14px;">
-      Игроки не должны повторяться, ровно 6 игроков в состав! Иначе, состав будет удалён из базы и очки аннулируются
-    </span>
-  </div>
 </div>
       
-      <div style="display: flex; align-items: center; margin: 20px 0;">
-        <button id="save-roster" class="save-roster-btn cta animate-pulse">
-		  <span>Сохранить состав</span>
-		  <span>
-			<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-			  <path class="one" d="M12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5C13 4.44772 12.5523 4 12 4Z" fill="white"/>
-			</svg>
-		  </span>
-		</button>
-        <span id="save-status" class="save-status"></span>
-      </div>
+<div style="display: flex; align-items: center; margin: 20px 0;">
+  <button id="save-roster" class="save-roster-btn cta">
+    <span>Сохранить состав</span>
+    <span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="one" d="M12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5C13 4.44772 12.5523 4 12 4Z" fill="white"/>
+      </svg>
+    </span>
+  </button>
+  <span id="save-status" class="save-status"></span>
+</div>
+
 	  <!-- После кнопки "Сохранить состав" -->
 	<div id="matches-container" class="matches-container"></div>
     </main>
@@ -1921,7 +2062,7 @@ main {
           <th>Тур</th>
           <th>Очки</th>
           <th>3-очк</th>
-          <th>Ассисты</th>
+          <th>Передачи</th>
           <th>Подборы</th>
           <th>Перехваты</th>
           <th>Блоки</th>
@@ -2014,7 +2155,7 @@ main {
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
     <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
     <a href="https://vtb-league.com/ru/standings/">Таблица</a>
-    <a href="#">Разработчик</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Разработчик</a>
   </footer>
   
 <script>
@@ -2038,30 +2179,36 @@ main {
     let tours = [];
     let currentUserId = null;
     let currentUserTeamId = null; // Добавляем переменную для ID команды пользователя
-	let currentPage = 1;
 let managersPerPage = 8;
 let totalPages = 1;
 let sortedLeaderboard = [];
 let currentButton = null;
 let currentSelectedPlayer = null;
-const playersPerPage = 10;
+let currentPage = 1;
+const playersPerPage = 20;
 
 async function loadPlayersPage(page) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('players')
-    .select('*, teams(name, logo_url)')
+    .select('*, teams(*)')
     .range((page - 1) * playersPerPage, page * playersPerPage - 1);
-  // Добавляем данные в таблицу
+
+  if (error) {
+    console.error("Ошибка загрузки игроков:", error);
+    return;
+  }
+
+  // Добавляем игроков в таблицу
+  renderPlayers(data);
 }
 
-// Обработчик скролла
+// Обработчик скролла для подгрузки
 window.addEventListener('scroll', () => {
   if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
     currentPage++;
     loadPlayersPage(currentPage);
   }
 });
-
 // Функция для отображения страницы лидерборда
 function renderLeaderboardPage(page) {
   const tableBody = document.getElementById('leaderboard-body');
@@ -2127,6 +2274,25 @@ function nextPage() {
     currentPage++;
     renderLeaderboardPage(currentPage);
   }
+}
+async function loadPlayerStats(playerId) {
+  const cachedStats = JSON.parse(localStorage.getItem(`playerStats_${playerId}`));
+  if (cachedStats) {
+    return cachedStats;
+  }
+
+  const { data, error } = await supabase
+    .from('player_stats')
+    .select('*')
+    .eq('player_id', playerId);
+
+  if (error) {
+    console.error("Ошибка загрузки статистики:", error);
+    return [];
+  }
+
+  localStorage.setItem(`playerStats_${playerId}`, JSON.stringify(data));
+  return data;
 }
 
     // Функция для отображения лидерборда
@@ -3261,7 +3427,9 @@ function closeRules() {
         document.getElementById('save-roster')?.addEventListener('click', function() {
           saveRosterToDatabase();
         });
-
+document.getElementById('filter-team').addEventListener('change', function() {
+  renderPlayersTable();
+});
         // Добавляем обработчики сортировки для заголовков таблицы
         document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
           header.addEventListener('click', () => {
@@ -3372,7 +3540,6 @@ async function loadPlayers() {
       .select('*, teams(*)');
 
     if (playersError) throw playersError;
-
     players = playersData;
 
     // 2. Получаем уникальные команды
@@ -3406,8 +3573,6 @@ async function loadPlayers() {
     return [];
   }
 }
-
-
 
     // Загрузка количества менеджеров
     async function loadManagersCount() {
@@ -3590,7 +3755,7 @@ async function renderPlayersTable() {
       return acc;
     }, {});
 
-    // 4. Фильтруем игроков
+    // 4. Фильтруем игроков по команде
     const filteredPlayers = teamFilterValue
       ? players.filter(player => player.teams?.name === teamFilterValue)
       : players;
@@ -3601,16 +3766,16 @@ async function renderPlayersTable() {
       const gamesCount = playerStats.length;
 
       // Рассчитываем средние значения
-	  const avgAvg = gamesCount > 0 ?
-  (playerStats.reduce((sum, s) =>
-    sum + (
-      (s.points || 0) +
-      1.5 * (s.assists || 0) +
-      1.3 * (s.rebounds || 0) +
-      3 * (s.steals || 0) +
-      3 * (s.blocks || 0) -
-      2 * (s.turnover || 0)
-    ), 0) / gamesCount).toFixed(1) : 0;
+      const avgAvg = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) =>
+          sum + (
+            (s.points || 0) +
+            1.5 * (s.assists || 0) +
+            1.3 * (s.rebounds || 0) +
+            3 * (s.steals || 0) +
+            3 * (s.blocks || 0) -
+            2 * (s.turnover || 0)
+          ), 0) / gamesCount).toFixed(1) : 0;
       const avgPoints = gamesCount > 0 ?
         (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : 0;
       const avgThrees = gamesCount > 0 ?
@@ -3885,6 +4050,32 @@ function calculateTotalStatsFromArray(stats) {
     totalTurnover: stats.reduce((sum, s) => sum + (s.turnover || 0), 0)
   };
 }
+// Улучшение работы тултипов
+document.addEventListener('DOMContentLoaded', function() {
+  const tooltips = document.querySelectorAll('.tooltip');
+
+  tooltips.forEach(tooltip => {
+    const tooltipText = tooltip.querySelector('.tooltiptext');
+
+    // Позиционирование тултипа при наведении
+    tooltip.addEventListener('mouseenter', function() {
+      // Проверяем, не выходит ли тултип за границы экрана
+      const rect = this.getBoundingClientRect();
+      const tooltipRect = tooltipText.getBoundingClientRect();
+
+      if (rect.left + tooltipRect.width / 2 > window.innerWidth) {
+        tooltipText.style.left = 'auto';
+        tooltipText.style.right = '0';
+        tooltipText.style.transform = 'translateX(0)';
+      }
+
+      if (rect.top - tooltipRect.height < 0) {
+        tooltipText.style.bottom = '125%';
+        tooltipText.style.top = 'auto';
+      }
+    });
+  });
+});
 
   </script>
 </body>
