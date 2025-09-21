@@ -567,22 +567,95 @@ main {
       height: 3px;
       background: linear-gradient(to right, var(--orange), var(--yellow), var(--orange));
     }
-    
     .players-table table {
       width: 100%;
-      border-collapse: collapse;
       table-layout: fixed; /* Фиксированная ширина столбцов */
+      border-collapse: collapse;
     }
     
-    .players-table th, .players-table td {
-      padding: 8px 10px; /* Уменьшаем отступы */
+    .players-table th, 
+    .players-table td {
+      padding: 8px 10px;
       text-align: center;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      width: calc(100% / 13); /* 13 столбцов равной ширины */
     }
     
+    .players-table th {
+      background-color: rgba(100, 60, 220, 0.5);
+      color: var(--white);
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    /* Стили для подсказок */
+    .th-tooltip {
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .th-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+      z-index: 100;
+      pointer-events: none;
+    }
+    
+    .th-tooltip:hover::after {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Альтернативный вариант подсказок через span */
+    .tooltip {
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .tooltip .tooltip-text {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #333;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+      z-index: 100;
+      pointer-events: none;
+    }
+    
+    .tooltip:hover .tooltip-text {
+      opacity: 1;
+      visibility: visible;
+    }
+
     .players-table th {
       background-color: rgba(100, 60, 220, 0.5);
       color: var(--white);
@@ -1989,28 +2062,28 @@ main {
         <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
       </div>
       
-<table style="width: 100%; min-width: 1300px;">
-  <thead>
-    <tr>
-      <th data-sort="add"></th>
-      <th data-sort="photo">Фото</th>
-      <th data-sort="name">Игрок</th>
-      <th data-sort="price">Цена</th>
-      <th data-sort="avgAvg" class="th-tooltip" data-tooltip="Среднее количество фэнтези очков">Ср.</th>
-      <th data-sort="points" class="th-tooltip" data-tooltip="Набранные очки">Очки</th>
-      <th data-sort="threes" class="th-tooltip" data-tooltip="Забитые трёхочковые">3-очк</th>
-      <th data-sort="assists" class="th-tooltip" data-tooltip="Передачи">ПРД</th>
-      <th data-sort="rebounds" class="th-tooltip" data-tooltip="Подборы">ПДБ</th>
-      <th data-sort="steals" class="th-tooltip" data-tooltip="Перехваты">ПРХ</th>
-      <th data-sort="blocks" class="th-tooltip" data-tooltip="Блоки">БЛК</th>
-      <th data-sort="turnovers" class="th-tooltip" data-tooltip="Потери">ПТР</th>
-      <th data-sort="selection" class="th-tooltip" data-tooltip="% Выбора">%</th>
-    </tr>
-  </thead>
-  <tbody id="players-table-body">
-    <!-- Игроки будут добавлены динамически -->
-  </tbody>
-</table>
+  <table style="width: 100%; min-width: 1300px;">
+    <thead>
+      <tr>
+        <th data-sort="add"></th>
+        <th data-sort="photo">Фото</th>
+        <th data-sort="name">Игрок</th>
+        <th data-sort="price">Цена</th>
+        <th data-sort="avgAvg" class="th-tooltip" data-tooltip="Среднее количество фэнтези очков">Ср.</th>
+        <th data-sort="points" class="th-tooltip" data-tooltip="Набранные очки">Очки</th>
+        <th data-sort="threes" class="th-tooltip" data-tooltip="Забитые трёхочковые">3-очк</th>
+        <th data-sort="assists" class="th-tooltip" data-tooltip="Передачи">ПРД</th>
+        <th data-sort="rebounds" class="th-tooltip" data-tooltip="Подборы">ПДБ</th>
+        <th data-sort="steals" class="th-tooltip" data-tooltip="Перехваты">ПРХ</th>
+        <th data-sort="blocks" class="th-tooltip" data-tooltip="Блоки">БЛК</th>
+        <th data-sort="turnovers" class="th-tooltip" data-tooltip="Потери">ПТР</th>
+        <th data-sort="selection" class="th-tooltip" data-tooltip="% Выбора">%</th>
+      </tr>
+    </thead>
+    <tbody id="players-table-body">
+      <!-- Игроки будут добавлены динамически -->
+    </tbody>
+  </table>
     </div>
   </div>
       
@@ -4196,6 +4269,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
