@@ -2657,14 +2657,18 @@ function closeTourMatches() {
     });
 
     // Обновлённая функция загрузки матчей тура
+// ЗАМЕНИТЕ существующую функцию на эту:
 async function loadCurrentTourMatches() {
   try {
-    if (!window.supabase) {
-      throw new Error('Supabase client not initialized');
+    // Проверяем инициализацию Supabase
+    if (!supabase) {
+      console.error('Supabase client not initialized');
+      showNotification('Ошибка подключения к базе данных', false);
+      return;
     }
 
     // 1. Получаем текущий тур
-    const { data: currentTour, error: tourError } = await window.supabase
+    const { data: currentTour, error: tourError } = await supabase
       .from('tours')
       .select('*')
       .order('start_time', { ascending: false })
@@ -2673,13 +2677,15 @@ async function loadCurrentTourMatches() {
 
     if (tourError || !currentTour) {
       console.error('Ошибка загрузки текущего тура:', tourError);
-      document.getElementById('matches-container').innerHTML =
-        '<p style="text-align: center; color: var(--gray);">Не удалось загрузить матчи</p>';
+      const matchesContainer = document.getElementById('matches-container');
+      if (matchesContainer) {
+        matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Не удалось загрузить матчи</p>';
+      }
       return;
     }
 
     // 2. Получаем все матчи для текущего тура
-    const { data: matches, error: matchesError } = await window.supabase
+    const { data: matches, error: matchesError } = await supabase
       .from('games')
       .select(`
         *,
@@ -2688,36 +2694,45 @@ async function loadCurrentTourMatches() {
       `)
       .eq('tour_id', currentTour.id);
 
-    if (matchesError || !matches) {
+    if (matchesError) {
       console.error('Ошибка загрузки матчей:', matchesError);
-      document.getElementById('matches-container').innerHTML =
-        '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
+      const matchesContainer = document.getElementById('matches-container');
+      if (matchesContainer) {
+        matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
+      }
       return;
     }
 
-    // 3. Отображаем матчи в контейнере
+    // 3. Отображаем матчи
     const matchesContainer = document.getElementById('matches-container');
-    matchesContainer.innerHTML = '';
+    if (matchesContainer) {
+      matchesContainer.innerHTML = '';
 
-    // Добавляем заголовок с номером тура
-    const tourHeader = document.createElement('div');
-    tourHeader.className = 'tour-header';
-    tourHeader.textContent = `Тур ${currentTour.round_number}`;
-    matchesContainer.appendChild(tourHeader);
+      // Добавляем заголовок с номером тура
+      const tourHeader = document.createElement('div');
+      tourHeader.className = 'tour-header';
+      tourHeader.textContent = `Тур ${currentTour.round_number}`;
+      matchesContainer.appendChild(tourHeader);
 
-    // Отображаем матчи
-    matches.forEach(match => {
-      const matchRow = createMatchRow(match);
-      matchesContainer.appendChild(matchRow);
-    });
+      // Отображаем матчи
+      if (matches && matches.length > 0) {
+        matches.forEach(match => {
+          const matchRow = createMatchRow(match);
+          matchesContainer.appendChild(matchRow);
+        });
+      } else {
+        matchesContainer.innerHTML += '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
+      }
+    }
 
   } catch (error) {
     console.error('Ошибка загрузки матчей:', error);
-    document.getElementById('matches-container').innerHTML =
-      '<p style="text-align: center; color: var(--gray);">Ошибка загрузки матчей</p>';
+    const matchesContainer = document.getElementById('matches-container');
+    if (matchesContainer) {
+      matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Ошибка загрузки матчей</p>';
+    }
   }
 }
-
 function createMatchRow(match) {
   const matchRow = document.createElement('div');
   matchRow.className = 'match-row';
@@ -3584,7 +3599,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Отображаем таблицу игроков
       renderPlayersTable();
-
+	// ДОБАВЬТЕ эту строку в функцию DOMContentLoaded:
+	document.getElementById('filter-team').addEventListener('change', renderPlayersTable);
       // Обработчик для кнопки ручного сохранения
       document.getElementById('save-roster')?.addEventListener('click', saveRosterToDatabase);
 
@@ -3689,17 +3705,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       roles = data;
     }
 
-// Исправленная функция загрузки игроков
+// ЗАМЕНИТЕ существующую функцию на эту:
 async function loadPlayers() {
   try {
+    // Проверяем инициализацию Supabase
+    if (!supabase) {
+      console.error('Supabase client not initialized');
+      showNotification('Ошибка подключения к базе данных', false);
+      return [];
+    }
+
     // 1. Загружаем игроков с данными о командах
     const { data: playersData, error: playersError } = await supabase
       .from('players')
       .select('*, teams(*)');
 
-    if (playersError) throw playersError;
+    if (playersError) {
+      console.error("Ошибка загрузки игроков:", playersError);
+      showNotification('Ошибка загрузки игроков', false);
+      return [];
+    }
 
-    players = playersData;
+    players = playersData || [];
 
     // 2. Получаем уникальные команды
     const teamsSet = new Set();
@@ -3711,30 +3738,32 @@ async function loadPlayers() {
 
     // 3. Заполняем фильтр командами
     const teamFilter = document.getElementById('filter-team');
+    if (teamFilter) {
+      // Очищаем существующие опции (кроме "Все")
+      while (teamFilter.options.length > 1) {
+        teamFilter.remove(1);
+      }
 
-    // Очищаем существующие опции (кроме "Все")
-    while (teamFilter.options.length > 1) {
-      teamFilter.remove(1);
+      // Добавляем команды в фильтр в алфавитном порядке
+      Array.from(teamsSet).sort().forEach(teamName => {
+        const option = document.createElement('option');
+        option.value = teamName;
+        option.textContent = teamName;
+        teamFilter.appendChild(option);
+      });
+
+      // Добавляем обработчик изменения фильтра
+      teamFilter.addEventListener('change', renderPlayersTable);
     }
 
-    // Добавляем команды в фильтр в алфавитном порядке
-    Array.from(teamsSet).sort().forEach(teamName => {
-      const option = document.createElement('option');
-      option.value = teamName;
-      option.textContent = teamName;
-      teamFilter.appendChild(option);
-    });
-
-    return playersData;
+    return players;
 
   } catch (error) {
     console.error("Ошибка загрузки игроков:", error);
+    showNotification('Ошибка загрузки игроков', false);
     return [];
   }
 }
-
-
-
     // Загрузка количества менеджеров
     async function loadManagersCount() {
       const { count, error } = await supabase
@@ -4166,4 +4195,5 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
