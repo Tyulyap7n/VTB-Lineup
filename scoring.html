@@ -1945,7 +1945,6 @@ main {
       <!-- Starting VI -->
       <div class="starting-vi-container animate-fadeIn">
         <div class="starting-vi">СТАРТОВЫЕ 6</div>
-        <div class="budget-info">Бюджет: <span id="spent-budget">0</span>$ / 70$</div>
       </div>
       
 <!-- ЗАМЕНИТЬ весь блок roles-lineup на этот -->
@@ -1985,6 +1984,7 @@ main {
   </button>
   <span id="save-status" class="save-status"></span>
 </div>
+		<div id="matches-container" class="matches-container"></div>
     </main>
   </div>
 <div id="leaderboard-modal" class="leaderboard-modal">
@@ -2023,11 +2023,6 @@ main {
 <div id="tour-matches-modal" class="leaderboard-modal">
   <div class="leaderboard-content">
     <h2>Матчи текущего тура</h2>
-    
-    <div id="matches-container" class="matches-container" >
-      <!-- Матчи будут загружены динамически -->
-    </div>
-    
     <button class="close-leaderboard" onclick="closeTourMatches()">Закрыть</button>
   </div>
 </div>
@@ -4125,4 +4120,5 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
+
 
