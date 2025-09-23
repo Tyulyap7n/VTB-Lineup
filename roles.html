@@ -268,120 +268,99 @@ main {
 }
 /* Обновленные стили для матчей */
 .match-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    background: linear-gradient(to right, var(--purple-light), var(--purple));
-    border-radius: 10px;
-    margin-bottom: 10px;
-    width: 100%;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Центрируем контейнер */
+  padding: 10px;
+  background: linear-gradient(to right, var(--purple-light), var(--purple));
+  border-radius: 10px;
+  margin-bottom: 10px;
+  width: 135%;
+  margin-left: -80px;
 }
 
 .team-container {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    position: relative;
-    flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
 }
 
 .team-home {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    order: 1;
+  display: left;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  order: 1;
 }
 
 .team-away {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    order: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  order: 2;
 }
 
 /* Домашняя команда: бейдж, название, логотип */
 .team-home .multiple-games-badge {
-    order: 0;
-    margin-right: 5px;
+  order: 0;
+  margin-right: 5px;
 }
 
 .team-home .team-name {
-    order: 1;
+  order: 1;
 }
 
 .team-home .team-logo {
-    order: 2;
+  order: 2;
 }
 
 /* Гостевая команда: логотип, название, бейдж */
 .team-away .team-logo {
-    order: 0;
+  order: 0;
 }
 
 .team-away .team-name {
-    order: 1;
+  order: 1;
 }
 
 .team-away .multiple-games-badge {
-    order: 2;
-    margin-left: 5px;
+  order: 2;
+  margin-left: 5px;
 }
 
 .team-logo {
-    width: 30px;
-    height: 30px;
-    object-fit: contain;
-    border-radius: 50%;
-    border: 1px solid var(--white);
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 1px solid var(--white);
 }
 
 .team-name {
-    font-weight: bold;
-    font-size: 16px;
-    white-space: nowrap;
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
 }
 
 .multiple-games-badge {
-    width: 20px;
-    height: 20px;
-    background: url('https://lineupfantasy.netlify.app/image/logo.jpg') no-repeat center center;
-    background-size: cover !important;
-    border-radius: 50%;
-    border: 2px solid var(--yellow);
-    z-index: 10;
-    animation: pulse 2s infinite;
+  width: 20px;
+  height: 20px;
+  background: url('https://lineupfantasy.netlify.app/image/logo.jpg') no-repeat center center;
+  background-size: cover !important;
+  border-radius: 50%;
+  border: 2px solid var(--yellow);
+  z-index: 10;
+  animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
 
-.tour-header {
-    color: var(--yellow);
-    margin-bottom: 15px;
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    width: 100%;
-}
-
-.matches-container {
-    width: 100%;
-    margin: 20px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-}
-
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
     .back-button {
       position: absolute;
       top: 20px;
@@ -1233,97 +1212,6 @@ main {
   margin: 15px 0;
   width: 100%;
 }
-    .matches-container {
-      width: 100%;
-      margin: 20px 0;
-	  margin-left: 12%;
-      max-width: 800px;
-      display: flex;
-	  justify-content: center;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-.match-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Распределяет пространство между элементами */
-  padding: 10px 10px; /* Отступы внутри строки матча */
-  background: linear-gradient(to right, var(--purple-light), var(--purple));
-  border-radius: 10px;
-  position: relative;
-  transition: all 0.3s ease;
-  margin-bottom: 10px; /* Отступ между строками матчей */
-  width: 75%; /* Ширина на весь контейнер */
-}
-
-    .match-row:hover {
-      box-shadow: 0 0 15px rgba(253, 230, 0, 0.5);
-      transform: scale(1.02);
-    }
-.team-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-  flex: 1; /* Равномерное распределение пространства */
-  justify-content: center; /* Центрирование содержимого */
-}
-.team-home {
-  order: 1; /* Домашняя команда справа */
-  
-}
-
-.team-away {
-  order: 2; /* Гостевая команда слева */
-}
-/* Логотип команды */
-.team-logo {
-  width: 30px;
-  height: 30px;
-  object-fit: contain; /* Показываем картинку полностью (без обрезки) */
-  border-radius: 50%;
-  border: 1px solid var(--white);
-  flex-shrink: 0; /* Запрещаем сжатие логотипа */
-}
-.multiple-games-badge {
-    position: absolute;
-    top: -12px;
-    right: -5px;
-    width: 24px;
-    height: 24px;
-    background: url('data:image/jpeg;base64,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') no-repeat center center;
-    background-size: cover !important;
-    border-radius: 50%;
-    border: 2px solid var(--yellow);
-    z-index: 10;
-    animation: pulse 2s infinite;
-}
-	    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-.team-name {
-  font-weight: bold;
-  font-size: 16px;
-  white-space: nowrap;
-  position: relative; /* Добавляем для правильного позиционирования бейджа */
-}
-    .vs-separator {
-      margin: 0 15px;
-      color: var(--yellow);
-      font-weight: bold;
-      font-size: 18px;
-      white-space: nowrap;
-    }
-    .tour-header {
-	margin-left: 36%;
-      color: var(--yellow);
-      margin-bottom: 10px;
-      font-size: 16px;
-      font-weight: bold;
-    }
 
 .tour-slider {
   width: 100%;
@@ -4797,6 +4685,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
