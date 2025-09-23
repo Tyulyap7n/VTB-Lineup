@@ -1985,9 +1985,6 @@ main {
   </button>
   <span id="save-status" class="save-status"></span>
 </div>
-
-	  <!-- После кнопки "Сохранить состав" -->
-	<div id="matches-container" class="matches-container"></div>
     </main>
   </div>
 <div id="leaderboard-modal" class="leaderboard-modal">
@@ -2186,20 +2183,62 @@ let currentButton = null;
 let currentSelectedPlayer = null;
 let currentPage = 1;
 const playersPerPage = 20;
-
+let isLoading = false;
+let hasMorePlayers = true;
 async function loadPlayersPage(page) {
-  const { data, error } = await supabase
+  if (isLoading || !hasMorePlayers) return;
+  
+  isLoading = true;
+  
+  const { data, error, count } = await supabase
     .from('players')
-    .select('*, teams(*)')
-    .range((page - 1) * playersPerPage, page * playersPerPage - 1);
+    .select('*, teams(*)', { count: 'exact' })
+    .range((page - 1) * playersPerPage, page * playersPerPage - 1)
+    .order('price', { ascending: false });
 
   if (error) {
     console.error("Ошибка загрузки игроков:", error);
+    isLoading = false;
     return;
   }
 
-  // Добавляем игроков в таблицу
+  // Проверяем, есть ли еще игроки для загрузки
+  if (data.length < playersPerPage) {
+    hasMorePlayers = false;
+  }
+
+  // Добавляем игроков в таблицу (без дублирования)
+  if (page === 1) {
+    players = data;
+  } else {
+    // Проверяем на дубликаты перед добавлением
+    const newPlayers = data.filter(newPlayer => 
+      !players.some(existingPlayer => existingPlayer.id === newPlayer.id)
+    );
+    players = [...players, ...newPlayers];
+  }
+
   renderPlayersTable();
+  isLoading = false;
+}
+
+// Правильный обработчик скролла
+let scrollHandler = null;
+
+function initializeScrollHandler() {
+  if (scrollHandler) {
+    window.removeEventListener('scroll', scrollHandler);
+  }
+  
+  scrollHandler = () => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && 
+        !isLoading && hasMorePlayers) {
+      currentPage++;
+      loadPlayersPage(currentPage);
+    }
+  };
+  
+  window.addEventListener('scroll', scrollHandler);
 }
 
 // Обработчик скролла для подгрузки
@@ -3725,9 +3764,14 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
     return false;
   }
 }
-// Модифицированная функция renderPlayersTable
+// В функции renderPlayersTable обновите начало:
 async function renderPlayersTable() {
   const tableBody = document.getElementById("players-table-body");
+  
+  // Очищаем только при первой загрузке
+  if (currentPage === 1) {
+    tableBody.innerHTML = "";
+  }
   tableBody.innerHTML = "<tr></tr>";
 
   try {
@@ -4081,3 +4125,4 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
+
