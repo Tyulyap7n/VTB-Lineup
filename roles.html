@@ -2836,161 +2836,202 @@ function closeTourMatches() {
       }
     });
 
-    // Обновлённая функция загрузки матчей тура
 async function loadCurrentTourMatches() {
-    try {
-        // 1. Получаем текущий тур
-        const { data: currentTour, error: tourError } = await supabase
-            .from('tours')
-            .select('*')
-            .order('start_time', { ascending: false })
-            .limit(1)
-            .single();
+  try {
+    console.log('Загрузка матчей текущего тура...');
 
-        if (tourError || !currentTour) {
-            console.error('Ошибка загрузки текущего тура:', tourError);
-            return;
+    // 1. Получаем текущий тур
+    const now = new Date();
+    const { data: currentTour, error: tourError } = await supabase
+      .from('tours')
+      .select('*')
+      .lte('start_time', now.toISOString())
+      .gte('end_time', now.toISOString())
+      .single();
+
+    let actualTour = currentTour;
+
+    // Если нет текущего тура, ищем ближайший будущий
+    if (tourError || !currentTour) {
+      console.log('Текущих туров нет, ищем ближайший будущий');
+      const { data: nextTour, error: nextError } = await supabase
+        .from('tours')
+        .select('*')
+        .gte('start_time', now.toISOString())
+        .order('start_time', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (nextError || !nextTour) {
+        console.log('Будущих туров нет, ищем последний завершенный');
+        const { data: lastTour, error: lastError } = await supabase
+          .from('tours')
+          .select('*')
+          .lte('end_time', now.toISOString())
+          .order('end_time', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (lastError || !lastTour) {
+          console.error('Туры не найдены');
+          showMatchesMessage('Туры не найдены в базе данных');
+          return;
         }
-
-        // 2. Получаем все матчи для текущего тура
-        const { data: matches, error: matchesError } = await supabase
-            .from('games')
-            .select(`
-                *,
-                home_team:teams!games_home_team_id_fkey(*),
-                away_team:teams!games_away_team_id_fkey(*)
-            `)
-            .eq('tour_id', currentTour.id);
-
-        if (matchesError || !matches) {
-            console.error('Ошибка загрузки матчей:', matchesError);
-            return;
-        }
-
-        // 3. Считаем количество игр для каждой команды в туре
-        const teamGameCounts = {};
-
-        matches.forEach(match => {
-            const homeTeamId = match.home_team.id;
-            const awayTeamId = match.away_team.id;
-
-            // Увеличиваем счётчик для домашней команды
-            if (!teamGameCounts[homeTeamId]) {
-                teamGameCounts[homeTeamId] = 0;
-            }
-            teamGameCounts[homeTeamId]++;
-
-            // Увеличиваем счётчик для гостевой команды
-            if (!teamGameCounts[awayTeamId]) {
-                teamGameCounts[awayTeamId] = 0;
-            }
-            teamGameCounts[awayTeamId]++;
-        });
-
-        // 4. Отображаем матчи в контейнере
-        const matchesContainer = document.getElementById('matches-container');
-        matchesContainer.innerHTML = '';
-
-        if (!matches || matches.length === 0) {
-            matchesContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Матчи не найдены</p>';
-            return;
-        }
-
-        // Добавляем заголовок с номером тура
-        const tourHeader = document.createElement('div');
-        tourHeader.className = 'tour-header';
-        tourHeader.textContent = `Тур ${currentTour.round_number}`;
-        matchesContainer.appendChild(tourHeader);
-
-        // Отображаем матчи
-        matches.forEach(match => {
-            const matchRow = document.createElement('div');
-            matchRow.className = 'match-row';
-
-            // Проверяем количество игр у команд
-            const homeTeamId = match.home_team.id;
-            const awayTeamId = match.away_team.id;
-
-            const homeMultipleGames = teamGameCounts[homeTeamId] > 1;
-            const awayMultipleGames = teamGameCounts[awayTeamId] > 1;
-
-            // Контейнер для домашней команды
-            const homeTeamContainer = document.createElement('div');
-            homeTeamContainer.className = 'team-container team-home';
-
-            const homeLogo = document.createElement('img');
-            homeLogo.src = match.home_team?.logo_url || 'https://via.placeholder.com/40';
-            homeLogo.alt = match.home_team?.name;
-            homeLogo.className = 'team-logo';
-
-            const homeName = document.createElement('div');
-            homeName.className = 'team-name';
-            homeName.textContent = match.home_team?.name;
-
-            
-            homeTeamContainer.appendChild(homeName);
-			homeTeamContainer.appendChild(homeLogo);
-
-            // Разделитель "VS"
-            const vsSeparator = document.createElement('div');
-            vsSeparator.className = 'vs-separator';
-            vsSeparator.textContent = '';
-            // Контейнер для гостевой команды
-            const awayTeamContainer = document.createElement('div');
-            awayTeamContainer.className = 'team-container team-away';
-
-            const awayLogo = document.createElement('img');
-            awayLogo.src = match.away_team?.logo_url || 'https://via.placeholder.com/40';
-            awayLogo.alt = match.away_team?.name;
-            awayLogo.className = 'team-logo';
-
-            const awayName = document.createElement('div');
-            awayName.className = 'team-name';
-            awayName.textContent = match.away_team?.name;
-
-            awayTeamContainer.appendChild(awayLogo);
-            awayTeamContainer.appendChild(awayName);
-            // Собираем строку матча
-<!-- Внутри функции loadCurrentTourMatches() -->
-// Собираем строку матча
-matchRow.appendChild(homeTeamContainer);
-matchRow.appendChild(vsSeparator);
-matchRow.appendChild(awayTeamContainer);
-
-// Добавляем бейджи для команд с несколькими играми
-if (homeMultipleGames) {
-    const badge = document.createElement('div');
-    badge.className = 'multiple-games-badge';
-    badge.title = 'У команды несколько игр в этом туре';
-    homeTeamContainer.style.position = 'relative';
-    homeTeamContainer.appendChild(badge);
-    // Позиционируем бейдж слева от текста
-    badge.style.left = '0%';
-    badge.style.top = '10%';
-    badge.style.transform = 'translateY(-50%)';
-    badge.style.marginRight = '8px';
-}
-
-if (awayMultipleGames) {
-    const badge = document.createElement('div');
-    badge.className = 'multiple-games-badge';
-    badge.title = 'У команды несколько игр в этом туре';
-    awayTeamContainer.style.position = 'relative';
-    awayTeamContainer.appendChild(badge);
-    // Позиционируем бейдж справа от текста
-    badge.style.right = '0%';
-    badge.style.top = '10%';
-    badge.style.transform = 'translateY(-50%)';
-    badge.style.marginLeft = '8px';
-}
-
-            matchesContainer.appendChild(matchRow);
-        });
-    } catch (error) {
-        console.error('Ошибка загрузки матчей:', error);
+        actualTour = lastTour;
+      } else {
+        actualTour = nextTour;
+      }
     }
-}
 
+    console.log('Актуальный тур ID:', actualTour.id, 'Номер:', actualTour.round_number);
+
+    // 2. Получаем все матчи для актуального тура
+    const { data: matches, error: matchesError } = await supabase
+      .from('games')
+      .select(`
+        *,
+        home_team:teams!games_home_team_id_fkey(*),
+        away_team:teams!games_away_team_id_fkey(*)
+      `)
+      .eq('tour_id', actualTour.id)
+      .order('id', { ascending: true });
+
+    if (matchesError) {
+      console.error('Ошибка загрузки матчей:', matchesError);
+      showMatchesMessage('Ошибка загрузки данных матчей');
+      return;
+    }
+
+    console.log('Найдено матчей:', matches?.length);
+
+    // 3. Считаем количество матчей для каждой команды
+    const teamMatchCount = {};
+    matches.forEach(match => {
+      const homeTeamId = match.home_team_id;
+      const awayTeamId = match.away_team_id;
+      teamMatchCount[homeTeamId] = (teamMatchCount[homeTeamId] || 0) + 1;
+      teamMatchCount[awayTeamId] = (teamMatchCount[awayTeamId] || 0) + 1;
+    });
+
+    // 4. Отображаем матчи
+    const matchesContainer = document.getElementById('matches-container');
+    if (!matchesContainer) {
+      console.error('Контейнер матчей не найден');
+      return;
+    }
+
+    matchesContainer.innerHTML = '';
+
+    if (!matches || matches.length === 0) {
+      showMatchesMessage(`Матчи не найдены для тура ${actualTour.round_number}`);
+      return;
+    }
+
+    // Добавляем заголовок с номером тура и статусом
+    const tourHeader = document.createElement('div');
+    tourHeader.className = 'tour-header';
+    const tourStart = new Date(actualTour.start_time);
+    const tourEnd = new Date(actualTour.end_time);
+    let status = '';
+
+    if (now < tourStart) {
+      status = `(старт ${tourStart.toLocaleDateString()})`;
+    } else if (now > tourEnd) {
+      status = '(завершен)';
+    } else {
+      status = '(идет сейчас)';
+    }
+
+    tourHeader.textContent = `Тур ${actualTour.round_number} ${status}`;
+    tourHeader.style.textAlign = 'center';
+    tourHeader.style.width = '100%';
+    matchesContainer.appendChild(tourHeader);
+
+    // Отображаем матчи
+    matches.forEach(match => {
+      const homeTeamName = match.home_team?.name || `Команда ${match.home_team_id}`;
+      const awayTeamName = match.away_team?.name || `Команда ${match.away_team_id}`;
+      const homeLogo = match.home_team?.logo_url || 'https://via.placeholder.com/40';
+      const awayLogo = match.away_team?.logo_url || 'https://via.placeholder.com/40';
+
+      const matchRow = document.createElement('div');
+      matchRow.className = 'match-row';
+
+      // ДОМАШНЯЯ КОМАНДА: бейдж, название, логотип
+      const homeTeamContainer = document.createElement('div');
+      homeTeamContainer.className = 'team-container team-home';
+
+      // Бейдж для домашней команды (слева)
+      if (teamMatchCount[match.home_team_id] >= 2) {
+        const homeBadge = document.createElement('div');
+        homeBadge.className = 'multiple-games-badge';
+        homeTeamContainer.appendChild(homeBadge);
+      }
+
+      const homeName = document.createElement('div');
+      homeName.className = 'team-name';
+      homeName.textContent = homeTeamName;
+      homeTeamContainer.appendChild(homeName);
+
+      const homeLogoImg = document.createElement('img');
+      homeLogoImg.src = homeLogo;
+      homeLogoImg.alt = homeTeamName;
+      homeLogoImg.className = 'team-logo';
+      homeTeamContainer.appendChild(homeLogoImg);
+
+      // Разделитель "VS"
+      const vsSeparator = document.createElement('div');
+      vsSeparator.className = 'vs-separator';
+      vsSeparator.textContent = 'VS';
+
+      // ГОСТЕВАЯ КОМАНДА: логотип, название, бейдж
+      const awayTeamContainer = document.createElement('div');
+      awayTeamContainer.className = 'team-container team-away';
+
+      const awayLogoImg = document.createElement('img');
+      awayLogoImg.src = awayLogo;
+      awayLogoImg.alt = awayTeamName;
+      awayLogoImg.className = 'team-logo';
+      awayTeamContainer.appendChild(awayLogoImg);
+
+      const awayName = document.createElement('div');
+      awayName.className = 'team-name';
+      awayName.textContent = awayTeamName;
+      awayTeamContainer.appendChild(awayName);
+
+      // Бейдж для гостевой команды (справа)
+      if (teamMatchCount[match.away_team_id] >= 2) {
+        const awayBadge = document.createElement('div');
+        awayBadge.className = 'multiple-games-badge';
+        awayTeamContainer.appendChild(awayBadge);
+      }
+
+      // Собираем строку матча
+      matchRow.appendChild(homeTeamContainer);
+      matchRow.appendChild(vsSeparator);
+      matchRow.appendChild(awayTeamContainer);
+      matchesContainer.appendChild(matchRow);
+    });
+
+    console.log('Матчи успешно отображены');
+
+  } catch (error) {
+    console.error('Ошибка загрузки матчей:', error);
+    showMatchesMessage('Ошибка загрузки матчей');
+  }
+}
+// Вспомогательная функция для отображения сообщений
+function showMatchesMessage(message) {
+  const matchesContainer = document.getElementById('matches-container');
+  if (!matchesContainer) return;
+
+  matchesContainer.innerHTML = `
+    <div style="text-align: center; color: var(--gray); padding: 20px;">
+      <p>${message}</p>
+      <small>Текущее время: ${new Date().toLocaleString()}</small>
+    </div>
+  `;
+}
 async function addPlayerStats(playerId, tourId, stats) {
   try {
     const { error } = await supabase
@@ -4431,47 +4472,63 @@ async function calculateAverageStats(playerId) {
       return Math.round((count / managersCount) * 100);
     }
 	// Функция для открытия popup с информацией об игроке
-    async function openPlayerPopup(playerId) {
-      try {
-        // Показываем оверлей
-        const overlay = document.getElementById('popup-overlay');
-        overlay.classList.add('show');
+async function openPlayerPopup(playerId) {
+  try {
+    // Показываем оверлей
+    const overlay = document.getElementById('popup-overlay');
+    overlay.classList.add('show');
 
-        // Получаем данные игрока
-        const { data: player, error: playerError } = await supabase
-          .from('players')
-          .select('*, teams(name, name_en)')
-          .eq('id', playerId)
-          .single();
+    // Получаем данные игрока
+    const { data: player, error: playerError } = await supabase
+      .from('players')
+      .select('*, teams(name, name_en)')
+      .eq('id', playerId)
+      .single();
 
-        if (playerError) throw playerError;
+    if (playerError) throw playerError;
 
-        // Получаем текущий язык
-        const lang = localStorage.getItem('preferred-language') || 'ru';
+    // Получаем текущий язык
+    const lang = localStorage.getItem('preferred-language') || 'ru';
 
-        // Заполняем данные в popup с учетом языка
-        document.getElementById('popup-player-photo').src = player.photo_url || 'https://via.placeholder.com/80';
-        
-        const firstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
-        const lastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
-        document.getElementById('popup-player-name').textContent = `${firstName} ${lastName}`;
-        
-        const position = lang === 'en' && player.position_en ? player.position_en : player.position;
-        document.getElementById('popup-player-position').textContent = 
-          `${getTranslatedText('popup.position')} ${position || getTranslatedText('popup.not_specified')}`;
-        
-        const teamName = lang === 'en' && player.teams?.name_en ? player.teams.name_en : player.teams?.name;
-        document.getElementById('popup-player-team').textContent = 
-          `${getTranslatedText('popup.team')} ${teamName || getTranslatedText('popup.not_specified')}`;
-        
-        const scout = lang === 'en' && player.scout_en ? player.scout_en : player.scout;
-        document.getElementById('popup-scout-report').textContent = scout || getTranslatedText('popup.no_scout');
+    // Заполняем данные в popup с учетом языка
+    document.getElementById('popup-player-photo').src = player.photo_url || 'https://via.placeholder.com/80';
+
+    const firstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
+    const lastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
+    document.getElementById('popup-player-name').textContent = `${firstName} ${lastName}`;
+
+    const position = lang === 'en' && player.position_en ? player.position_en : player.position;
+    document.getElementById('popup-player-position').textContent =
+      `${getTranslatedText('popup.position')} ${position || getTranslatedText('popup.not_specified')}`;
+
+    const teamName = lang === 'en' && player.teams?.name_en ? player.teams.name_en : player.teams?.name;
+    document.getElementById('popup-player-team').textContent =
+      `${getTranslatedText('popup.team')} ${teamName || getTranslatedText('popup.not_specified')}`;
+
+    const scout = lang === 'en' && player.scout_en ? player.scout_en : player.scout;
+    document.getElementById('popup-scout-report').textContent = scout || getTranslatedText('popup.no_scout');
+
+    // Загружаем статистику игрока
+    const { data: stats, error: statsError } = await supabase
+      .from('player_stats')
+      .select('*, tours(round_number)')
+      .eq('player_id', playerId)
+      .order('tour', { ascending: false });
 
     // Заполняем статистику по турам
     const tourStatsBody = document.querySelector('#popup-tour-stats tbody');
     tourStatsBody.innerHTML = '';
 
-    if (stats.length > 0) {
+    if (stats && stats.length > 0) {
+      // Загружаем данные о турах для отображения номеров туров
+      const tourIds = stats.map(s => s.tour);
+      const { data: tours, error: toursError } = await supabase
+        .from('tours')
+        .select('id, round_number')
+        .in('id', tourIds);
+
+      if (toursError) throw toursError;
+
       stats.forEach(stat => {
         const tour = tours.find(t => t.id === stat.tour);
         const row = document.createElement('tr');
@@ -4492,31 +4549,31 @@ async function calculateAverageStats(playerId) {
     }
 
     // Рассчитываем среднюю статистику
-    const avgStats = calculateAverageStatsFromArray(stats);
+    const avgStats = calculateAverageStatsFromArray(stats || []);
     const avgStatsContainer = document.getElementById('popup-avg-stats');
     avgStatsContainer.innerHTML = `
-      <div><strong>Очки:</strong> ${avgStats.avgPoints.toFixed(1)}</div>
+      <div><strong>${getTranslatedText('popup.points')}:</strong> ${avgStats.avgPoints.toFixed(1)}</div>
       <div><strong>3-очк:</strong> ${avgStats.avgThrees.toFixed(1)}</div>
-      <div><strong>Ассисты:</strong> ${avgStats.avgAssists.toFixed(1)}</div>
-      <div><strong>Подборы:</strong> ${avgStats.avgRebounds.toFixed(1)}</div>
-      <div><strong>Перехваты:</strong> ${avgStats.avgSteals.toFixed(1)}</div>
-      <div><strong>Блоки:</strong> ${avgStats.avgBlocks.toFixed(1)}</div>
-      <div><strong>Потери:</strong> ${avgStats.avgTurnover.toFixed(1)}</div>
-      <div><strong>Игры:</strong> ${stats.length}</div>
+      <div><strong>${getTranslatedText('popup.assists')}:</strong> ${avgStats.avgAssists.toFixed(1)}</div>
+      <div><strong>${getTranslatedText('popup.rebounds')}:</strong> ${avgStats.avgRebounds.toFixed(1)}</div>
+      <div><strong>${getTranslatedText('popup.steals')}:</strong> ${avgStats.avgSteals.toFixed(1)}</div>
+      <div><strong>${getTranslatedText('popup.blocks')}:</strong> ${avgStats.avgBlocks.toFixed(1)}</div>
+      <div><strong>${getTranslatedText('popup.turnovers')}:</strong> ${avgStats.avgTurnover.toFixed(1)}</div>
+      <div><strong>${getTranslatedText('popup.games')}:</strong> ${stats ? stats.length : 0}</div>
     `;
 
     // Рассчитываем суммарную статистику
-    const totalStats = calculateTotalStatsFromArray(stats);
+    const totalStats = calculateTotalStatsFromArray(stats || []);
     const totalStatsContainer = document.getElementById('popup-total-stats');
     totalStatsContainer.innerHTML = `
-      <div><strong>Очки:</strong> ${totalStats.totalPoints}</div>
+      <div><strong>${getTranslatedText('popup.points')}:</strong> ${totalStats.totalPoints}</div>
       <div><strong>3-очк:</strong> ${totalStats.totalThrees}</div>
-      <div><strong>Ассисты:</strong> ${totalStats.totalAssists}</div>
-      <div><strong>Подборы:</strong> ${totalStats.totalRebounds}</div>
-      <div><strong>Перехваты:</strong> ${totalStats.totalSteals}</div>
-      <div><strong>Блоки:</strong> ${totalStats.totalBlocks}</div>
-      <div><strong>Потери:</strong> ${totalStats.totalTurnover}</div>
-      <div><strong>Игры:</strong> ${stats.length}</div>
+      <div><strong>${getTranslatedText('popup.assists')}:</strong> ${totalStats.totalAssists}</div>
+      <div><strong>${getTranslatedText('popup.rebounds')}:</strong> ${totalStats.totalRebounds}</div>
+      <div><strong>${getTranslatedText('popup.steals')}:</strong> ${totalStats.totalSteals}</div>
+      <div><strong>${getTranslatedText('popup.blocks')}:</strong> ${totalStats.totalBlocks}</div>
+      <div><strong>${getTranslatedText('popup.turnovers')}:</strong> ${totalStats.totalTurnover}</div>
+      <div><strong>${getTranslatedText('popup.games')}:</strong> ${stats ? stats.length : 0}</div>
     `;
 
     // Показываем popup с анимацией
@@ -4526,12 +4583,11 @@ async function calculateAverageStats(playerId) {
       popup.classList.add('show');
     }, 10);
 
-      } catch (error) {
-        console.error('Ошибка загрузки данных игрока:', error);
-        showNotification('alerts.loading_error', false);
+  } catch (error) {
+    console.error('Ошибка загрузки данных игрока:', error);
+    showNotification('alerts.loading_error', false);
   }
 }
-
 // Функция для закрытия popup
 function closePlayerPopup() {
   const popup = document.getElementById('player-popup');
@@ -4590,3 +4646,4 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
