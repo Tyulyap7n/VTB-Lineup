@@ -553,7 +553,87 @@
   // Глобальные переменные
   let teams = [];
   let currentTeam = null;
-  let currentLang = 'ru'; // По умолчанию русский
+  let currentLang = 'ru';
+
+  // Словарь переводов для интерфейса
+  const translations = {
+    ru: {
+      pageTitle: "Скаут",
+      selectTeam: "Выберите команду для просмотра игроков",
+      playersTitle: "Игроки команды",
+      backToTeams: "← Вернуться к командам",
+      backButton: "Назад",
+      stats: {
+        average: "Среднее",
+        points: "Очки",
+        assists: "Ассисты",
+        rebounds: "Подборы",
+        steals: "Перехваты",
+        blocks: "Блоки",
+        turnover: "Потери"
+      },
+      notifications: {
+        teamLoadError: "Ошибка загрузки команд",
+        playerLoadError: "Ошибка загрузки игроков",
+        noScout: "Скаут-отчёт отсутствует"
+      },
+      sidebar: {
+        scout: "Скаут",
+        leaderboard: "Лидерборд",
+        news: "Новости",
+        exit: "Выход"
+      },
+      footer: {
+        home: "Главная",
+        news: "Новости",
+        results: "Результаты",
+        standings: "Таблица",
+        developer: "Разработчик"
+      }
+    },
+    en: {
+      pageTitle: "Scout",
+      selectTeam: "Select a team to view players",
+      playersTitle: "Team Players",
+      backToTeams: "← Back to Teams",
+      backButton: "Back",
+      stats: {
+        average: "Average",
+        points: "Points",
+        assists: "Assists",
+        rebounds: "Rebounds",
+        steals: "Steals",
+        blocks: "Blocks",
+        turnover: "Turnovers"
+      },
+      notifications: {
+        teamLoadError: "Failed to load teams",
+        playerLoadError: "Failed to load players",
+        noScout: "Scout report missing"
+      },
+      sidebar: {
+        scout: "Scout",
+        leaderboard: "Leaderboard",
+        news: "News",
+        exit: "Exit"
+      },
+      footer: {
+        home: "Home",
+        news: "News",
+        results: "Results",
+        standings: "Standings",
+        developer: "Developer"
+      }
+    }
+  };
+
+  // Функция для получения перевода
+  function t(key, section = null) {
+    if (section) {
+      return translations[currentLang][section][key] || key;
+    }
+    return translations[currentLang][key] || key;
+  }
 
   // Функция загрузки команд
   async function loadTeams() {
@@ -567,11 +647,8 @@
       teams = data;
       renderTeams();
     } catch (error) {
-      console.error('Ошибка загрузки команд:', error);
-      showNotification(
-        currentLang === 'ru' ? 'Ошибка загрузки команд' : 'Failed to load teams',
-        false
-      );
+      console.error('Error loading teams:', error);
+      showNotification(t('teamLoadError', 'notifications'), false);
     }
   }
 
@@ -579,6 +656,7 @@
   function renderTeams() {
     const teamsGrid = document.getElementById('teams-grid');
     teamsGrid.innerHTML = '';
+
     teams.forEach(team => {
       const teamCard = document.createElement('div');
       teamCard.className = 'team-card';
@@ -591,15 +669,16 @@
       `;
       teamsGrid.appendChild(teamCard);
     });
+
+    // Обновляем текст интерфейса
+    document.querySelector('.team-selection-title').textContent = t('selectTeam');
   }
 
   // Функция выбора команды
   function selectTeam(team) {
     currentTeam = team;
     document.getElementById('current-team-name').textContent =
-      currentLang === 'ru'
-        ? `Игроки команды ${team.name}`
-        : `Team ${team.name_en || team.name} players`;
+      `${t('playersTitle')} ${currentLang === 'ru' ? team.name : (team.name_en || team.name)}`;
 
     document.getElementById('back-to-teams').classList.add('active');
     document.querySelector('.team-selection').style.display = 'none';
@@ -669,11 +748,8 @@
 
       renderPlayers(playersWithStats);
     } catch (error) {
-      console.error('Ошибка загрузки игроков:', error);
-      showNotification(
-        currentLang === 'ru' ? 'Ошибка загрузки игроков' : 'Failed to load players',
-        false
-      );
+      console.error('Error loading players:', error);
+      showNotification(t('playerLoadError', 'notifications'), false);
     }
   }
 
@@ -696,8 +772,8 @@
         : (currentTeam.name_en || currentTeam.name);
 
       const scoutReport = currentLang === 'ru'
-        ? (player.scout || 'Скаут-отчёт отсутствует')
-        : (player.scout_en || player.scout || 'Scout report missing');
+        ? (player.scout || t('noScout', 'notifications'))
+        : (player.scout_en || player.scout || t('noScout', 'notifications'));
 
       const playerCard = document.createElement('div');
       playerCard.className = 'player-card';
@@ -715,27 +791,27 @@
         <div class="player-stats">
           <div class="stat-item">
             <div class="stat-value">${player.avgValue}</div>
-            <div class="stat-label">${currentLang === 'ru' ? 'Среднее' : 'Average'}</div>
+            <div class="stat-label">${t('average', 'stats')}</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">${player.stats.points}</div>
-            <div class="stat-label">${currentLang === 'ru' ? 'Очки' : 'Points'}</div>
+            <div class="stat-label">${t('points', 'stats')}</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">${player.stats.assists}</div>
-            <div class="stat-label">${currentLang === 'ru' ? 'Ассисты' : 'Assists'}</div>
+            <div class="stat-label">${t('assists', 'stats')}</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">${player.stats.rebounds}</div>
-            <div class="stat-label">${currentLang === 'ru' ? 'Подборы' : 'Rebounds'}</div>
+            <div class="stat-label">${t('rebounds', 'stats')}</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">${player.stats.steals}</div>
-            <div class="stat-label">${currentLang === 'ru' ? 'Перехваты' : 'Steals'}</div>
+            <div class="stat-label">${t('steals', 'stats')}</div>
           </div>
           <div class="stat-item">
             <div class="stat-value">${player.stats.blocks}</div>
-            <div class="stat-label">${currentLang === 'ru' ? 'Блоки' : 'Blocks'}</div>
+            <div class="stat-label">${t('blocks', 'stats')}</div>
           </div>
         </div>
       `;
@@ -750,11 +826,13 @@
     notification.textContent = message;
     document.body.appendChild(notification);
 
+    // Анимация появления
     setTimeout(() => {
       notification.style.opacity = '1';
       notification.style.transform = 'translateY(0)';
     }, 10);
 
+    // Удаление через 3 секунды
     setTimeout(() => {
       notification.style.opacity = '0';
       notification.style.transform = 'translateY(-20px)';
@@ -762,6 +840,44 @@
         notification.remove();
       }, 300);
     }, 3000);
+  }
+
+  // Функция обновления текста интерфейса
+  function updateInterfaceText() {
+    // Обновляем заголовок страницы
+    document.title = t('pageTitle');
+
+    // Обновляем текст в сайдбаре
+    document.querySelectorAll('.sidebar-item')[0].querySelector('span').textContent = t('scout', 'sidebar');
+    document.querySelectorAll('.sidebar-item')[1].querySelector('span').textContent = t('leaderboard', 'sidebar');
+    document.querySelectorAll('.sidebar-item')[2].querySelector('span').textContent = t('news', 'sidebar');
+    document.querySelectorAll('.sidebar-item')[3].querySelector('span').textContent = t('exit', 'sidebar');
+
+    // Обновляем текст в футере
+    document.querySelector('footer').innerHTML = `
+      <a href="pick.html">${t('home', 'footer')}</a>
+      <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">${t('news', 'footer')}</a>
+      <a href="https://vtb-league.com/ru/schedule/">${t('results', 'footer')}</a>
+      <a href="https://vtb-league.com/ru/standings/">${t('standings', 'footer')}</a>
+      <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">${t('developer', 'footer')}</a>
+    `;
+
+    // Обновляем кнопку "Назад"
+    document.querySelector('.back-button').textContent = t('backButton');
+
+    // Обновляем текст кнопки возврата к командам
+    document.getElementById('back-to-teams').textContent = t('backToTeams');
+
+    // Если показаны игроки, обновляем заголовок
+    if (document.getElementById('players-section').classList.contains('active') && currentTeam) {
+      document.getElementById('current-team-name').textContent =
+        `${t('playersTitle')} ${currentLang === 'ru' ? currentTeam.name : (currentTeam.name_en || currentTeam.name)}`;
+    }
+
+    // Если показаны команды, обновляем заголовок
+    if (document.querySelector('.team-selection').style.display !== 'none') {
+      document.querySelector('.team-selection-title').textContent = t('selectTeam');
+    }
   }
 
   // Инициализация страницы
@@ -809,25 +925,33 @@
       btn.addEventListener('click', () => {
         const newLang = btn.dataset.lang;
         if (newLang !== currentLang) {
+          // Обновляем активную кнопку
           document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
+
+          // Сохраняем язык и обновляем интерфейс
           currentLang = newLang;
           localStorage.setItem('userLang', newLang);
+          updateInterfaceText();
 
+          // Перезагружаем контент
           if (document.getElementById('players-section').classList.contains('active')) {
             loadTeamPlayers(currentTeam.id);
           } else {
-            loadTeams();
+            renderTeams();
           }
         }
       });
     });
 
-    // 4. Загрузка команд
+    // 4. Загрузка команд и обновление интерфейса
+    updateInterfaceText();
     loadTeams();
   });
 </script>
+
 </body>
 </html>
+
 
 
