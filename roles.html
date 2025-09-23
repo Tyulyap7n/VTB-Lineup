@@ -122,7 +122,40 @@
     .header-logo img:hover {
       transform: scale(1.1);
     }
-    
+        /* Стили для переключателя языка */
+    .language-switcher {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 5px;
+      z-index: 1000;
+    }
+
+    .lang-btn {
+      padding: 5px 10px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 12px;
+      font-family: 'Petrov Sans', Arial, sans-serif;
+    }
+
+    .lang-btn.active {
+      background: var(--yellow);
+      color: var(--black);
+      border-color: var(--yellow);
+    }
+
+    .lang-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .lang-btn.active:hover {
+      background: #e6d600;
+    }
+
     .account-link {
       color: var(--yellow);
       text-decoration: none;
@@ -1944,6 +1977,11 @@ main {
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="VTB Logo">
     </div>
 	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
+	      <!-- Переключатель языка -->
+    <div class="language-switcher">
+      <button id="switch-to-en" class="lang-btn">EN</button>
+      <button id="switch-to-ru" class="lang-btn active">RU</button>
+    </div>
   </header>
   <div class="main-container">
      <aside id="leagues-sidebar">
@@ -2267,6 +2305,163 @@ let totalPages = 1;
 let sortedLeaderboard = [];
 let currentButton = null;
 let currentSelectedPlayer = null;
+	    // Объект с переводами
+    const translations = {
+      ru: {
+        'header.rules': 'Правила',
+        'sidebar.scout': 'Скаут',
+        'sidebar.leaderboard': 'Лидерборд',
+        'sidebar.news': 'Новости',
+        'sidebar.logout': 'Выход',
+        'buttons.back': 'Назад',
+        'filters.team': 'Команда',
+        'filters.all': 'Все',
+        'budget.spent': 'Потрачено:',
+        'budget.total': 'Бюджет:',
+        'table.photo': 'Фото',
+        'table.player': 'Игрок',
+        'table.price': 'Цена',
+        'table.avg': 'Ср.',
+        'table.points': 'Очки',
+        'table.threes': '3-очк',
+        'table.assists': 'ПРД',
+        'table.rebounds': 'ПДБ',
+        'table.steals': 'ПРХ',
+        'table.blocks': 'БЛК',
+        'table.turnovers': 'ПТР',
+        'table.selection': '%',
+        'team.starting_vi': 'СТАРТОВЫЕ 6',
+        'roles.scorer': 'Скорер',
+        'roles.assistant': 'Ассистент',
+        'roles.rebounder': 'Подбирающий',
+        'roles.stopper': 'Защитник',
+        'roles.shooter': 'Шутер',
+        'roles.surprise': 'Сюрприз',
+        'buttons.save_roster': 'Сохранить состав',
+        'footer.home': 'Главная',
+        'footer.news': 'Новости',
+        'footer.results': 'Результаты',
+        'footer.standings': 'Таблица',
+        'footer.developer': 'Разработчик',
+        'alerts.auth_required': 'Пожалуйста, авторизуйтесь.',
+        'alerts.no_team': 'У вас нет команды',
+        'alerts.leagues_error': 'Ошибка загрузки лиг пользователя:',
+        'alerts.leagues_info_error': 'Ошибка загрузки лиг:',
+        'alerts.loading_error': 'Ошибка загрузки данных',
+        'alerts.save_success': 'Состав успешно сохранен!',
+        'alerts.save_error': 'Ошибка сохранения',
+        'alerts.duplicate_player': 'Этот игрок уже выбран на другой позиции',
+        'alerts.team_limit': 'Лимит игроков из команды {team} исчерпан (максимум 3)',
+        'alerts.budget_exceeded': 'Превышен бюджет в 70$',
+        'alerts.player_assigned': '{player} назначен на роль {role}',
+        'alerts.player_removed': 'Игрок удалён из позиции {role}',
+        'alerts.tour_not_ended': 'Состав можно посмотреть только после окончания тура',
+        'alerts.no_players': 'Нет доступных игроков',
+        'alerts.no_team_players': 'Игроки команды "{team}" не найдены',
+        'alerts.loading_data': 'Загрузка данных...',
+        'status.saving': 'Сохранение...',
+        'status.saved': 'Сохранено',
+        'status.error': 'Ошибка',
+        'leaderboard.position': 'Место',
+        'leaderboard.team': 'Команда',
+        'leaderboard.total_points': 'Общие очки',
+        'leaderboard.tour_points': 'Очки по турам',
+        'popup.position': 'Позиция:',
+        'popup.team': 'Команда:',
+        'popup.scout_report': 'Скаут отчёт',
+        'popup.no_scout': 'Скаут отчёт отсутствует',
+        'popup.tour_stats': 'Статистика по турам',
+        'popup.avg_stats': 'Средняя статистика',
+        'popup.total_stats': 'Суммарная статистика',
+        'popup.tour': 'Тур',
+        'popup.points': 'Очки',
+        'popup.threes': '3-очк',
+        'popup.assists': 'Ассисты',
+        'popup.rebounds': 'Подборы',
+        'popup.steals': 'Перехваты',
+        'popup.blocks': 'Блоки',
+        'popup.turnovers': 'Потери',
+        'popup.games': 'Игры',
+        'popup.no_stats': 'Статистика отсутствует'
+      },
+      en: {
+        'header.rules': 'Rules',
+        'sidebar.scout': 'Scout',
+        'sidebar.leaderboard': 'Leaderboard',
+        'sidebar.news': 'News',
+        'sidebar.logout': 'Logout',
+        'buttons.back': 'Back',
+        'filters.team': 'Team',
+        'filters.all': 'All',
+        'budget.spent': 'Spent:',
+        'budget.total': 'Budget:',
+        'table.photo': 'Photo',
+        'table.player': 'Player',
+        'table.price': 'Price',
+        'table.avg': 'Avg',
+        'table.points': 'Points',
+        'table.threes': '3PT',
+        'table.assists': 'AST',
+        'table.rebounds': 'REB',
+        'table.steals': 'STL',
+        'table.blocks': 'BLK',
+        'table.turnovers': 'TO',
+        'table.selection': '%',
+        'team.starting_vi': 'STARTING 6',
+        'roles.scorer': 'Scorer',
+        'roles.assistant': 'Assistant',
+        'roles.rebounder': 'Rebounder',
+        'roles.stopper': 'Stopper',
+        'roles.shooter': 'Shooter',
+        'roles.surprise': 'Surprise',
+        'buttons.save_roster': 'Save Roster',
+        'footer.home': 'Home',
+        'footer.news': 'News',
+        'footer.results': 'Results',
+        'footer.standings': 'Standings',
+        'footer.developer': 'Developer',
+        'alerts.auth_required': 'Please log in.',
+        'alerts.no_team': 'You don\'t have a team',
+        'alerts.leagues_error': 'Error loading user leagues:',
+        'alerts.leagues_info_error': 'Error loading leagues:',
+        'alerts.loading_error': 'Error loading data',
+        'alerts.save_success': 'Roster saved successfully!',
+        'alerts.save_error': 'Save error',
+        'alerts.duplicate_player': 'This player is already selected for another position',
+        'alerts.team_limit': 'Team {team} limit reached (max 3)',
+        'alerts.budget_exceeded': 'Budget exceeded (70$)',
+        'alerts.player_assigned': '{player} assigned to {role} role',
+        'alerts.player_removed': 'Player removed from {role} position',
+        'alerts.tour_not_ended': 'Team composition can be viewed only after the tour ends',
+        'alerts.no_players': 'No players available',
+        'alerts.no_team_players': 'No players found for team "{team}"',
+        'alerts.loading_data': 'Loading data...',
+        'status.saving': 'Saving...',
+        'status.saved': 'Saved',
+        'status.error': 'Error',
+        'leaderboard.position': 'Position',
+        'leaderboard.team': 'Team',
+        'leaderboard.total_points': 'Total Points',
+        'leaderboard.tour_points': 'Tour Points',
+        'popup.position': 'Position:',
+        'popup.team': 'Team:',
+        'popup.scout_report': 'Scout Report',
+        'popup.no_scout': 'No scout report available',
+        'popup.tour_stats': 'Tour Statistics',
+        'popup.avg_stats': 'Average Statistics',
+        'popup.total_stats': 'Total Statistics',
+        'popup.tour': 'Tour',
+        'popup.points': 'Points',
+        'popup.threes': '3PT',
+        'popup.assists': 'Assists',
+        'popup.rebounds': 'Rebounds',
+        'popup.steals': 'Steals',
+        'popup.blocks': 'Blocks',
+        'popup.turnovers': 'Turnovers',
+        'popup.games': 'Games',
+        'popup.no_stats': 'No statistics available'
+      }
+    };
 const playersPerPage = 10;
 
 async function loadPlayersPage(page) {
@@ -3051,8 +3246,68 @@ async function viewTeamDetails(teamId, tourId) {
     showNotification('Ошибка просмотра состава', false);
   }
 }
-    // Функция для отображения уведомлений
-    function showNotification(message, isSuccess = true) {
+
+    // Функция переключения языка
+    function switchLanguage(lang) {
+      // Обновляем текстовое содержимое
+      const textElements = document.querySelectorAll('[data-translate]');
+      textElements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+
+      // Обновляем placeholder'ы
+      const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+      placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+          element.placeholder = translations[lang][key];
+        }
+      });
+
+      // Обновляем alt тексты для картинок
+      const altElements = document.querySelectorAll('[data-translate-alt]');
+      altElements.forEach(element => {
+        const key = element.getAttribute('data-translate-alt');
+        if (translations[lang] && translations[lang][key]) {
+          element.alt = translations[lang][key];
+        }
+      });
+
+      // Обновляем активную кнопку языка
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`switch-to-${lang}`).classList.add('active');
+
+      // Сохраняем выбор языка
+      localStorage.setItem('preferred-language', lang);
+      document.documentElement.setAttribute('lang', lang);
+
+      // Перерисовываем таблицу с новым языком
+      if (typeof renderPlayersTable === 'function') {
+        renderPlayersTable();
+      }
+    }
+
+    // Функция для получения переведенного текста
+    function getTranslatedText(key, params = {}) {
+      const lang = localStorage.getItem('preferred-language') || 'ru';
+      let text = translations[lang][key] || key;
+      
+      // Заменяем параметры в тексте
+      Object.keys(params).forEach(param => {
+        text = text.replace(`{${param}}`, params[param]);
+      });
+      
+      return text;
+    }
+
+    // Функция для показа уведомлений с переводом
+    function showNotification(messageKey, isSuccess = true, params = {}) {
+      const message = getTranslatedText(messageKey, params);
       const notification = document.getElementById('notification');
       notification.textContent = message;
       notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
@@ -3064,7 +3319,8 @@ async function viewTeamDetails(teamId, tourId) {
     }
 
     // Функция для обновления статуса сохранения
-    function updateSaveStatus(message, status = '') {
+    function updateSaveStatus(messageKey, status = '', params = {}) {
+      const message = getTranslatedText(messageKey, params);
       const statusElement = document.getElementById('save-status');
       statusElement.textContent = message;
       statusElement.className = `save-status ${status}`;
@@ -3077,7 +3333,7 @@ async function viewTeamDetails(teamId, tourId) {
       return new Set(playerIds).size !== players.length;
     }
 
-    // Функция удаления игрока из роли
+    // Модифицированная функция удаления игрока
     function removePlayer(role) {
       const slot = document.getElementById(`slot-${role}`);
       const emptySlot = slot.querySelector('.empty-slot');
@@ -3106,8 +3362,9 @@ async function viewTeamDetails(teamId, tourId) {
       // Пересчитываем бюджет
       updateSpentBudget();
 
-      // Показываем уведомление об удалении
-      showNotification(`Игрок удалён из позиции ${role}`);
+      showNotification('alerts.player_removed', true, {
+        role: getTranslatedText(`roles.${role.toLowerCase()}`)
+      });
     }
 
     // Функция для сохранения состава в Supabase
@@ -3451,14 +3708,16 @@ function closeRules() {
       // Проверка на дублирование игроков
       for (const [r, p] of Object.entries(currentRoster)) {
         if (p && p.id === player.id && r !== role) {
-          showNotification('Этот игрок уже выбран на другой позиции', false);
+          showNotification('alerts.duplicate_player', false);
           return false;
         }
       }
-	      // Проверка лимита игроков из одной команды
+
+      // Проверка лимита игроков из одной команды
       if (!checkTeamLimit(player, role)) {
         return false;
       }
+
       // Обновляем текущий состав
       currentRoster[role] = player;
 
@@ -3472,9 +3731,15 @@ function closeRules() {
       // Создаем элемент с информацией об игроке
       const playerInfo = document.createElement('div');
       playerInfo.className = 'player-info';
+      
+      // Получаем имя игрока на текущем языке
+      const lang = localStorage.getItem('preferred-language') || 'ru';
+      const firstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
+      const lastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
+      
       playerInfo.innerHTML = `
-        <img src="${player.photo_url || 'https://via.placeholder.com/50'}" alt="${player.first_name} ${player.last_name}" class="player-photo">
-        <div class="player-name">${player.first_name} ${player.last_name}</div>
+        <img src="${player.photo_url || 'https://via.placeholder.com/50'}" alt="${firstName} ${lastName}" class="player-photo">
+        <div class="player-name">${firstName} ${lastName}</div>
         <div class="player-price">${player.price}$</div>
       `;
       
@@ -3498,6 +3763,11 @@ function closeRules() {
       if (autoSave) {
         scheduleAutoSave();
       }
+
+      showNotification('alerts.player_assigned', true, {
+        player: `${firstName} ${lastName}`,
+        role: getTranslatedText(`roles.${role.toLowerCase()}`)
+      });
 
       return true;
     }
@@ -3575,65 +3845,85 @@ function assignToRole(role) {
         startingViContainer.parentNode.insertBefore(warningElement, startingViContainer.nextSibling);
       }
     });
-    // Инициализация страницы
-    document.addEventListener("DOMContentLoaded", async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          alert("Пожалуйста, авторизуйтесь.");
-          window.location.href = "index.html";
-          return;
-        }
+// Инициализация языка при загрузке страницы
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    // Инициализация языка
+    const savedLang = localStorage.getItem('preferred-language') || 'ru';
+    switchLanguage(savedLang);
 
-        // Загружаем роли
-        await loadRoles();
+    // Обработчики для кнопок переключения языка
+    document.getElementById('switch-to-en').addEventListener('click', () => switchLanguage('en'));
+    document.getElementById('switch-to-ru').addEventListener('click', () => switchLanguage('ru'));
 
-        // Загружаем игроков
-        await loadPlayers();
+    // Проверяем авторизацию пользователя
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      showNotification('alerts.auth_required', false);
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 2000);
+      return;
+    }
 
-        // Загружаем количество менеджеров
-        await loadManagersCount();
+    // Загружаем роли
+    await loadRoles();
 
-        // Загружаем текущую команду пользователя
-        await loadUserTeam(user.id);
+    // Загружаем игроков
+    await loadPlayers();
 
-        // Загружаем сохраненный состав
-        setTimeout(() => {
-          loadSavedRoster();
-        }, 1000);
+    // Загружаем количество менеджеров
+    await loadManagersCount();
 
-        // Отображаем таблицу игроков
-        renderPlayersTable();
+    // Загружаем текущую команду пользователя
+    await loadUserTeam(user.id);
 
-        // Обработчик для кнопки ручного сохранения
-        document.getElementById('save-roster')?.addEventListener('click', function() {
-          saveRosterToDatabase();
-        });
-		  document.getElementById('filter-team').addEventListener('change', () => {
-			renderPlayersTable(); // Перерисовываем таблицу при изменении фильтра
-		  });
-        // Добавляем обработчики сортировки для заголовков таблицы
-        document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
-          header.addEventListener('click', () => {
-            const column = header.getAttribute('data-sort');
-            sortTable(column);
-          });
-        });
+    // Загружаем сохраненный состав
+    setTimeout(() => {
+      loadSavedRoster();
+    }, 1000);
 
-        // Анимация появления элементов
-        anime({
-          targets: '.animate-fadeIn',
-          opacity: [0, 1],
-          translateY: [20, 0],
-          delay: anime.stagger(100),
-          duration: 800,
-          easing: 'easeOutQuad'
-        });
-      } catch (error) {
-        console.error("Ошибка инициализации:", error);
-      }
+    // Отображаем таблицу игроков
+    renderPlayersTable();
+
+    // Загружаем матчи текущего тура
+    await loadCurrentTourMatches();
+
+    // Обработчик для кнопки ручного сохранения
+    document.getElementById('save-roster')?.addEventListener('click', function() {
+      saveRosterToDatabase();
     });
 
+    // Обработчик изменения фильтра команды
+    document.getElementById('filter-team').addEventListener('change', () => {
+      renderPlayersTable();
+    });
+
+    // Добавляем обработчики сортировки для заголовков таблицы
+    document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.getAttribute('data-sort');
+        sortTable(column);
+      });
+    });
+
+    // Анимация появления элементов
+    anime({
+      targets: '.animate-fadeIn',
+      opacity: [0, 1],
+      translateY: [20, 0],
+      delay: anime.stagger(100),
+      duration: 800,
+      easing: 'easeOutQuad'
+    });
+
+    console.log("Страница успешно инициализирована");
+
+  } catch (error) {
+    console.error("Ошибка инициализации:", error);
+    showNotification('alerts.loading_error', false);
+  }
+});
     // Функция сортировки таблицы
     function sortTable(column) {
       const tbody = document.getElementById('players-table-body');
@@ -3871,11 +4161,14 @@ function filterPlayersByTeam() {
  */
 async function renderPlayersTable() {
   const tableBody = document.getElementById("players-table-body");
+  const lang = localStorage.getItem('preferred-language') || 'ru';
+
+  // Показываем индикатор загрузки
   tableBody.innerHTML = `
     <tr>
       <td colspan="13" class="loading-row">
         <div class="spinner"></div>
-        Загрузка данных...
+        ${getTranslatedText('alerts.loading_data')}
       </td>
     </tr>
   `;
@@ -3885,28 +4178,40 @@ async function renderPlayersTable() {
     const teamFilterValue = document.getElementById('filter-team').value;
     const { column: sortColumn, direction: sortDirection } = currentSort;
 
-    // 2. Загружаем всех игроков с данными о командах (кешируем для повторных вызовов)
+    // 2. Загружаем всех игроков с данными о командах
     const { data: players, error: playersError } = await supabase
       .from('players')
-      .select('*, teams(*)');
+      .select('*, teams(name, name_en, logo_url)');
 
     if (playersError) throw playersError;
+    
     if (!players || players.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="13" class="no-data">Нет доступных игроков</td></tr>';
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="13" class="no-data">
+            ${getTranslatedText('alerts.no_players')}
+          </td>
+        </tr>
+      `;
       return;
     }
 
     // 3. Фильтруем игроков по команде (если фильтр установлен)
-    let filteredPlayers = teamFilterValue
-      ? players.filter(player => player.teams?.name === teamFilterValue)
-      : [...players];
+    let filteredPlayers = players;
+    if (teamFilterValue) {
+      filteredPlayers = players.filter(player => {
+        const teamName = lang === 'en' && player.teams?.name_en ? 
+          player.teams.name_en : player.teams?.name;
+        return teamName === teamFilterValue;
+      });
+    }
 
     // 4. Если нет игроков после фильтрации - показываем сообщение
     if (filteredPlayers.length === 0) {
       tableBody.innerHTML = `
         <tr>
           <td colspan="13" class="no-results">
-            Игроки команды "${teamFilterValue}" не найдены
+            ${getTranslatedText('alerts.no_team_players', { team: teamFilterValue })}
           </td>
         </tr>
       `;
@@ -3938,25 +4243,39 @@ async function renderPlayersTable() {
       const getSortValue = (player, stats) => {
         switch(sortColumn) {
           case 'name':
-            return `${player.first_name} ${player.last_name}`.toLowerCase();
+            const aFirstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
+            const aLastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
+            const bFirstName = lang === 'en' && b.first_name_en ? b.first_name_en : b.first_name;
+            const bLastName = lang === 'en' && b.last_name_en ? b.last_name_en : b.last_name;
+            return `${aFirstName} ${aLastName}`.toLowerCase();
+
           case 'price':
             return player.price || 0;
+
           case 'avg':
             return stats.reduce((sum, s) => sum + (s.points || 0), 0) / Math.max(stats.length, 1);
+
           case 'points':
             return stats.reduce((sum, s) => sum + (s.points || 0), 0) / Math.max(stats.length, 1);
+
           case 'threes':
             return stats.reduce((sum, s) => sum + (s.threes || 0), 0) / Math.max(stats.length, 1);
+
           case 'assists':
             return stats.reduce((sum, s) => sum + (s.assists || 0), 0) / Math.max(stats.length, 1);
+
           case 'rebounds':
             return stats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / Math.max(stats.length, 1);
+
           case 'steals':
             return stats.reduce((sum, s) => sum + (s.steals || 0), 0) / Math.max(stats.length, 1);
+
           case 'blocks':
             return stats.reduce((sum, s) => sum + (s.blocks || 0), 0) / Math.max(stats.length, 1);
+
           case 'turnovers':
             return stats.reduce((sum, s) => sum + (s.turnover || 0), 0) / Math.max(stats.length, 1);
+
           default:
             return 0;
         }
@@ -3990,30 +4309,35 @@ async function renderPlayersTable() {
           return (sum / gamesCount).toFixed(1);
         };
 
+        // Получаем данные на нужном языке
+        const firstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
+        const lastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
+        const teamName = lang === 'en' && player.teams?.name_en ? player.teams.name_en : player.teams?.name;
+
         return `
           <tr>
             <td>
               <button class="select-button"
-                      onclick="openRoleSelector(${player.id}, '${player.first_name} ${player.last_name}', this)">
+                      onclick="openRoleSelector(${player.id}, '${firstName} ${lastName}', this)">
                 +
               </button>
             </td>
             <td>
               <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
-                   alt="${player.first_name} ${player.last_name}"
+                   alt="${firstName} ${lastName}"
                    width="40" height="40" style="border-radius: 50%;">
             </td>
             <td>
               <div style="display: flex; align-items: center; gap: 8px;">
                 ${player.teams?.logo_url ?
                   `<img src="${player.teams.logo_url}"
-                       alt="${player.teams.name}"
+                       alt="${teamName}"
                        width="24" height="24"
                        style="border-radius: 50%;">` : ''}
                 <span class="player-name-cell"
                       onclick="openPlayerPopup(${player.id})"
                       style="cursor: pointer;">
-                  ${player.first_name} ${player.last_name}
+                  ${firstName} ${lastName}
                 </span>
               </div>
             </td>
@@ -4030,18 +4354,32 @@ async function renderPlayersTable() {
         `;
       })
       .join('');
+
+    // 9. Обновляем заголовки таблицы с учетом языка
+    updateTableHeaders(lang);
+
   } catch (error) {
     console.error("Ошибка загрузки данных:", error);
     tableBody.innerHTML = `
       <tr>
         <td colspan="13" class="error-message">
-          Ошибка загрузки данных. Пожалуйста, попробуйте позже.
+          ${getTranslatedText('alerts.loading_error')}
         </td>
       </tr>
     `;
   }
 }
 
+// Функция для обновления заголовков таблицы
+function updateTableHeaders(lang) {
+  const headers = document.querySelectorAll('.players-table th[data-translate]');
+  headers.forEach(header => {
+    const key = header.getAttribute('data-translate');
+    if (translations[lang] && translations[lang][key]) {
+      header.textContent = translations[lang][key];
+    }
+  });
+}
     // Расчёт средней статистики игрока
 async function calculateAverageStats(playerId) {
   const { data: playerStats, error } = await supabase
@@ -4093,45 +4431,41 @@ async function calculateAverageStats(playerId) {
       return Math.round((count / managersCount) * 100);
     }
 	// Функция для открытия popup с информацией об игроке
-async function openPlayerPopup(playerId) {
-  try {
-    // Показываем оверлей
-    const overlay = document.getElementById('popup-overlay');
-    overlay.classList.add('show');
+    async function openPlayerPopup(playerId) {
+      try {
+        // Показываем оверлей
+        const overlay = document.getElementById('popup-overlay');
+        overlay.classList.add('show');
 
-    // Получаем данные игрока
-    const { data: player, error: playerError } = await supabase
-      .from('players')
-      .select('*, teams(name)')
-      .eq('id', playerId)
-      .single();
+        // Получаем данные игрока
+        const { data: player, error: playerError } = await supabase
+          .from('players')
+          .select('*, teams(name, name_en)')
+          .eq('id', playerId)
+          .single();
 
-    if (playerError) throw playerError;
+        if (playerError) throw playerError;
 
-    // Получаем статистику игрока
-    const { data: stats, error: statsError } = await supabase
-      .from('player_stats')
-      .select('*, tours(round_number)')
-      .eq('player_id', playerId)
-      .order('tour', { ascending: false });
+        // Получаем текущий язык
+        const lang = localStorage.getItem('preferred-language') || 'ru';
 
-    if (statsError) throw statsError;
-
-    // Получаем данные о турах для статистики
-    const tourIds = stats.map(s => s.tour);
-    const { data: tours, error: toursError } = await supabase
-      .from('tours')
-      .select('id, round_number')
-      .in('id', tourIds);
-
-    if (toursError) throw toursError;
-
-    // Заполняем данные в popup
-    document.getElementById('popup-player-photo').src = player.photo_url || 'https://via.placeholder.com/80';
-    document.getElementById('popup-player-name').textContent = `${player.first_name} ${player.last_name}`;
-    document.getElementById('popup-player-position').textContent = `Позиция: ${player.position || 'Не указана'}`;
-    document.getElementById('popup-player-team').textContent = `Команда: ${player.teams?.name || 'Не указана'}`;
-    document.getElementById('popup-scout-report').textContent = player.scout || 'Скаут отчёт отсутствует';
+        // Заполняем данные в popup с учетом языка
+        document.getElementById('popup-player-photo').src = player.photo_url || 'https://via.placeholder.com/80';
+        
+        const firstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
+        const lastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
+        document.getElementById('popup-player-name').textContent = `${firstName} ${lastName}`;
+        
+        const position = lang === 'en' && player.position_en ? player.position_en : player.position;
+        document.getElementById('popup-player-position').textContent = 
+          `${getTranslatedText('popup.position')} ${position || getTranslatedText('popup.not_specified')}`;
+        
+        const teamName = lang === 'en' && player.teams?.name_en ? player.teams.name_en : player.teams?.name;
+        document.getElementById('popup-player-team').textContent = 
+          `${getTranslatedText('popup.team')} ${teamName || getTranslatedText('popup.not_specified')}`;
+        
+        const scout = lang === 'en' && player.scout_en ? player.scout_en : player.scout;
+        document.getElementById('popup-scout-report').textContent = scout || getTranslatedText('popup.no_scout');
 
     // Заполняем статистику по турам
     const tourStatsBody = document.querySelector('#popup-tour-stats tbody');
@@ -4192,9 +4526,9 @@ async function openPlayerPopup(playerId) {
       popup.classList.add('show');
     }, 10);
 
-  } catch (error) {
-    console.error('Ошибка загрузки данных игрока:', error);
-    showNotification('Ошибка загрузки данных игрока', false);
+      } catch (error) {
+        console.error('Ошибка загрузки данных игрока:', error);
+        showNotification('alerts.loading_error', false);
   }
 }
 
@@ -4254,4 +4588,5 @@ function calculateTotalStatsFromArray(stats) {
 
   </script>
 </body>
+
 </html>
