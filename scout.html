@@ -843,122 +843,126 @@
   }
 
   // Функция отображения уведомлений
-  function showNotification(message, isSuccess = true) {
-    const notification = document.createElement('div');
-    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
-    notification.textContent = message;
-    document.body.appendChild(notification);
-
-    // Анимация появления
-    setTimeout(() => {
-      notification.style.opacity = '1';
-      notification.style.transform = 'translateY(0)';
-    }, 10);
-
-    // Удаление через 3 секунды
-    setTimeout(() => {
-      notification.style.opacity = '0';
-      notification.style.transform = 'translateY(-20px)';
-      setTimeout(() => {
-        notification.remove();
-      }, 300);
-    }, 3000);
+function showNotification(message, isSuccess = true) {
+  // Создаём контейнер для уведомлений, если его нет
+  let notificationContainer = document.getElementById('notification-container');
+  if (!notificationContainer) {
+    notificationContainer = document.createElement('div');
+    notificationContainer.id = 'notification-container';
+    notificationContainer.style.position = 'fixed';
+    notificationContainer.style.top = '20px';
+    notificationContainer.style.right = '20px';
+    notificationContainer.style.zIndex = '1000';
+    document.body.appendChild(notificationContainer);
   }
 
-  // Функция обновления текста интерфейса
-  function updateInterfaceText() {
-    // Обновляем заголовок страницы
+  // Создаём уведомление
+  const notification = document.createElement('div');
+  notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+  notification.textContent = message;
+  notificationContainer.appendChild(notification);
+
+  // Анимация появления
+  setTimeout(() => {
+    notification.style.opacity = '1';
+    notification.style.transform = 'translateY(0)';
+  }, 10);
+
+  // Удаление через 3 секунды
+  setTimeout(() => {
+    notification.style.opacity = '0';
+    notification.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      notification.remove();
+      // Удаляем контейнер, если он пуст
+      if (notificationContainer && notificationContainer.childElementCount === 0) {
+        notificationContainer.remove();
+      }
+    }, 300);
+  }, 3000);
+}
+
+function updateInterfaceText() {
+  try {
+    // 1. Обновляем заголовок страницы
     document.title = t('pageTitle');
 
-    // Обновляем текст в сайдбаре
-    document.querySelectorAll('.sidebar-item')[0].querySelector('span').textContent = t('scout', 'sidebar');
-    document.querySelectorAll('.sidebar-item')[1].querySelector('span').textContent = t('leaderboard', 'sidebar');
-    document.querySelectorAll('.sidebar-item')[2].querySelector('span').textContent = t('news', 'sidebar');
-    document.querySelectorAll('.sidebar-item')[3].querySelector('span').textContent = t('exit', 'sidebar');
+    // 2. Обновляем сайдбар (только если элементы существуют)
+    const sidebarItems = document.querySelectorAll('.sidebar-item');
+    const sidebarTranslations = [
+      { index: 0, key: 'scout' },
+      { index: 1, key: 'news' },       // Исправлено: ранее был 'leaderboard', но в HTML его нет
+      { index: 2, key: 'exit' }        // Индексы подогнаны под реальный HTML
+    ];
 
-    // Обновляем текст в футере
-    document.querySelector('footer').innerHTML = `
-      <a href="pick.html">${t('home', 'footer')}</a>
-      <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">${t('news', 'footer')}</a>
-      <a href="https://vtb-league.com/ru/schedule/">${t('results', 'footer')}</a>
-      <a href="https://vtb-league.com/ru/standings/">${t('standings', 'footer')}</a>
-      <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">${t('developer', 'footer')}</a>
-    `;
-
-    // Обновляем кнопку "Назад"
-    document.querySelector('.back-button').textContent = t('backButton');
-
-    // Обновляем текст кнопки возврата к командам
-    document.getElementById('back-to-teams').textContent = t('backToTeams');
-
-    // Если показаны игроки, обновляем заголовок
-    if (document.getElementById('players-section').classList.contains('active') && currentTeam) {
-      document.getElementById('current-team-name').textContent =
-        `${t('playersTitle')} ${currentLang === 'ru' ? currentTeam.name : (currentTeam.name_en || currentTeam.name)}`;
-    }
-
-    // Если показаны команды, обновляем заголовок
-    if (document.querySelector('.team-selection').style.display !== 'none') {
-      document.querySelector('.team-selection-title').textContent = t('selectTeam');
-    }
-  }
-
-  // Инициализация страницы
-  document.addEventListener('DOMContentLoaded', () => {
-    // 1. Инициализация языка
-    const savedLang = localStorage.getItem('userLang') || 'ru';
-    currentLang = savedLang;
-
-    // Подсветка активной кнопки языка
-    document.querySelectorAll('.lang-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.lang === savedLang);
+    sidebarTranslations.forEach(({ index, key }) => {
+      if (sidebarItems[index]) {
+        const span = sidebarItems[index].querySelector('span');
+        if (span) span.textContent = t(key, 'sidebar');
+      }
     });
 
-    // 2. Добавление стилей для уведомлений
-    if (!document.getElementById('notification-styles')) {
-      const style = document.createElement('style');
-      style.id = 'notification-styles';
-      style.textContent = `
-        .notification {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          padding: 15px 20px;
-          border-radius: 10px;
-          color: white;
-          font-weight: bold;
-          z-index: 1000;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          transform: translateY(-20px);
-          opacity: 0;
-        }
-        .notification.success {
-          background: linear-gradient(to right, #4CAF50, #2E7D32);
-        }
-        .notification.error {
-          background: linear-gradient(to right, #f44336, #c62828);
-        }
-      `;
-      document.head.appendChild(style);
+    // 3. Обновляем футер (выборочно, без перезаписи innerHTML)
+    const footerLinks = document.querySelectorAll('footer a');
+    const footerTranslations = ['home', 'news', 'results', 'standings', 'developer'];
+
+    footerLinks.forEach((link, index) => {
+      if (footerTranslations[index]) {
+        link.textContent = t(footerTranslations[index], 'footer');
+      }
+    });
+
+    // 4. Обновляем кнопки (с проверками)
+    const backButton = document.querySelector('.back-button');
+    if (backButton) backButton.textContent = t('backButton');
+
+    const backToTeamsBtn = document.getElementById('back-to-teams');
+    if (backToTeamsBtn) backToTeamsBtn.textContent = t('backToTeams');
+
+    // 5. Обновляем заголовки секций (если они активны)
+    const playersSection = document.getElementById('players-section');
+    if (playersSection && playersSection.classList.contains('active') && currentTeam) {
+      const currentTeamNameEl = document.getElementById('current-team-name');
+      if (currentTeamNameEl) {
+        currentTeamNameEl.textContent =
+          `${t('playersTitle')} ${currentLang === 'ru' ? currentTeam.name : (currentTeam.name_en || currentTeam.name)}`;
+      }
     }
 
-    // 3. Обработчик смены языка
-    document.querySelectorAll('.lang-btn').forEach(btn => {
+    // 6. Обновляем заголовок выбора команд (если секция видна)
+    const teamSelection = document.querySelector('.team-selection');
+    if (teamSelection && teamSelection.style.display !== 'none') {
+      const teamSelectionTitle = teamSelection.querySelector('.team-selection-title');
+      if (teamSelectionTitle) teamSelectionTitle.textContent = t('selectTeam');
+    }
+
+  } catch (error) {
+    console.error('Ошибка при обновлении интерфейса:', error);
+    showNotification(t('interfaceUpdateError', 'notifications'), false);
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  // 1. Инициализация языка (с резервным значением 'ru')
+  const savedLang = localStorage.getItem('userLang');
+  currentLang = savedLang && ['ru', 'en'].includes(savedLang) ? savedLang : 'ru';
+
+  // 2. Подсветка активной кнопки языка (если кнопки существуют)
+  const langButtons = document.querySelectorAll('.lang-btn');
+  if (langButtons.length > 0) {
+    langButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === currentLang);
       btn.addEventListener('click', () => {
         const newLang = btn.dataset.lang;
-        if (newLang !== currentLang) {
+        if (newLang !== currentLang && ['ru', 'en'].includes(newLang)) {
           // Обновляем активную кнопку
-          document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          langButtons.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
-
           // Сохраняем язык и обновляем интерфейс
           currentLang = newLang;
           localStorage.setItem('userLang', newLang);
           updateInterfaceText();
-
           // Перезагружаем контент
-          if (document.getElementById('players-section').classList.contains('active')) {
+          if (document.getElementById('players-section')?.classList.contains('active') && currentTeam) {
             loadTeamPlayers(currentTeam.id);
           } else {
             renderTeams();
@@ -966,15 +970,35 @@
         }
       });
     });
+  }
 
-    // 4. Загрузка команд и обновление интерфейса
-    updateInterfaceText();
-    loadTeams();
-  });
+  // 3. Добавление стилей для уведомлений (если их ещё нет)
+  if (!document.getElementById('notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+      .notification {
+        position: fixed; top: 20px; right: 20px; padding: 15px 20px;
+        border-radius: 10px; color: white; font-weight: bold; z-index: 1000;
+        transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transform: translateY(-20px); opacity: 0;
+      }
+      .notification.success { background: linear-gradient(to right, #4CAF50, #2E7D32); }
+      .notification.error { background: linear-gradient(to right, #f44336, #c62828); }
+    `;
+    document.head.appendChild(style);
+  }
+
+  // 4. Загрузка команд и обновление интерфейса
+  updateInterfaceText();
+  loadTeams();
+});
+
 </script>
 
 </body>
 </html>
+
 
 
 
