@@ -2930,202 +2930,238 @@ function closeTourMatches() {
       }
     });
 
+// Полностью исправленная функция загрузки матчей тура
 async function loadCurrentTourMatches() {
-  try {
-    console.log('Загрузка матчей текущего тура...');
+    try {
+        console.log('=== ЗАГРУЗКА МАТЧЕЙ ТУРА ===');
+        const now = new Date();
+        console.log('Текущее время:', now.toLocaleString());
 
-    // 1. Получаем текущий тур
-    const now = new Date();
-    const { data: currentTour, error: tourError } = await supabase
-      .from('tours')
-      .select('*')
-      .lte('start_time', now.toISOString())
-      .gte('end_time', now.toISOString())
-      .single();
+        // 1. Ищем тур, который идет сейчас
+        const { data: currentTour, error: currentError } = await supabase
+            .from('tours')
+            .select('*')
+            .lte('start_time', now.toISOString())
+            .gte('end_time', now.toISOString())
+            .single();
 
-    let actualTour = currentTour;
+        let actualTour = currentTour;
 
-    // Если нет текущего тура, ищем ближайший будущий
-    if (tourError || !currentTour) {
-      console.log('Текущих туров нет, ищем ближайший будущий');
-      const { data: nextTour, error: nextError } = await supabase
-        .from('tours')
-        .select('*')
-        .gte('start_time', now.toISOString())
-        .order('start_time', { ascending: true })
-        .limit(1)
-        .single();
+        // Если нет текущего тура, ищем ближайший будущий
+        if (currentError || !currentTour) {
+            console.log('Текущих туров нет, ищем ближайший будущий');
+            const { data: nextTour, error: nextError } = await supabase
+                .from('tours')
+                .select('*')
+                .gte('start_time', now.toISOString())
+                .order('start_time', { ascending: true })
+                .limit(1)
+                .single();
 
-      if (nextError || !nextTour) {
-        console.log('Будущих туров нет, ищем последний завершенный');
-        const { data: lastTour, error: lastError } = await supabase
-          .from('tours')
-          .select('*')
-          .lte('end_time', now.toISOString())
-          .order('end_time', { ascending: false })
-          .limit(1)
-          .single();
+            if (nextError || !nextTour) {
+                console.log('Будущих туров нет, ищем последний завершенный');
+                const { data: lastTour, error: lastError } = await supabase
+                    .from('tours')
+                    .select('*')
+                    .lte('end_time', now.toISOString())
+                    .order('end_time', { ascending: false })
+                    .limit(1)
+                    .single();
 
-        if (lastError || !lastTour) {
-          console.error('Туры не найдены');
-          showMatchesMessage('Туры не найдены в базе данных');
-          return;
+                if (lastError || !lastTour) {
+                    console.error('Туры не найдены');
+                    showMatchesMessage('Туры не найдены в базе данных');
+                    return;
+                }
+                actualTour = lastTour;
+            } else {
+                actualTour = nextTour;
+            }
         }
-        actualTour = lastTour;
-      } else {
-        actualTour = nextTour;
-      }
+
+        console.log('Актуальный тур ID:', actualTour.id, 'Номер:', actualTour.round_number);
+
+        // 2. Получаем все матчи для актуального тура
+        const { data: matches, error: matchesError } = await supabase
+            .from('games')
+            .select(`
+                *,
+                home_team:teams!games_home_team_id_fkey(*),
+                away_team:teams!games_away_team_id_fkey(*)
+            `)
+            .eq('tour_id', actualTour.id)
+            .order('id', { ascending: true });
+
+        if (matchesError) {
+            console.error('Ошибка загрузки матчей:', matchesError);
+            showMatchesMessage('Ошибка загрузки данных матчей');
+            return;
+        }
+
+        console.log('Найдено матчей:', matches?.length);
+
+        // 3. Считаем количество матчей для каждой команды
+        const teamMatchCount = {};
+        matches.forEach(match => {
+            const homeTeamId = match.home_team_id;
+            const awayTeamId = match.away_team_id;
+            teamMatchCount[homeTeamId] = (teamMatchCount[homeTeamId] || 0) + 1;
+            teamMatchCount[awayTeamId] = (teamMatchCount[awayTeamId] || 0) + 1;
+        });
+
+        // 4. Отображаем матчи
+        const matchesContainer = document.getElementById('matches-container');
+        if (!matchesContainer) {
+            console.error('Контейнер матчей не найден');
+            return;
+        }
+
+        matchesContainer.innerHTML = '';
+
+        if (!matches || matches.length === 0) {
+            showMatchesMessage(`Матчи не найдены для тура ${actualTour.round_number}`);
+            return;
+        }
+
+        // Добавляем заголовок с номером тура и статусом
+        const tourHeader = document.createElement('div');
+        tourHeader.className = 'tour-header';
+        const tourStart = new Date(actualTour.start_time);
+        const tourEnd = new Date(actualTour.end_time);
+        let status = '';
+
+        if (now < tourStart) {
+            status = `(старт ${tourStart.toLocaleDateString()})`;
+        } else if (now > tourEnd) {
+            status = '(завершен)';
+        } else {
+            status = '(идет сейчас)';
+        }
+
+        tourHeader.textContent = `Тур ${actualTour.round_number} ${status}`;
+        tourHeader.style.textAlign = 'center';
+        tourHeader.style.width = '100%';
+        matchesContainer.appendChild(tourHeader);
+
+        // Отображаем матчи
+        matches.forEach(match => {
+            const homeTeamName = match.home_team?.name || `Команда ${match.home_team_id}`;
+            const awayTeamName = match.away_team?.name || `Команда ${match.away_team_id}`;
+            const homeLogo = match.home_team?.logo_url || 'https://via.placeholder.com/40';
+            const awayLogo = match.away_team?.logo_url || 'https://via.placeholder.com/40';
+
+            const matchRow = document.createElement('div');
+            matchRow.className = 'match-row';
+
+            // ДОМАШНЯЯ КОМАНДА: бейдж, название, логотип
+            const homeTeamContainer = document.createElement('div');
+            homeTeamContainer.className = 'team-container team-home';
+
+            // Бейдж для домашней команды (слева)
+            if (teamMatchCount[match.home_team_id] >= 2) {
+                const homeBadge = document.createElement('div');
+                homeBadge.className = 'multiple-games-badge';
+                homeTeamContainer.appendChild(homeBadge);
+            }
+
+            const homeName = document.createElement('div');
+            homeName.className = 'team-name';
+            homeName.textContent = homeTeamName;
+            homeTeamContainer.appendChild(homeName);
+
+            const homeLogoImg = document.createElement('img');
+            homeLogoImg.src = homeLogo;
+            homeLogoImg.alt = homeTeamName;
+            homeLogoImg.className = 'team-logo';
+            homeTeamContainer.appendChild(homeLogoImg);
+
+            // ГОСТЕВАЯ КОМАНДА: логотип, название, бейдж
+            const awayTeamContainer = document.createElement('div');
+            awayTeamContainer.className = 'team-container team-away';
+
+            const awayLogoImg = document.createElement('img');
+            awayLogoImg.src = awayLogo;
+            awayLogoImg.alt = awayTeamName;
+            awayLogoImg.className = 'team-logo';
+            awayTeamContainer.appendChild(awayLogoImg);
+
+            const awayName = document.createElement('div');
+            awayName.className = 'team-name';
+            awayName.textContent = awayTeamName;
+            awayTeamContainer.appendChild(awayName);
+
+            // Бейдж для гостевой команды (справа)
+            if (teamMatchCount[match.away_team_id] >= 2) {
+                const awayBadge = document.createElement('div');
+                awayBadge.className = 'multiple-games-badge';
+                awayTeamContainer.appendChild(awayBadge);
+            }
+
+            // Собираем строку матча
+            matchRow.appendChild(homeTeamContainer);
+            matchRow.appendChild(awayTeamContainer);
+            matchesContainer.appendChild(matchRow);
+        });
+
+        console.log('Матчи успешно отображены');
+
+    } catch (error) {
+        console.error('Ошибка загрузки матчей:', error);
+        showMatchesMessage('Ошибка загрузки матчей');
     }
-
-    console.log('Актуальный тур ID:', actualTour.id, 'Номер:', actualTour.round_number);
-
-    // 2. Получаем все матчи для актуального тура
-    const { data: matches, error: matchesError } = await supabase
-      .from('games')
-      .select(`
-        *,
-        home_team:teams!games_home_team_id_fkey(*),
-        away_team:teams!games_away_team_id_fkey(*)
-      `)
-      .eq('tour_id', actualTour.id)
-      .order('id', { ascending: true });
-
-    if (matchesError) {
-      console.error('Ошибка загрузки матчей:', matchesError);
-      showMatchesMessage('Ошибка загрузки данных матчей');
-      return;
-    }
-
-    console.log('Найдено матчей:', matches?.length);
-
-    // 3. Считаем количество матчей для каждой команды
-    const teamMatchCount = {};
-    matches.forEach(match => {
-      const homeTeamId = match.home_team_id;
-      const awayTeamId = match.away_team_id;
-      teamMatchCount[homeTeamId] = (teamMatchCount[homeTeamId] || 0) + 1;
-      teamMatchCount[awayTeamId] = (teamMatchCount[awayTeamId] || 0) + 1;
-    });
-
-    // 4. Отображаем матчи
-    const matchesContainer = document.getElementById('matches-container');
-    if (!matchesContainer) {
-      console.error('Контейнер матчей не найден');
-      return;
-    }
-
-    matchesContainer.innerHTML = '';
-
-    if (!matches || matches.length === 0) {
-      showMatchesMessage(`Матчи не найдены для тура ${actualTour.round_number}`);
-      return;
-    }
-
-    // Добавляем заголовок с номером тура и статусом
-    const tourHeader = document.createElement('div');
-    tourHeader.className = 'tour-header';
-    const tourStart = new Date(actualTour.start_time);
-    const tourEnd = new Date(actualTour.end_time);
-    let status = '';
-
-    if (now < tourStart) {
-      status = `(старт ${tourStart.toLocaleDateString()})`;
-    } else if (now > tourEnd) {
-      status = '(завершен)';
-    } else {
-      status = '(идет сейчас)';
-    }
-
-    tourHeader.textContent = `Тур ${actualTour.round_number} ${status}`;
-    tourHeader.style.textAlign = 'center';
-    tourHeader.style.width = '100%';
-    matchesContainer.appendChild(tourHeader);
-
-    // Отображаем матчи
-    matches.forEach(match => {
-      const homeTeamName = match.home_team?.name || `Команда ${match.home_team_id}`;
-      const awayTeamName = match.away_team?.name || `Команда ${match.away_team_id}`;
-      const homeLogo = match.home_team?.logo_url || 'https://via.placeholder.com/40';
-      const awayLogo = match.away_team?.logo_url || 'https://via.placeholder.com/40';
-
-      const matchRow = document.createElement('div');
-      matchRow.className = 'match-row';
-
-      // ДОМАШНЯЯ КОМАНДА: бейдж, название, логотип
-      const homeTeamContainer = document.createElement('div');
-      homeTeamContainer.className = 'team-container team-home';
-
-      // Бейдж для домашней команды (слева)
-      if (teamMatchCount[match.home_team_id] >= 2) {
-        const homeBadge = document.createElement('div');
-        homeBadge.className = 'multiple-games-badge';
-        homeTeamContainer.appendChild(homeBadge);
-      }
-
-      const homeName = document.createElement('div');
-      homeName.className = 'team-name';
-      homeName.textContent = homeTeamName;
-      homeTeamContainer.appendChild(homeName);
-
-      const homeLogoImg = document.createElement('img');
-      homeLogoImg.src = homeLogo;
-      homeLogoImg.alt = homeTeamName;
-      homeLogoImg.className = 'team-logo';
-      homeTeamContainer.appendChild(homeLogoImg);
-
-      // Разделитель "VS"
-      const vsSeparator = document.createElement('div');
-      vsSeparator.className = 'vs-separator';
-      vsSeparator.textContent = 'VS';
-
-      // ГОСТЕВАЯ КОМАНДА: логотип, название, бейдж
-      const awayTeamContainer = document.createElement('div');
-      awayTeamContainer.className = 'team-container team-away';
-
-      const awayLogoImg = document.createElement('img');
-      awayLogoImg.src = awayLogo;
-      awayLogoImg.alt = awayTeamName;
-      awayLogoImg.className = 'team-logo';
-      awayTeamContainer.appendChild(awayLogoImg);
-
-      const awayName = document.createElement('div');
-      awayName.className = 'team-name';
-      awayName.textContent = awayTeamName;
-      awayTeamContainer.appendChild(awayName);
-
-      // Бейдж для гостевой команды (справа)
-      if (teamMatchCount[match.away_team_id] >= 2) {
-        const awayBadge = document.createElement('div');
-        awayBadge.className = 'multiple-games-badge';
-        awayTeamContainer.appendChild(awayBadge);
-      }
-
-      // Собираем строку матча
-      matchRow.appendChild(homeTeamContainer);
-      matchRow.appendChild(vsSeparator);
-      matchRow.appendChild(awayTeamContainer);
-      matchesContainer.appendChild(matchRow);
-    });
-
-    console.log('Матчи успешно отображены');
-
-  } catch (error) {
-    console.error('Ошибка загрузки матчей:', error);
-    showMatchesMessage('Ошибка загрузки матчей');
-  }
 }
+
 // Вспомогательная функция для отображения сообщений
 function showMatchesMessage(message) {
-  const matchesContainer = document.getElementById('matches-container');
-  if (!matchesContainer) return;
+    const matchesContainer = document.getElementById('matches-container');
+    if (!matchesContainer) return;
 
-  matchesContainer.innerHTML = `
-    <div style="text-align: center; color: var(--gray); padding: 20px;">
-      <p>${message}</p>
-      <small>Текущее время: ${new Date().toLocaleString()}</small>
-    </div>
-  `;
+    matchesContainer.innerHTML = `
+        <div style="text-align: center; color: var(--gray); padding: 20px;">
+            <p>${message}</p>
+            <small>Текущее время: ${new Date().toLocaleString()}</small>
+        </div>
+    `;
 }
+
+// Функция для открытия модального окна с матчами текущего тура
+async function showTourMatches() {
+    try {
+        const modal = document.getElementById('tour-matches-modal');
+        modal.style.display = 'flex';
+
+        // Анимация появления
+        anime({
+            targets: '.leaderboard-content',
+            scale: [0.8, 1],
+            opacity: [0, 1],
+            duration: 500,
+            easing: 'easeOutElastic(1, .8)'
+        });
+
+        // Загружаем матчи текущего тура
+        await loadCurrentTourMatches();
+
+    } catch (error) {
+        console.error('Ошибка открытия матчей тура:', error);
+        showNotification('Ошибка загрузки матчей', false);
+    }
+}
+
+// Функция для закрытия модального окна
+function closeTourMatches() {
+    const modal = document.getElementById('tour-matches-modal');
+    anime({
+        targets: '.leaderboard-content',
+        scale: 0.8,
+        opacity: 0,
+        duration: 300,
+        complete: function() {
+            modal.style.display = 'none';
+        }
+    });
+}
+
 async function addPlayerStats(playerId, tourId, stats) {
   try {
     const { error } = await supabase
@@ -4740,5 +4776,6 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
