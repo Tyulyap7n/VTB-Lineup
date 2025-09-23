@@ -61,6 +61,40 @@
       font-size: 18px;
     }
 
+    /* Переключатель языка */
+    .language-switcher {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 5px;
+      z-index: 1000;
+    }
+
+    .lang-btn {
+      padding: 5px 10px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 12px;
+      font-family: 'Petrov Sans', Arial, sans-serif;
+    }
+
+    .lang-btn.active {
+      background: var(--yellow);
+      color: var(--black);
+      border-color: var(--yellow);
+    }
+
+    .lang-btn:hover {
+      background: #f0f0f0;
+    }
+
+    .lang-btn.active:hover {
+      background: #e6d600;
+    }
+
     /* Основной контейнер */
     .main-container {
       display: flex;
@@ -227,22 +261,27 @@
     <div class="header-logo">
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="VTB Logo">
     </div>
+    <!-- Переключатель языка -->
+    <div class="language-switcher">
+      <button id="switch-to-en" class="lang-btn">EN</button>
+      <button id="switch-to-ru" class="lang-btn active">RU</button>
+    </div>
   </header>
 
   <!-- Основной контейнер -->
   <div class="main-container">
      <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
-        <span>Скаут</span>
+        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут" data-translate-alt="sidebar.scout">
+        <span data-translate="sidebar.scout">Скаут</span>
       </div>
 	  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
-        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
-        <span>Новости</span>
+        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости" data-translate-alt="sidebar.news">
+        <span data-translate="sidebar.news">Новости</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='index.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
-        <span>Выход</span>
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход" data-translate-alt="sidebar.logout">
+        <span data-translate="sidebar.logout">Выход</span>
       </div>
       <div id="user-leagues"></div>
     </aside>
@@ -254,10 +293,10 @@
           <!-- Фэнтези по ролям -->
           <div class="league-block-container">
             <div class="league-block" onclick="window.location.href='roles.html'">
-              <div class="league-block-front">
+              <div class="league-block-front" data-translate="leagues.roles_front">
                 Фэнтези по ролям
               </div>
-              <div class="league-block-back">
+              <div class="league-block-back" data-translate="leagues.roles_back">
                 Здесь вы собираете команду с учетом ролей игроков (защитник, нападающий, центр). Очки начисляются за статистику игроков в реальных матчах.
               </div>
             </div>
@@ -266,10 +305,10 @@
         <!-- Фэнтези по очкам -->
         <div class="league-block-container">
           <div class="league-block" onclick="window.location.href='scoring.html'">
-            <div class="league-block-front">
+            <div class="league-block-front" data-translate="leagues.scoring_front">
               Фэнтези по очкам
             </div>
-            <div class="league-block-back">
+            <div class="league-block-back" data-translate="leagues.scoring_back">
               Ваша задача — набрать максимальное количество очков за матчи ваших игроков. Очки начисляются за очки, подборы, передачи, перехваты и блок-шоты.
             </div>
           </div>
@@ -278,26 +317,110 @@
     </main>
   </div>
   <footer>
-    <a href="pick.html">Главная</a>
-    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
-    <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
-    <a href="https://vtb-league.com/ru/standings/">Таблица</a>
-    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Разработчик</a>
+    <a href="pick.html" data-translate="footer.home">Главная</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/" data-translate="footer.news">Новости</a>
+    <a href="https://vtb-league.com/ru/schedule/" data-translate="footer.results">Результаты</a>
+    <a href="https://vtb-league.com/ru/standings/" data-translate="footer.standings">Таблица</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/" data-translate="footer.developer">Разработчик</a>
   </footer>
 
   <!-- Supabase Client -->
   <script>
+    // Объект с переводами
+    const translations = {
+      ru: {
+        'sidebar.scout': 'Скаут',
+        'sidebar.news': 'Новости',
+        'sidebar.logout': 'Выход',
+        'leagues.roles_front': 'Фэнтези по ролям',
+        'leagues.roles_back': 'Здесь вы собираете команду с учетом ролей игроков (защитник, нападающий, центр). Очки начисляются за статистику игроков в реальных матчах.',
+        'leagues.scoring_front': 'Фэнтези по очкам',
+        'leagues.scoring_back': 'Ваша задача — набрать максимальное количество очков за матчи ваших игроков. Очки начисляются за очки, подборы, передачи, перехваты и блок-шоты.',
+        'footer.home': 'Главная',
+        'footer.news': 'Новости',
+        'footer.results': 'Результаты',
+        'footer.standings': 'Таблица',
+        'footer.developer': 'Разработчик',
+        'alerts.auth_required': 'Пожалуйста, авторизуйтесь.',
+        'alerts.leagues_error': 'Ошибка загрузки лиг пользователя:',
+        'alerts.leagues_info_error': 'Ошибка загрузки лиг:'
+      },
+      en: {
+        'sidebar.scout': 'Scout',
+        'sidebar.news': 'News',
+        'sidebar.logout': 'Logout',
+        'leagues.roles_front': 'Fantasy by Roles',
+        'leagues.roles_back': 'Here you build a team considering player roles (guard, forward, center). Points are awarded for player statistics in real matches.',
+        'leagues.scoring_front': 'Fantasy by Points',
+        'leagues.scoring_back': 'Your goal is to score maximum points from your players\' matches. Points are awarded for points, rebounds, assists, steals and blocks.',
+        'footer.home': 'Home',
+        'footer.news': 'News',
+        'footer.results': 'Results',
+        'footer.standings': 'Standings',
+        'footer.developer': 'Developer',
+        'alerts.auth_required': 'Please log in.',
+        'alerts.leagues_error': 'Error loading user leagues:',
+        'alerts.leagues_info_error': 'Error loading leagues:'
+      }
+    };
+
+    // Функция переключения языка
+    function switchLanguage(lang) {
+      // Обновляем текстовое содержимое
+      const textElements = document.querySelectorAll('[data-translate]');
+      textElements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
+        }
+      });
+
+      // Обновляем alt тексты для картинок
+      const altElements = document.querySelectorAll('[data-translate-alt]');
+      altElements.forEach(element => {
+        const key = element.getAttribute('data-translate-alt');
+        if (translations[lang] && translations[lang][key]) {
+          element.alt = translations[lang][key];
+        }
+      });
+
+      // Обновляем активную кнопку языка
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`switch-to-${lang}`).classList.add('active');
+
+      // Сохраняем выбор языка
+      localStorage.setItem('preferred-language', lang);
+      document.documentElement.setAttribute('lang', lang);
+    }
+
+    // Функция для показа уведомлений с переводом
+    function showTranslatedAlert(messageKey, additionalText = '') {
+      const lang = localStorage.getItem('preferred-language') || 'ru';
+      const message = translations[lang][messageKey] + additionalText;
+      alert(message);
+    }
+
     // Инициализация Supabase
     const SUPABASE_URL = 'https://svnnneohwcuxirsximkp.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bm5uZW9od2N1eGlyc3hpbWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjM0NTcsImV4cCI6MjA3MjYzOTQ1N30.9H5aI1gj0FHGAC6NM08BbMno26ZdueNg7G1PnTDItpA';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener("DOMContentLoaded", async () => {
+      // Инициализация языка
+      const savedLang = localStorage.getItem('preferred-language') || 'ru';
+      switchLanguage(savedLang);
+
+      // Обработчики для кнопок переключения языка
+      document.getElementById('switch-to-en').addEventListener('click', () => switchLanguage('en'));
+      document.getElementById('switch-to-ru').addEventListener('click', () => switchLanguage('ru'));
+
       // Получаем текущего пользователя
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        alert("Пожалуйста, авторизуйтесь.");
+        showTranslatedAlert('alerts.auth_required');
         window.location.href = "index.html";
         return;
       }
@@ -310,6 +433,7 @@
 
       if (userLeaguesError) {
         console.error("Ошибка загрузки лиг пользователя:", userLeaguesError);
+        showTranslatedAlert('alerts.leagues_error', userLeaguesError.message);
         return;
       }
 
@@ -322,6 +446,7 @@
 
       if (leaguesError) {
         console.error("Ошибка загрузки лиг:", leaguesError);
+        showTranslatedAlert('alerts.leagues_info_error', leaguesError.message);
         return;
       }
 
