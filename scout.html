@@ -886,9 +886,8 @@ function updateInterfaceText() {
     // 2. Обновляем сайдбар (только если элементы существуют)
     const sidebarItems = document.querySelectorAll('.sidebar-item');
     const sidebarTranslations = [
-      { index: 0, key: 'scout' },
-      { index: 1, key: 'news' },       // Исправлено: ранее был 'leaderboard', но в HTML его нет
-      { index: 2, key: 'exit' }        // Индексы подогнаны под реальный HTML
+      { index: 0, key: 'news' },
+      { index: 1, key: 'exit' }        // Индексы подогнаны под реальный HTML
     ];
 
     sidebarTranslations.forEach(({ index, key }) => {
@@ -994,6 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
