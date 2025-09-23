@@ -2608,7 +2608,7 @@ async function loadCurrentTourMatches() {
             return;
         }
 
-        // 2. Получаем все матчи для текущего тура
+        // 2. Получаем все матчи для текущего тура (ИСПРАВЛЕННЫЙ ЗАПРОС)
         const { data: matches, error: matchesError } = await supabase
             .from('games')
             .select(`
@@ -2618,33 +2618,18 @@ async function loadCurrentTourMatches() {
             `)
             .eq('tour_id', currentTour.id);
 
-        if (matchesError || !matches) {
+        if (matchesError) {
             console.error('Ошибка загрузки матчей:', matchesError);
             return;
         }
 
-        // 3. Считаем количество игр для каждой команды в туре
-        const teamGameCounts = {};
-
-        matches.forEach(match => {
-            const homeTeamId = match.home_team.id;
-            const awayTeamId = match.away_team.id;
-
-            // Увеличиваем счётчик для домашней команды
-            if (!teamGameCounts[homeTeamId]) {
-                teamGameCounts[homeTeamId] = 0;
-            }
-            teamGameCounts[homeTeamId]++;
-
-            // Увеличиваем счётчик для гостевой команды
-            if (!teamGameCounts[awayTeamId]) {
-                teamGameCounts[awayTeamId] = 0;
-            }
-            teamGameCounts[awayTeamId]++;
-        });
-
-        // 4. Отображаем матчи в контейнере
+        // 3. Отображаем матчи в основном контейнере (не в модальном)
         const matchesContainer = document.getElementById('matches-container');
+        if (!matchesContainer) {
+            console.error('Контейнер матчей не найден');
+            return;
+        }
+
         matchesContainer.innerHTML = '';
 
         if (!matches || matches.length === 0) {
@@ -2663,14 +2648,7 @@ async function loadCurrentTourMatches() {
             const matchRow = document.createElement('div');
             matchRow.className = 'match-row';
 
-            // Проверяем количество игр у команд
-            const homeTeamId = match.home_team.id;
-            const awayTeamId = match.away_team.id;
-
-            const homeMultipleGames = teamGameCounts[homeTeamId] > 1;
-            const awayMultipleGames = teamGameCounts[awayTeamId] > 1;
-
-            // Контейнер для домашней команды
+            // Домашняя команда
             const homeTeamContainer = document.createElement('div');
             homeTeamContainer.className = 'team-container team-home';
 
@@ -2683,15 +2661,15 @@ async function loadCurrentTourMatches() {
             homeName.className = 'team-name';
             homeName.textContent = match.home_team?.name;
 
-            
+            homeTeamContainer.appendChild(homeLogo);
             homeTeamContainer.appendChild(homeName);
-			homeTeamContainer.appendChild(homeLogo);
 
-            // Разделитель "VS"
+            // Разделитель
             const vsSeparator = document.createElement('div');
             vsSeparator.className = 'vs-separator';
-            vsSeparator.textContent = '';
-            // Контейнер для гостевой команды
+            vsSeparator.textContent = 'VS';
+
+            // Гостевая команда
             const awayTeamContainer = document.createElement('div');
             awayTeamContainer.className = 'team-container team-away';
 
@@ -2706,42 +2684,15 @@ async function loadCurrentTourMatches() {
 
             awayTeamContainer.appendChild(awayLogo);
             awayTeamContainer.appendChild(awayName);
+
             // Собираем строку матча
-<!-- Внутри функции loadCurrentTourMatches() -->
-// Собираем строку матча
-matchRow.appendChild(homeTeamContainer);
-matchRow.appendChild(vsSeparator);
-matchRow.appendChild(awayTeamContainer);
-
-// Добавляем бейджи для команд с несколькими играми
-if (homeMultipleGames) {
-    const badge = document.createElement('div');
-    badge.className = 'multiple-games-badge';
-    badge.title = 'У команды несколько игр в этом туре';
-    homeTeamContainer.style.position = 'relative';
-    homeTeamContainer.appendChild(badge);
-    // Позиционируем бейдж слева от текста
-    badge.style.left = '0%';
-    badge.style.top = '10%';
-    badge.style.transform = 'translateY(-50%)';
-    badge.style.marginRight = '8px';
-}
-
-if (awayMultipleGames) {
-    const badge = document.createElement('div');
-    badge.className = 'multiple-games-badge';
-    badge.title = 'У команды несколько игр в этом туре';
-    awayTeamContainer.style.position = 'relative';
-    awayTeamContainer.appendChild(badge);
-    // Позиционируем бейдж справа от текста
-    badge.style.right = '0%';
-    badge.style.top = '10%';
-    badge.style.transform = 'translateY(-50%)';
-    badge.style.marginLeft = '8px';
-}
+            matchRow.appendChild(homeTeamContainer);
+            matchRow.appendChild(vsSeparator);
+            matchRow.appendChild(awayTeamContainer);
 
             matchesContainer.appendChild(matchRow);
         });
+
     } catch (error) {
         console.error('Ошибка загрузки матчей:', error);
     }
@@ -3481,10 +3432,19 @@ document.getElementById('filter-team').addEventListener('change', function() {
           duration: 800,
           easing: 'easeOutQuad'
         });
-      } catch (error) {
-        console.error("Ошибка инициализации:", error);
-      }
-    });
+    // Инициализируем скролл хендлер
+    initializeScrollHandler();
+    
+    // Загружаем первую страницу игроков
+    await loadPlayersPage(1);
+    
+    // Загружаем матчи
+    await loadCurrentTourMatches();
+    
+  } catch (error) {
+    console.error("Ошибка инициализации:", error);
+  }
+});
 
     // Функция сортировки таблицы
 function sortTable(column) {
@@ -4120,5 +4080,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </body>
 
 </html>
+
 
 
