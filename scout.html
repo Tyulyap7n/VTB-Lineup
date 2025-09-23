@@ -29,7 +29,7 @@
       margin: 0;
       padding: 0;
     }
-
+	
     body {
       font-family: 'Inter', Arial, sans-serif;
       display: flex;
@@ -97,7 +97,34 @@
       flex: 1;
       position: relative;
     }
-
+	  /* Кнопки переключения языка в хедере */
+  .lang-switcher {
+    display: flex;
+    gap: 5px;
+    margin-right: 20px;
+  }
+  .lang-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    font-size: 14px;
+  }
+  .lang-btn.active {
+    background-color: var(--yellow);
+    color: var(--black);
+    box-shadow: 0 0 10px rgba(253, 230, 0, 0.5);
+  }
+  .lang-btn:not(.active) {
+    background-color: var(--white);
+    color: var(--black);
+  }
+  .lang-btn:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+  }
     aside {
       position: absolute;
       top: 0;
@@ -464,6 +491,10 @@
     <div class="header-logo">
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="FIBA Logo">
     </div>
+	  <div class="lang-switcher">
+		  <button class="lang-btn active" data-lang="ru">RU</button>
+		  <button class="lang-btn" data-lang="en">EN</button>
+		</div>
   </header>
 
   <div class="main-container">
@@ -524,7 +555,7 @@
     // Глобальные переменные
     let teams = [];
     let currentTeam = null;
-
+	let currentLang = 'ru'; // По умолчанию русский
     // Функция загрузки команд
     async function loadTeams() {
       try {
@@ -543,24 +574,21 @@
       }
     }
 
-    // Функция отображения команд
-    function renderTeams() {
-      const teamsGrid = document.getElementById('teams-grid');
-      teamsGrid.innerHTML = '';
+function renderTeams() {
+  const teamsGrid = document.getElementById('teams-grid');
+  teamsGrid.innerHTML = '';
+  teams.forEach(team => {
+    const teamCard = document.createElement('div');
+    teamCard.className = 'team-card';
+    teamCard.onclick = () => selectTeam(team);
+    teamCard.innerHTML = `
+      <img src="${team.logo_url || 'https://via.placeholder.com/60'}" alt="${currentLang === 'ru' ? team.name : team.name_en}" class="team-logo">
+      <div class="team-name">${currentLang === 'ru' ? team.name : team.name_en}</div>
+    `;
+    teamsGrid.appendChild(teamCard);
+  });
+}
 
-      teams.forEach(team => {
-        const teamCard = document.createElement('div');
-        teamCard.className = 'team-card';
-        teamCard.onclick = () => selectTeam(team);
-
-        teamCard.innerHTML = `
-          <img src="${team.logo_url || 'https://via.placeholder.com/60'}" alt="${team.name}" class="team-logo">
-          <div class="team-name">${team.name}</div>
-        `;
-
-        teamsGrid.appendChild(teamCard);
-      });
-    }
 
     // Функция выбора команды
     function selectTeam(team) {
@@ -581,22 +609,21 @@
     }
 
     // Функция загрузки игроков команды
-    async function loadTeamPlayers(teamId) {
-      try {
-        const { data: players, error: playersError } = await supabase
-          .from('players')
-          .select('*, player_stats(*)')
-          .eq('team_id', teamId);
+async function loadTeamPlayers(teamId) {
+  try {
+    const { data: players, error: playersError } = await supabase
+      .from('players')
+      .select('*, player_stats(*)')
+      .eq('team_id', teamId);
 
-        if (playersError) throw playersError;
+    if (playersError) throw playersError;
 
-        const { data: stats, error: statsError } = await supabase
-          .from('player_stats')
-          .select('*')
-          .in('player_id', players.map(p => p.id));
+    const { data: stats, error: statsError } = await supabase
+      .from('player_stats')
+      .select('*')
+      .in('player_id', players.map(p => p.id));
 
-        if (statsError) throw statsError;
-
+    if (statsError) throw statsError;
         // Группируем статистику по игрокам
         const statsByPlayer = stats.reduce((acc, stat) => {
           if (!acc[stat.player_id]) acc[stat.player_id] = [];
@@ -635,35 +662,41 @@
           return { ...player, stats: avgStats, avgValue };
         });
 
-        renderPlayers(playersWithStats);
-      } catch (error) {
-        console.error('Ошибка загрузки игроков:', error);
-        showNotification('Ошибка загрузки игроков', false);
-      }
-    }
+    renderPlayers(playersWithStats);
+  } catch (error) {
+    console.error('Ошибка загрузки игроков:', error);
+    showNotification(currentLang === 'ru'
+      ? 'Ошибка загрузки игроков'
+      : 'Failed to load players', false);
+  }
+}
 
     // Функция отображения игроков
     function renderPlayers(players) {
-      const playersGrid = document.getElementById('players-grid');
-      playersGrid.innerHTML = '';
+  const playersGrid = document.getElementById('players-grid');
+  playersGrid.innerHTML = '';
+  players.forEach(player => {
+    const playerName = currentLang === 'ru'
+      ? `${player.first_name} ${player.last_name}`
+      : `${player.first_name_en || player.first_name} ${player.last_name_en || player.last_name}`;
 
-      players.forEach(player => {
-        const playerCard = document.createElement('div');
-        playerCard.className = 'player-card';
+    const playerPosition = currentLang === 'ru' ? player.position : player.position_en || player.position;
+    const teamName = currentLang === 'ru' ? currentTeam.name : currentTeam.name_en || currentTeam.name;
+    const scoutReport = currentLang === 'ru' ? player.scout : player.scout_en || player.scout;
 
-        playerCard.innerHTML = `
-          <img src="${player.photo_url || 'https://via.placeholder.com/100'}" alt="${player.first_name} ${player.last_name}" class="player-photo">
-
-          <div class="player-info">
-            <div class="player-name">${player.first_name} ${player.last_name}</div>
-            <div class="player-position">${player.position || 'Н/Д'}</div>
-            <div class="player-team">${currentTeam.name}</div>
-            <div class="player-price">${player.price || 0}$</div>
-          </div>
-
-          <div class="scout-report">
-            ${player.scout || 'Скаут отчёт отсутствует'}
-          </div>
+    const playerCard = document.createElement('div');
+    playerCard.className = 'player-card';
+    playerCard.innerHTML = `
+      <img src="${player.photo_url || 'https://via.placeholder.com/100'}" alt="${playerName}" class="player-photo">
+      <div class="player-info">
+        <div class="player-name">${playerName}</div>
+        <div class="player-position">${playerPosition || 'N/A'}</div>
+        <div class="player-team">${teamName}</div>
+        <div class="player-price">${player.price || 0}$</div>
+      </div>
+      <div class="scout-report">
+        ${scoutReport || (currentLang === 'ru' ? 'Скаут-отчёт отсутствует' : 'Scout report missing')}
+      </div>
 
           <div class="player-stats">
             <div class="stat-item">
@@ -698,9 +731,31 @@
     }
 
     // Функция отображения уведомлений
-    function showNotification(message, isSuccess = true) {
-      const notification = document.createElement('div');
-      notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+function showNotification(message, isSuccess = true) {
+  const notifications = {
+    ru: {
+      success: 'Успех!',
+      error: 'Ошибка!',
+      teamLoadError: 'Ошибка загрузки команд',
+      playerLoadError: 'Ошибка загрузки игроков'
+    },
+    en: {
+      success: 'Success!',
+      error: 'Error!',
+      teamLoadError: 'Failed to load teams',
+      playerLoadError: 'Failed to load players'
+    }
+  };
+
+  const notification = document.createElement('div');
+  notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+
+  if (message === 'Ошибка загрузки команд') {
+    message = notifications[currentLang].teamLoadError;
+  } else if (message === 'Ошибка загрузки игроков') {
+    message = notifications[currentLang].playerLoadError;
+  }
+
       notification.textContent = message;
 
       document.body.appendChild(notification);
@@ -725,37 +780,72 @@
       }, 3000);
     }
 
-    // Инициализация страницы
-    document.addEventListener('DOMContentLoaded', () => {
-      // Добавляем стили для уведомлений
-      const style = document.createElement('style');
-      style.textContent = `
-        .notification {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          padding: 15px 20px;
-          border-radius: 10px;
-          color: white;
-          font-weight: bold;
-          z-index: 1000;
-          transition: opacity 0.3s, transform 0.3s;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
+ document.addEventListener('DOMContentLoaded', () => {
+  // 1. Инициализация языка
+  const savedLang = localStorage.getItem('userLang') || 'ru';
+  currentLang = savedLang;
 
-        .notification.success {
-          background: linear-gradient(to right, #4CAF50, #2E7D32);
-        }
+  // Подсветка активной кнопки языка
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === savedLang);
+  });
 
-        .notification.error {
-          background: linear-gradient(to right, #f44336, #c62828);
-        }
-      `;
-      document.head.appendChild(style);
+  // 2. Добавление стилей для уведомлений (если ещё не добавлены)
+  if (!document.getElementById('notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        z-index: 1000;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      .notification.success {
+        background: linear-gradient(to right, #4CAF50, #2E7D32);
+      }
+      .notification.error {
+        background: linear-gradient(to right, #f44336, #c62828);
+      }
+      .notification.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
-      // Загружаем команды
-      loadTeams();
+  // 3. Обработчик смены языка
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newLang = btn.dataset.lang;
+      if (newLang !== currentLang) {
+        // Обновляем активную кнопку
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Сохраняем язык
+        currentLang = newLang;
+        localStorage.setItem('userLang', newLang);
+
+        // Перезагружаем контент
+        if (document.getElementById('players-section').classList.contains('active')) {
+          loadTeamPlayers(currentTeam.id);
+        } else {
+          loadTeams();
+        }
+      }
     });
+  });
   </script>
 </body>
 </html>
+
