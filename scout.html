@@ -549,107 +549,111 @@
     <a href="https://vtb-league.com/ru/standings/">Таблица</a>
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Разработчик</a>
   </footer>
-  <script>
+<script>
+  // Глобальные переменные
+  let teams = [];
+  let currentTeam = null;
+  let currentLang = 'ru'; // По умолчанию русский
 
+  // Функция загрузки команд
+  async function loadTeams() {
+    try {
+      const { data, error } = await supabase
+        .from('teams')
+        .select('*, name_en')
+        .order('name', { ascending: true });
 
-    // Глобальные переменные
-    let teams = [];
-    let currentTeam = null;
-	let currentLang = 'ru'; // По умолчанию русский
-    // Функция загрузки команд
-    async function loadTeams() {
-      try {
-        const { data, error } = await supabase
-          .from('teams')
-          .select('*')
-          .order('name', { ascending: true });
-
-        if (error) throw error;
-
-        teams = data;
-        renderTeams();
-      } catch (error) {
-        console.error('Ошибка загрузки команд:', error);
-        showNotification('Ошибка загрузки команд', false);
-      }
+      if (error) throw error;
+      teams = data;
+      renderTeams();
+    } catch (error) {
+      console.error('Ошибка загрузки команд:', error);
+      showNotification(
+        currentLang === 'ru' ? 'Ошибка загрузки команд' : 'Failed to load teams',
+        false
+      );
     }
+  }
 
-function renderTeams() {
-  const teamsGrid = document.getElementById('teams-grid');
-  teamsGrid.innerHTML = '';
-  teams.forEach(team => {
-    const teamCard = document.createElement('div');
-    teamCard.className = 'team-card';
-    teamCard.onclick = () => selectTeam(team);
-    teamCard.innerHTML = `
-      <img src="${team.logo_url || 'https://via.placeholder.com/60'}" alt="${currentLang === 'ru' ? team.name : team.name_en}" class="team-logo">
-      <div class="team-name">${currentLang === 'ru' ? team.name : team.name_en}</div>
-    `;
-    teamsGrid.appendChild(teamCard);
-  });
-}
+  // Функция отображения команд
+  function renderTeams() {
+    const teamsGrid = document.getElementById('teams-grid');
+    teamsGrid.innerHTML = '';
+    teams.forEach(team => {
+      const teamCard = document.createElement('div');
+      teamCard.className = 'team-card';
+      teamCard.onclick = () => selectTeam(team);
+      teamCard.innerHTML = `
+        <img src="${team.logo_url || 'https://via.placeholder.com/60'}"
+             alt="${currentLang === 'ru' ? team.name : (team.name_en || team.name)}"
+             class="team-logo">
+        <div class="team-name">${currentLang === 'ru' ? team.name : (team.name_en || team.name)}</div>
+      `;
+      teamsGrid.appendChild(teamCard);
+    });
+  }
 
+  // Функция выбора команды
+  function selectTeam(team) {
+    currentTeam = team;
+    document.getElementById('current-team-name').textContent =
+      currentLang === 'ru'
+        ? `Игроки команды ${team.name}`
+        : `Team ${team.name_en || team.name} players`;
 
-    // Функция выбора команды
-    function selectTeam(team) {
-      currentTeam = team;
-      document.getElementById('current-team-name').textContent = `Игроки команды ${team.name}`;
-      document.getElementById('back-to-teams').classList.add('active');
-      document.querySelector('.team-selection').style.display = 'none';
-      document.getElementById('players-section').classList.add('active');
+    document.getElementById('back-to-teams').classList.add('active');
+    document.querySelector('.team-selection').style.display = 'none';
+    document.getElementById('players-section').classList.add('active');
+    loadTeamPlayers(team.id);
+  }
 
-      loadTeamPlayers(team.id);
-    }
+  // Функция возврата к командам
+  function showTeams() {
+    document.querySelector('.team-selection').style.display = 'flex';
+    document.getElementById('players-section').classList.remove('active');
+    document.getElementById('back-to-teams').classList.remove('active');
+  }
 
-    // Функция возврата к командам
-    function showTeams() {
-      document.querySelector('.team-selection').style.display = 'flex';
-      document.getElementById('players-section').classList.remove('active');
-      document.getElementById('back-to-teams').classList.remove('active');
-    }
+  // Функция загрузки игроков команды
+  async function loadTeamPlayers(teamId) {
+    try {
+      const { data: players, error: playersError } = await supabase
+        .from('players')
+        .select('*, player_stats(*)')
+        .eq('team_id', teamId);
 
-    // Функция загрузки игроков команды
-async function loadTeamPlayers(teamId) {
-  try {
-    const { data: players, error: playersError } = await supabase
-      .from('players')
-      .select('*, player_stats(*)')
-      .eq('team_id', teamId);
+      if (playersError) throw playersError;
 
-    if (playersError) throw playersError;
+      const { data: stats, error: statsError } = await supabase
+        .from('player_stats')
+        .select('*')
+        .in('player_id', players.map(p => p.id));
 
-    const { data: stats, error: statsError } = await supabase
-      .from('player_stats')
-      .select('*')
-      .in('player_id', players.map(p => p.id));
+      if (statsError) throw statsError;
 
-    if (statsError) throw statsError;
-        // Группируем статистику по игрокам
-        const statsByPlayer = stats.reduce((acc, stat) => {
-          if (!acc[stat.player_id]) acc[stat.player_id] = [];
-          acc[stat.player_id].push(stat);
-          return acc;
-        }, {});
+      const statsByPlayer = stats.reduce((acc, stat) => {
+        if (!acc[stat.player_id]) acc[stat.player_id] = [];
+        acc[stat.player_id].push(stat);
+        return acc;
+      }, {});
 
-        // Рассчитываем среднюю статистику для каждого игрока
-        const playersWithStats = players.map(player => {
-          const playerStats = statsByPlayer[player.id] || [];
-          const gamesCount = playerStats.length;
+      const playersWithStats = players.map(player => {
+        const playerStats = statsByPlayer[player.id] || [];
+        const gamesCount = playerStats.length;
 
-          const avgStats = {
-            points: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : 0,
-            threes: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : 0,
-            assists: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : 0,
-            rebounds: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : 0,
-            steals: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : 0,
-            blocks: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : 0,
-            turnover: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : 0,
-            games: gamesCount
-          };
+        const avgStats = {
+          points: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : 0,
+          threes: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : 0,
+          assists: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : 0,
+          rebounds: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : 0,
+          steals: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : 0,
+          blocks: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : 0,
+          turnover: gamesCount > 0 ? (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : 0,
+          games: gamesCount
+        };
 
-          // Рассчитываем среднее значение по формуле
-          const avgValue = gamesCount > 0 ?
-            (playerStats.reduce((sum, s) =>
+        const avgValue = gamesCount > 0
+          ? (playerStats.reduce((sum, s) =>
               sum + (
                 (s.points || 0) +
                 1.5 * (s.assists || 0) +
@@ -657,195 +661,173 @@ async function loadTeamPlayers(teamId) {
                 3 * (s.steals || 0) +
                 3 * (s.blocks || 0) -
                 2 * (s.turnover || 0)
-              ), 0) / gamesCount).toFixed(1) : 0;
+              ), 0) / gamesCount).toFixed(1)
+          : 0;
 
-          return { ...player, stats: avgStats, avgValue };
-        });
-
-    renderPlayers(playersWithStats);
-  } catch (error) {
-    console.error('Ошибка загрузки игроков:', error);
-    showNotification(currentLang === 'ru'
-      ? 'Ошибка загрузки игроков'
-      : 'Failed to load players', false);
-  }
-}
-
-    // Функция отображения игроков
-    function renderPlayers(players) {
-  const playersGrid = document.getElementById('players-grid');
-  playersGrid.innerHTML = '';
-  players.forEach(player => {
-    const playerName = currentLang === 'ru'
-      ? `${player.first_name} ${player.last_name}`
-      : `${player.first_name_en || player.first_name} ${player.last_name_en || player.last_name}`;
-
-    const playerPosition = currentLang === 'ru' ? player.position : player.position_en || player.position;
-    const teamName = currentLang === 'ru' ? currentTeam.name : currentTeam.name_en || currentTeam.name;
-    const scoutReport = currentLang === 'ru' ? player.scout : player.scout_en || player.scout;
-
-    const playerCard = document.createElement('div');
-    playerCard.className = 'player-card';
-    playerCard.innerHTML = `
-      <img src="${player.photo_url || 'https://via.placeholder.com/100'}" alt="${playerName}" class="player-photo">
-      <div class="player-info">
-        <div class="player-name">${playerName}</div>
-        <div class="player-position">${playerPosition || 'N/A'}</div>
-        <div class="player-team">${teamName}</div>
-        <div class="player-price">${player.price || 0}$</div>
-      </div>
-      <div class="scout-report">
-        ${scoutReport || (currentLang === 'ru' ? 'Скаут-отчёт отсутствует' : 'Scout report missing')}
-      </div>
-
-          <div class="player-stats">
-            <div class="stat-item">
-              <div class="stat-value">${player.avgValue}</div>
-              <div class="stat-label">Среднее</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">${player.stats.points}</div>
-              <div class="stat-label">Очки</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">${player.stats.assists}</div>
-              <div class="stat-label">Ассисты</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">${player.stats.rebounds}</div>
-              <div class="stat-label">Подборы</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">${player.stats.steals}</div>
-              <div class="stat-label">Перехваты</div>
-            </div>
-            <div class="stat-item">
-              <div class="stat-value">${player.stats.blocks}</div>
-              <div class="stat-label">Блоки</div>
-            </div>
-          </div>
-        `;
-
-        playersGrid.appendChild(playerCard);
+        return { ...player, stats: avgStats, avgValue };
       });
+
+      renderPlayers(playersWithStats);
+    } catch (error) {
+      console.error('Ошибка загрузки игроков:', error);
+      showNotification(
+        currentLang === 'ru' ? 'Ошибка загрузки игроков' : 'Failed to load players',
+        false
+      );
     }
-
-    // Функция отображения уведомлений
-function showNotification(message, isSuccess = true) {
-  const notifications = {
-    ru: {
-      success: 'Успех!',
-      error: 'Ошибка!',
-      teamLoadError: 'Ошибка загрузки команд',
-      playerLoadError: 'Ошибка загрузки игроков'
-    },
-    en: {
-      success: 'Success!',
-      error: 'Error!',
-      teamLoadError: 'Failed to load teams',
-      playerLoadError: 'Failed to load players'
-    }
-  };
-
-  const notification = document.createElement('div');
-  notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
-
-  if (message === 'Ошибка загрузки команд') {
-    message = notifications[currentLang].teamLoadError;
-  } else if (message === 'Ошибка загрузки игроков') {
-    message = notifications[currentLang].playerLoadError;
   }
 
-      notification.textContent = message;
+  // Функция отображения игроков
+  function renderPlayers(players) {
+    const playersGrid = document.getElementById('players-grid');
+    playersGrid.innerHTML = '';
 
-      document.body.appendChild(notification);
+    players.forEach(player => {
+      const playerName = currentLang === 'ru'
+        ? `${player.first_name} ${player.last_name}`
+        : `${player.first_name_en || player.first_name} ${player.last_name_en || player.last_name}`;
 
-      // Анимация появления
+      const playerPosition = currentLang === 'ru'
+        ? player.position
+        : (player.position_en || player.position);
+
+      const teamName = currentLang === 'ru'
+        ? currentTeam.name
+        : (currentTeam.name_en || currentTeam.name);
+
+      const scoutReport = currentLang === 'ru'
+        ? (player.scout || 'Скаут-отчёт отсутствует')
+        : (player.scout_en || player.scout || 'Scout report missing');
+
+      const playerCard = document.createElement('div');
+      playerCard.className = 'player-card';
+      playerCard.innerHTML = `
+        <img src="${player.photo_url || 'https://via.placeholder.com/100'}"
+             alt="${playerName}"
+             class="player-photo">
+        <div class="player-info">
+          <div class="player-name">${playerName}</div>
+          <div class="player-position">${playerPosition || 'N/A'}</div>
+          <div class="player-team">${teamName}</div>
+          <div class="player-price">${player.price || 0}$</div>
+        </div>
+        <div class="scout-report">${scoutReport}</div>
+        <div class="player-stats">
+          <div class="stat-item">
+            <div class="stat-value">${player.avgValue}</div>
+            <div class="stat-label">${currentLang === 'ru' ? 'Среднее' : 'Average'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${player.stats.points}</div>
+            <div class="stat-label">${currentLang === 'ru' ? 'Очки' : 'Points'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${player.stats.assists}</div>
+            <div class="stat-label">${currentLang === 'ru' ? 'Ассисты' : 'Assists'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${player.stats.rebounds}</div>
+            <div class="stat-label">${currentLang === 'ru' ? 'Подборы' : 'Rebounds'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${player.stats.steals}</div>
+            <div class="stat-label">${currentLang === 'ru' ? 'Перехваты' : 'Steals'}</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">${player.stats.blocks}</div>
+            <div class="stat-label">${currentLang === 'ru' ? 'Блоки' : 'Blocks'}</div>
+          </div>
+        </div>
+      `;
+      playersGrid.appendChild(playerCard);
+    });
+  }
+
+  // Функция отображения уведомлений
+  function showNotification(message, isSuccess = true) {
+    const notification = document.createElement('div');
+    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateY(0)';
+    }, 10);
+
+    setTimeout(() => {
       notification.style.opacity = '0';
       notification.style.transform = 'translateY(-20px)';
-
       setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateY(0)';
-      }, 10);
-
-      // Удаление через 3 секунды
-      setTimeout(() => {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateY(-20px)';
-
-        setTimeout(() => {
-          document.body.removeChild(notification);
-        }, 300);
-      }, 3000);
-    }
-
- document.addEventListener('DOMContentLoaded', () => {
-  // 1. Инициализация языка
-  const savedLang = localStorage.getItem('userLang') || 'ru';
-  currentLang = savedLang;
-
-  // Подсветка активной кнопки языка
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.lang === savedLang);
-  });
-
-  // 2. Добавление стилей для уведомлений (если ещё не добавлены)
-  if (!document.getElementById('notification-styles')) {
-    const style = document.createElement('style');
-    style.id = 'notification-styles';
-    style.textContent = `
-      .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 10px;
-        color: white;
-        font-weight: bold;
-        z-index: 1000;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        transform: translateY(-20px);
-        opacity: 0;
-      }
-      .notification.success {
-        background: linear-gradient(to right, #4CAF50, #2E7D32);
-      }
-      .notification.error {
-        background: linear-gradient(to right, #f44336, #c62828);
-      }
-      .notification.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    `;
-    document.head.appendChild(style);
+        notification.remove();
+      }, 300);
+    }, 3000);
   }
 
-  // 3. Обработчик смены языка
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const newLang = btn.dataset.lang;
-      if (newLang !== currentLang) {
-        // Обновляем активную кнопку
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+  // Инициализация страницы
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1. Инициализация языка
+    const savedLang = localStorage.getItem('userLang') || 'ru';
+    currentLang = savedLang;
 
-        // Сохраняем язык
-        currentLang = newLang;
-        localStorage.setItem('userLang', newLang);
-
-        // Перезагружаем контент
-        if (document.getElementById('players-section').classList.contains('active')) {
-          loadTeamPlayers(currentTeam.id);
-        } else {
-          loadTeams();
-        }
-      }
+    // Подсветка активной кнопки языка
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.lang === savedLang);
     });
+
+    // 2. Добавление стилей для уведомлений
+    if (!document.getElementById('notification-styles')) {
+      const style = document.createElement('style');
+      style.id = 'notification-styles';
+      style.textContent = `
+        .notification {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          padding: 15px 20px;
+          border-radius: 10px;
+          color: white;
+          font-weight: bold;
+          z-index: 1000;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+        .notification.success {
+          background: linear-gradient(to right, #4CAF50, #2E7D32);
+        }
+        .notification.error {
+          background: linear-gradient(to right, #f44336, #c62828);
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    // 3. Обработчик смены языка
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const newLang = btn.dataset.lang;
+        if (newLang !== currentLang) {
+          document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentLang = newLang;
+          localStorage.setItem('userLang', newLang);
+
+          if (document.getElementById('players-section').classList.contains('active')) {
+            loadTeamPlayers(currentTeam.id);
+          } else {
+            loadTeams();
+          }
+        }
+      });
+    });
+
+    // 4. Загрузка команд
+    loadTeams();
   });
-  </script>
+</script>
 </body>
 </html>
+
 
