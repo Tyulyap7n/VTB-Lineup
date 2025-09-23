@@ -266,7 +266,101 @@ main {
   flex: 1;
   max-width: none; /* Убираем ограничение */
 }
-    
+    /* Обновленные стили для матчей */
+.match-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Центрируем контейнер */
+  padding: 10px;
+  background: linear-gradient(to right, var(--purple-light), var(--purple));
+  border-radius: 10px;
+  margin-bottom: 10px;
+  width: 135%;
+  margin-left: -80px;
+}
+
+.team-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+}
+
+.team-home {
+  display: left;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  order: 1;
+}
+
+.team-away {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  order: 2;
+}
+
+/* Домашняя команда: бейдж, название, логотип */
+.team-home .multiple-games-badge {
+  order: 0;
+  margin-right: 5px;
+}
+
+.team-home .team-name {
+  order: 1;
+}
+
+.team-home .team-logo {
+  order: 2;
+}
+
+/* Гостевая команда: логотип, название, бейдж */
+.team-away .team-logo {
+  order: 0;
+}
+
+.team-away .team-name {
+  order: 1;
+}
+
+.team-away .multiple-games-badge {
+  order: 2;
+  margin-left: 5px;
+}
+
+.team-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 1px solid var(--white);
+}
+
+.team-name {
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.multiple-games-badge {
+  width: 20px;
+  height: 20px;
+  background: url('https://lineupfantasy.netlify.app/image/logo.jpg') no-repeat center center;
+  background-size: cover !important;
+  border-radius: 50%;
+  border: 2px solid var(--yellow);
+  z-index: 10;
+  animation: pulse 2s infinite;
+}
+
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
     .back-button {
       position: absolute;
       top: 20px;
@@ -4646,4 +4740,5 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
