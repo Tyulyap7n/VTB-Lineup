@@ -4121,9 +4121,7 @@ async function initTeamFilter() {
         const teamFilter = document.getElementById('filter-team');
         if (teamFilter) {
             // Очищаем существующие опции (кроме "Все")
-            while (teamFilter.options.length > 1) {
-                teamFilter.remove(1);
-            }
+            teamFilter.innerHTML = '<option value="">Все</option>';
 
             // Добавляем команды в фильтр
             teams.forEach(team => {
@@ -4133,7 +4131,6 @@ async function initTeamFilter() {
                 teamFilter.appendChild(option);
             });
         }
-
     } catch (error) {
         console.error("Ошибка инициализации фильтра команд:", error);
     }
@@ -4164,11 +4161,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Инициализация языка
     const savedLang = localStorage.getItem('preferred-language') || 'ru';
     switchLanguage(savedLang);
-
+	        // Обработчики событий для кнопок пагинации
+        document.getElementById('prev-page').addEventListener('click', prevPage);
+        document.getElementById('next-page').addEventListener('click', nextPage);
     // Обработчики для кнопок переключения языка
     document.getElementById('switch-to-en').addEventListener('click', () => switchLanguage('en'));
     document.getElementById('switch-to-ru').addEventListener('click', () => switchLanguage('ru'));
-
+	await initTeamFilter();
     // Проверяем авторизацию пользователя
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
@@ -4898,6 +4897,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
