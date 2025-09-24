@@ -4065,34 +4065,53 @@ function assignToRole(role) {
     });
 	// Заполняем фильтр командами при загрузке страницы
 async function initTeamFilter() {
-  try {
-    const { data: players, error } = await supabase
-      .from('players')
-      .select('team_name, team_name_en');
+    try {
+        const { data: teams, error } = await supabase
+            .from('teams')
+            .select('name')
+            .order('name');
 
-    if (error) throw error;
+        if (error) throw error;
 
-    const teamFilter = document.getElementById('filter-team');
-    const teamsSet = new Set();
+        const teamFilter = document.getElementById('filter-team');
+        if (teamFilter) {
+            // Очищаем существующие опции (кроме "Все")
+            while (teamFilter.options.length > 1) {
+                teamFilter.remove(1);
+            }
 
-    players.forEach(player => {
-      if (player.team_name) {
-        teamsSet.add(player.team_name);
-      }
-    });
+            // Добавляем команды в фильтр
+            teams.forEach(team => {
+                const option = document.createElement('option');
+                option.value = team.name;
+                option.textContent = team.name;
+                teamFilter.appendChild(option);
+            });
+        }
 
-    // Добавляем команды в фильтр
-    Array.from(teamsSet).sort().forEach(teamName => {
-      const option = document.createElement('option');
-      option.value = teamName;
-      option.textContent = teamName;
-      teamFilter.appendChild(option);
-    });
-
-  } catch (error) {
-    console.error("Ошибка инициализации фильтра команд:", error);
-  }
+    } catch (error) {
+        console.error("Ошибка инициализации фильтра команд:", error);
+    }
 }
+
+// Обработчики фильтров
+document.getElementById('filter-team')?.addEventListener('change', () => {
+    currentPage = 1;
+    renderPlayersTable();
+});
+
+document.getElementById('filter-position')?.addEventListener('change', () => {
+    currentPage = 1;
+    renderPlayersTable();
+});
+
+// Обработчики сортировки
+document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+    header.addEventListener('click', () => {
+        const column = header.getAttribute('data-sort');
+        sortTable(column);
+    });
+});
 
 // Инициализация языка при загрузке страницы
 document.addEventListener("DOMContentLoaded", async () => {
@@ -4174,13 +4193,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 function sortTable(column) {
-  if (currentSort.column === column) {
-    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-  } else {
-    currentSort.column = column;
-    currentSort.direction = 'asc';
-  }
-  renderPlayers();
+    if (currentSort.column === column) {
+        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.column = column;
+        currentSort.direction = 'asc';
+    }
+    
+    // Сбрасываем индикаторы сортировки
+    document.querySelectorAll('.players-table th').forEach(h => {
+        h.classList.remove('sort-asc', 'sort-desc');
+    });
+    
+    // Устанавливаем индикатор для текущего столбца
+    const currentHeader = document.querySelector(`th[data-sort="${column}"]`);
+    if (currentHeader) {
+        currentHeader.classList.add(`sort-${currentSort.direction}`);
+    }
+    
+    renderPlayersTable();
 }
 function nextPage() {
   if (currentPage * playersPerPage < allPlayers.length) {
@@ -4820,6 +4851,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
