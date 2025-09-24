@@ -572,83 +572,7 @@
   // Глобальные переменные
   let teams = [];
   let currentTeam = null;
-  let currentLang = 'ru';
 
-  // Словарь переводов для интерфейса
-  const translations = {
-    ru: {
-      pageTitle: "Скаут",
-      selectTeam: "Выберите команду для просмотра игроков",
-      playersTitle: "Игроки команды",
-      backToTeams: "← Вернуться к командам",
-      backButton: "Назад",
-      stats: {
-        average: "Среднее",
-        points: "Очки",
-        assists: "Ассисты",
-        rebounds: "Подборы",
-        steals: "Перехваты",
-        blocks: "Блоки",
-        turnover: "Потери"
-      },
-      notifications: {
-        teamLoadError: "Ошибка загрузки команд",
-        playerLoadError: "Ошибка загрузки игроков",
-        noScout: "Скаут-отчёт отсутствует"
-      },
-      sidebar: {
-        news: "Новости",
-        exit: "Выход"
-      },
-      footer: {
-        home: "Главная",
-        news: "Новости",
-        results: "Результаты",
-        standings: "Таблица",
-        developer: "Разработчик"
-      }
-    },
-    en: {
-      pageTitle: "Scout",
-      selectTeam: "Select a team to view players",
-      playersTitle: "Team Players",
-      backToTeams: "← Back to Teams",
-      backButton: "Back",
-      stats: {
-        average: "Average",
-        points: "Points",
-        assists: "Assists",
-        rebounds: "Rebounds",
-        steals: "Steals",
-        blocks: "Blocks",
-        turnover: "Turnovers"
-      },
-      notifications: {
-        teamLoadError: "Failed to load teams",
-        playerLoadError: "Failed to load players",
-        noScout: "Scout report missing"
-      },
-      sidebar: {
-        news: "News",
-        exit: "Exit"
-      },
-      footer: {
-        home: "Home",
-        news: "News",
-        results: "Results",
-        standings: "Standings",
-        developer: "Developer"
-      }
-    }
-  };
-
-  // Функция для получения перевода
-  function t(key, section = null) {
-    if (section) {
-      return translations[currentLang][section][key] || key;
-    }
-    return translations[currentLang][key] || key;
-  }
 
   // Функция загрузки команд
   async function loadTeams() {
@@ -989,6 +913,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
 
 
