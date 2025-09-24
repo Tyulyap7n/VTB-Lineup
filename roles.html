@@ -1790,6 +1790,39 @@ main {
   opacity: 0;
   animation: modalFadeIn 0.5s ease forwards;
 }
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.pagination-button {
+    padding: 8px 16px;
+    background: linear-gradient(to right, var(--purple), var(--purple-dark));
+    color: var(--white);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.pagination-button:hover {
+    background: linear-gradient(to right, var(--purple-light), var(--purple));
+    transform: scale(1.05);
+}
+
+.pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#page-info {
+    color: var(--white);
+    font-weight: bold;
+}
 
 .rules-content {
   background: transparent;
@@ -2039,6 +2072,11 @@ main {
           <!-- Игроки будут добавлены динамически -->
         </tbody>
       </table>
+		<div class="pagination-controls">
+		    <button id="prev-page" class="pagination-button" onclick="prevPage()">❮</button>
+		    <span id="page-info">Страница 1 из 1</span>
+		    <button id="next-page" class="pagination-button" onclick="nextPage()">❯</button>
+		</div>
     </div>
   </div>
       
@@ -4217,17 +4255,22 @@ function sortTable(column) {
     renderPlayersTable();
 }
 function nextPage() {
-  if (currentPage * playersPerPage < allPlayers.length) {
-    currentPage++;
-    renderPlayers();
-  }
+    const playersPerPage = 8;
+    const totalPages = Math.ceil(players.length / playersPerPage);
+
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderPlayersTable();
+    }
 }
+
 function prevPage() {
-  if (currentPage > 1) {
-    currentPage--;
-    renderPlayers();
-  }
+    if (currentPage > 1) {
+        currentPage--;
+        renderPlayersTable();
+    }
 }
+
 function updatePaginationControls() {
   document.getElementById('page-indicator').textContent = `${currentPage} / ${Math.ceil(allPlayers.length / playersPerPage)}`;
 }
@@ -4461,7 +4504,6 @@ async function renderPlayersTable() {
         if (currentSort.column) {
             filteredPlayers.sort((a, b) => {
                 let aValue, bValue;
-
                 switch (currentSort.column) {
                     case 'name':
                         aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
@@ -4476,11 +4518,9 @@ async function renderPlayersTable() {
                         bValue = calculatePlayerAverage(b);
                         break;
                     default:
-                        // Для статистических колонок
                         aValue = calculateStatAverage(a, currentSort.column);
                         bValue = calculateStatAverage(b, currentSort.column);
                 }
-
                 if (currentSort.direction === 'asc') {
                     return aValue > bValue ? 1 : -1;
                 } else {
@@ -4489,30 +4529,36 @@ async function renderPlayersTable() {
             });
         }
 
+        // Пагинация: вычисляем индексы начала и конца для текущей страницы
+        const playersPerPage = 8;
+        const startIndex = (currentPage - 1) * playersPerPage;
+        const endIndex = startIndex + playersPerPage;
+        const playersToShow = filteredPlayers.slice(startIndex, endIndex);
+
         // Отрисовываем таблицу
         tableBody.innerHTML = '';
-        filteredPlayers.forEach(player => {
+        playersToShow.forEach(player => {
             const playerStats = player.stats || [];
             const gamesCount = playerStats.length;
 
             // Рассчитываем средние значения
-            const avgPoints = gamesCount > 0 ? 
+            const avgPoints = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : '0.0';
-            const avgThrees = gamesCount > 0 ? 
+            const avgThrees = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : '0.0';
-            const avgAssists = gamesCount > 0 ? 
+            const avgAssists = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : '0.0';
-            const avgRebounds = gamesCount > 0 ? 
+            const avgRebounds = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : '0.0';
-            const avgSteals = gamesCount > 0 ? 
+            const avgSteals = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : '0.0';
-            const avgBlocks = gamesCount > 0 ? 
+            const avgBlocks = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : '0.0';
-            const avgTurnover = gamesCount > 0 ? 
+            const avgTurnover = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : '0.0';
 
             // Рассчитываем средний показатель (AVG)
-            const avgAvg = gamesCount > 0 ? 
+            const avgAvg = gamesCount > 0 ?
                 (playerStats.reduce((sum, s) => sum + (
                     (s.points || 0) +
                     1.5 * (s.assists || 0) +
@@ -4523,12 +4569,10 @@ async function renderPlayersTable() {
                 ), 0) / gamesCount).toFixed(1) : '0.0';
 
             const row = document.createElement("tr");
-            
-            // Сохраняем оригинальный вызов функции добавления игрока
-row.innerHTML = `
-    <td>
-        <button class="select-button" onclick="openRoleSelector(${player.id}, this)">+</button>
-    </td>
+            row.innerHTML = `
+                <td>
+                    <button class="select-button" onclick="openRoleSelector(${player.id}, this)">+</button>
+                </td>
                 <td>
                     <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
                          alt="${player.first_name} ${player.last_name}"
@@ -4536,7 +4580,7 @@ row.innerHTML = `
                 </td>
                 <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        ${player.teams?.logo_url ? 
+                        ${player.teams?.logo_url ?
                             `<img src="${player.teams.logo_url}" alt="${player.teams.name}" width="24" height="24" style="border-radius: 50%;">` : ''}
                         <span class="player-name-cell" onclick="openPlayerPopup(${player.id})" style="cursor: pointer; color: var(--white); transition: color 0.3s ease;">
                             ${player.first_name} ${player.last_name} (${player.position})
@@ -4557,6 +4601,9 @@ row.innerHTML = `
             tableBody.appendChild(row);
         });
 
+        // Обновляем элементы пагинации
+        updatePaginationControls(filteredPlayers.length);
+
     } catch (error) {
         console.error("Ошибка загрузки данных:", error);
         tableBody.innerHTML = `
@@ -4568,6 +4615,7 @@ row.innerHTML = `
         `;
     }
 }
+
 	function calculateStatAverage(player, statName) {
     const stats = player.stats || [];
     if (stats.length === 0) return 0;
@@ -4590,13 +4638,15 @@ function prevPage() {
     }
 }
 
-function updatePaginationControls() {
-    const totalPages = Math.ceil(players.length / playersPerPage);
-    const pageInfo = document.getElementById('page-info');
-    if (pageInfo) {
-        pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
-    }
+function updatePaginationControls(totalPlayers) {
+    const playersPerPage = 8;
+    const totalPages = Math.ceil(totalPlayers / playersPerPage);
+
+    document.getElementById('page-info').textContent = `Страница ${currentPage} из ${totalPages}`;
+    document.getElementById('prev-page').disabled = currentPage === 1;
+    document.getElementById('next-page').disabled = currentPage === totalPages;
 }
+
 
 function calculatePlayerAverage(player) {
     const stats = player.stats || [];
@@ -4845,6 +4895,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
