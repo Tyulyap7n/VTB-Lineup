@@ -2486,12 +2486,67 @@ let currentSelectedPlayer = null;
     };
 const playersPerPage = 10;
 
-async function loadPlayersPage(page) {
-  const { data } = await supabase
-    .from('players')
-    .select('*, teams(name, logo_url)')
-    .range((page - 1) * playersPerPage, page * playersPerPage - 1);
-  // Добавляем данные в таблицу
+async function loadPlayersPage(page = 1) {
+  try {
+    // 1. Загружаем игроков
+    const { data: players, error: playersError } = await supabase
+      .from('players')
+      .select('id, first_name, last_name, price, photo_url, team_name');
+
+    if (playersError) throw playersError;
+
+    // 2. Загружаем статистику
+    const { data: stats, error: statsError } = await supabase
+      .from('player_stats')
+      .select('player_id, points, assists, rebounds, steals, blocks, turnover, threes');
+
+    if (statsError) throw statsError;
+
+    // 3. Группируем статистику по игрокам
+    const statsByPlayer = {};
+    stats.forEach(s => {
+      if (!statsByPlayer[s.player_id]) {
+        statsByPlayer[s.player_id] = {
+          games: 0,
+          points: 0,
+          assists: 0,
+          rebounds: 0,
+          steals: 0,
+          blocks: 0,
+          turnovers: 0,
+          threes: 0
+        };
+      }
+      let st = statsByPlayer[s.player_id];
+      st.games++;
+      st.points += s.points || 0;
+      st.assists += s.assists || 0;
+      st.rebounds += s.rebounds || 0;
+      st.steals += s.steals || 0;
+      st.blocks += s.blocks || 0;
+      st.turnovers += s.turnover || 0;
+      st.threes += s.threes || 0;
+    });
+
+    // 4. Объединяем игроков со статистикой
+    allPlayers = players.map(p => {
+      const st = statsByPlayer[p.id] || {
+        games: 0,
+        points: 0,
+        assists: 0,
+        rebounds: 0,
+        steals: 0,
+        blocks: 0,
+        turnovers: 0,
+        threes: 0
+      };
+      return { ...p, stats: st, avg: calculateAvg(st) };
+    });
+
+    renderPlayers();
+  } catch (err) {
+    console.error('Ошибка загрузки игроков:', err);
+  }
 }
 
 // Обработчик скролла
@@ -2501,6 +2556,55 @@ window.addEventListener('scroll', () => {
     loadPlayersPage(currentPage);
   }
 });
+	function renderPlayers() {
+  const tbody = document.getElementById('players-table-body');
+  tbody.innerHTML = '';
+
+  // пагинация
+  const start = (currentPage - 1) * playersPerPage;
+  const end = start + playersPerPage;
+  let playersToShow = [...allPlayers];
+
+  // сортировка
+  if (currentSort.column) {
+    playersToShow.sort((a, b) => {
+      let valA = a[currentSort.column];
+      let valB = b[currentSort.column];
+      if (currentSort.column === 'avg') {
+        valA = parseFloat(valA);
+        valB = parseFloat(valB);
+      }
+      if (currentSort.direction === 'asc') {
+        return valA > valB ? 1 : -1;
+      } else {
+        return valA < valB ? 1 : -1;
+      }
+    });
+  }
+
+  playersToShow.slice(start, end).forEach(p => {
+    const st = p.stats;
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><button class="select-button" onclick="assignPlayer(${p.id})">+</button></td>
+      <td><img src="${p.photo_url || ''}" style="width:30px;height:30px;border-radius:50%"></td>
+      <td>${p.first_name} ${p.last_name}</td>
+      <td>${p.price ?? 0}</td>
+      <td>${p.avg}</td>
+      <td>${st.points}</td>
+      <td>${st.threes}</td>
+      <td>${st.assists}</td>
+      <td>${st.rebounds}</td>
+      <td>${st.steals}</td>
+      <td>${st.blocks}</td>
+      <td>${st.turnovers}</td>
+      <td>0%</td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  updatePaginationControls();
+}
 async function loadPlayerStats(playerIds) {
   try {
     const { data: stats, error } = await supabase
@@ -4073,56 +4177,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     showNotification('alerts.loading_error', false);
   }
 });
-    // Функция сортировки таблицы
-    function sortTable(column) {
-      const tbody = document.getElementById('players-table-body');
-      const rows = Array.from(tbody.querySelectorAll('tr'));
-      const header = document.querySelector(`th[data-sort="${column}"]`);
-      
-      // Сбрасываем классы сортировки у всех заголовков
-      document.querySelectorAll('.players-table th').forEach(h => {
-        h.classList.remove('sort-asc', 'sort-desc');
-      });
-      
-      // Определяем направление сортировки
-      let direction = 'asc';
-      if (currentSort.column === column) {
-        direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-      }
-      
-      // Устанавливаем класс для заголовка
-      header.classList.add(`sort-${direction}`);
-      
-      // Сохраняем текущую сортировку
-      currentSort = { column, direction };
-      
-      // Сортируем строки
-      rows.sort((a, b) => {
-        let aValue = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
-        let bValue = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent;
-        
-        // Преобразуем числовые значения
-        if (column !== 'name' && column !== 'photo' && column !== 'add') {
-          aValue = aValue.replace('$', '').replace('%', '');
-          bValue = bValue.replace('$', '').replace('%', '');
-          
-          aValue = isNaN(parseFloat(aValue)) ? aValue : parseFloat(aValue);
-          bValue = isNaN(parseFloat(bValue)) ? bValue : parseFloat(bValue);
-        }
-        
-        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-        return 0;
-      });
-      
-      // Удаляем существующие строки
-      while (tbody.firstChild) {
-        tbody.removeChild(tbody.firstChild);
-      }
-      
-      // Добавляем отсортированные строки
-      rows.forEach(row => tbody.appendChild(row));
-    }
+function sortTable(column) {
+  if (currentSort.column === column) {
+    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+  } else {
+    currentSort.column = column;
+    currentSort.direction = 'asc';
+  }
+  renderPlayers();
+}
+function nextPage() {
+  if (currentPage * playersPerPage < allPlayers.length) {
+    currentPage++;
+    renderPlayers();
+  }
+}
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    renderPlayers();
+  }
+}
+function updatePaginationControls() {
+  document.getElementById('page-indicator').textContent = `${currentPage} / ${Math.ceil(allPlayers.length / playersPerPage)}`;
+}
+
+// запуск при загрузке
+document.addEventListener('DOMContentLoaded', () => loadPlayersPage());
 
     // Получение индекса колонки по имени
     function getColumnIndex(columnName) {
@@ -4773,6 +4854,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
