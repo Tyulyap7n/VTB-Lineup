@@ -284,11 +284,6 @@
     <div class="header-logo">
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="VTB Logo">
     </div>
-    <!-- Переключатель языка -->
-    <div class="language-switcher">
-      <button id="switch-to-en" class="lang-btn">EN</button>
-      <button id="switch-to-ru" class="lang-btn active">RU</button>
-    </div>
   </header>
   <!-- Основной контейнер -->
   <div class="main-container">
@@ -315,7 +310,7 @@
           <div class="league-block-container">
             <div class="league-block" onclick="window.location.href='roles.html'">
               <div class="league-block-front">
-                <img src="https://image2url.com/images/1758736575986-e847d70e-f7bb-4a43-8e4e-d91394b2869f.png" alt="Роли">
+                <img src="roles.png" alt="Роли">
               </div>
               <div class="league-block-back">
                 РОЛИ — УНИКАЛЬНАЯ ФИШКА НАШЕГО ФЭНТЕЗИ ФОРМАТА. НИКАКИХ ПОЗИЦИЙ, ПОДБИРАЙ ИГРОКОВ ПОД НУЖНУЮ РОЛЬ!
@@ -327,7 +322,7 @@
           <div class="league-block-container">
             <div class="league-block" onclick="window.location.href='scoring.html'">
               <div class="league-block-front">
-                <img src="https://image2url.com/images/1758736510984-19bade9e-1338-414c-afcc-77377b1725a4.png" alt="Классика">
+                <img src="classic.png" alt="Классика">
               </div>
               <div class="league-block-back">
                 КЛАССИЧЕСКОЕ ФЭНТЕЗИ — СОБЕРИ СОСТАВ ПО ПОЗИЦИЯМ И НАБЕРИ МАКСИМУМ ФЭНТЕЗИ-ОЧКОВ!
@@ -353,18 +348,6 @@
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener("DOMContentLoaded", async () => {
-      // Обработчики для кнопок переключения языка
-      document.getElementById('switch-to-en').addEventListener('click', () => {
-        document.getElementById('switch-to-en').classList.add('active');
-        document.getElementById('switch-to-ru').classList.remove('active');
-        localStorage.setItem('preferred-language', 'en');
-      });
-
-      document.getElementById('switch-to-ru').addEventListener('click', () => {
-        document.getElementById('switch-to-ru').classList.add('active');
-        document.getElementById('switch-to-en').classList.remove('active');
-        localStorage.setItem('preferred-language', 'ru');
-      });
 
       // Получаем текущего пользователя
       const { data: { user } } = await supabase.auth.getUser();
@@ -417,3 +400,4 @@
   </script>
 </body>
 </html>
+
