@@ -4905,11 +4905,6 @@ async function renderPlayersTable() {
                 }
             });
         }
-
-        const startIndex = (currentPage - 1) * playersPerPage;
-        const endIndex = startIndex + playersPerPage;
-        const playersToShow = filteredPlayers.slice(startIndex, endIndex);
-
         // Отрисовываем таблицу
         tableBody.innerHTML = '';
         playersToShow.forEach(player => {
@@ -5271,6 +5266,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
