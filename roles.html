@@ -2369,7 +2369,6 @@ let currentSelectedPlayer = null;
         'alerts.no_team': 'У вас нет команды',
         'alerts.leagues_error': 'Ошибка загрузки лиг пользователя:',
         'alerts.leagues_info_error': 'Ошибка загрузки лиг:',
-        'alerts.loading_error': 'Ошибка загрузки данных',
         'alerts.save_success': 'Состав успешно сохранен!',
         'alerts.save_error': 'Ошибка сохранения',
         'alerts.duplicate_player': 'Этот игрок уже выбран на другой позиции',
@@ -2446,7 +2445,6 @@ let currentSelectedPlayer = null;
         'alerts.no_team': 'You don\'t have a team',
         'alerts.leagues_error': 'Error loading user leagues:',
         'alerts.leagues_info_error': 'Error loading leagues:',
-        'alerts.loading_error': 'Error loading data',
         'alerts.save_success': 'Roster saved successfully!',
         'alerts.save_error': 'Save error',
         'alerts.duplicate_player': 'This player is already selected for another position',
@@ -4195,7 +4193,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   } catch (error) {
     console.error("Ошибка инициализации:", error);
-    showNotification('alerts.loading_error', false);
   }
 });
 function sortTable(column) {
@@ -4788,7 +4785,6 @@ async function openPlayerPopup(playerId) {
 
   } catch (error) {
     console.error('Ошибка загрузки данных игрока:', error);
-    showNotification('alerts.loading_error', false);
   }
 }
 // Функция для закрытия popup
@@ -4849,6 +4845,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
