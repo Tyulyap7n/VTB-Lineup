@@ -295,169 +295,269 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 
   <style>
-    /* Стили для переключателя языка */
-    .language-switcher {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      gap: 5px;
-      z-index: 1000;
-    }
-
-    .lang-btn {
-      padding: 5px 10px;
-      border: 1px solid #ccc;
-      background: white;
-      cursor: pointer;
-      border-radius: 3px;
-      font-size: 12px;
-    }
-
-    .lang-btn.active {
-      background: #007bff;
-      color: white;
-      border-color: #007bff;
-    }
-
-    .lang-btn:hover {
-      background: #f0f0f0;
-    }
-
-    .lang-btn.active:hover {
-      background: #0056b3;
-    }
-    .preview-item img {
-  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
-}
-.preview-item:active {
-  transform: scale(0.98);
-}
-
-    /* Анимация для блока preview-images */
-.preview-images {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 30px;
-  perspective: 1000px; /* Для 3D-эффектов */
-  opacity: 0; /* Начальная прозрачность для анимации */
-  transform: translateY(20px); /* Начальное смещение */
-  animation: fadeInUp 0.8s ease-out forwards; /* Анимация появления */
-}
-
-.preview-item {
-  flex: 0 0 280px;
-  height: 220px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  position: relative;
-  cursor: pointer;
-  transform-style: preserve-3d; /* Сохранение 3D-пространства */
-}
-
-.preview-item:hover {
-  transform: translateY(-5px) scale(1.03);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
-  z-index: 10;
-}
-
-.preview-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.6s ease;
-  backface-visibility: hidden; /* Убираем мерцание при анимации */
-}
-
-.preview-item:hover img {
-  transform: scale(1.05);
-}
-
-.preview-item p {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  color: white;
-  padding: 15px;
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.4;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.preview-item:hover p {
-  opacity: 1;
-}
-
-/* Эффект "дыхания" (пульсации) для привлечения внимания */
-@keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.015); }
-}
-
-.preview-item:nth-child(2) {
-  animation: breathe 4s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-.preview-item:nth-child(3) {
-  animation: breathe 5s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-/* Анимация появления блока */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+<style>
+  /* Стили для переключателя языка (оставляем без изменений) */
+  .language-switcher {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 5px;
+    z-index: 1000;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  .lang-btn {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    background: white;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
   }
-}
-@media (prefers-color-scheme: dark) {
+  .lang-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+  .lang-btn:hover {
+    background: #f0f0f0;
+  }
+  .lang-btn.active:hover {
+    background: #0056b3;
+  }
+
+  /* Новые стили для адаптивности */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
+  }
+
+  .auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .site-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #2c3e50;
+  }
+
+  .logo-left, .logo-right {
+    width: 50px;
+    height: 50px;
+    margin: 0 15px;
+  }
+
+  .logo-left img, .logo-right img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  main.auth-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .form-section {
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-section h2 {
+    margin-top: 0;
+    color: #2c3e50;
+    text-align: center;
+    font-size: 22px;
+  }
+
+  .form-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .form-section input {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+  }
+
+  .form-section input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+
+  .btn-primary, .btn-secondary {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+
+  /* Стили для блока с фотографиями */
+  .preview-images {
+    width: 100%;
+    margin-top: 30px;
+    padding: 0 20px;
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
   .preview-item {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  }
-  .preview-item p {
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-  }
-}
-
-/* Эффект паралакса при скролле (для десктопов) */
-@media (min-width: 768px) {
-  .preview-item {
-    transform: translateZ(0);
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: auto;
   }
 
-  .preview-item:nth-child(1) {
-    transition: transform 0.3s ease;
+  .preview-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   }
 
-  .preview-item:nth-child(2) {
-    transition: transform 0.4s ease;
-    transform: translateZ(-20px) scale(0.98);
+  .preview-img-wrapper {
+    height: 180px;
+    overflow: hidden;
   }
 
-  .preview-item:nth-child(3) {
+  .preview-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     transition: transform 0.5s ease;
-    transform: translateZ(-40px) scale(0.95);
   }
 
-  .preview-item:nth-child(4) {
-    transition: transform 0.6s ease;
-    transform: translateZ(-60px) scale(0.92);
+  .preview-item:hover .preview-img-wrapper img {
+    transform: scale(1.05);
   }
-}
+
+  .preview-item p {
+    padding: 15px;
+    margin: 0;
+    font-size: 14px;
+    color: #495057;
+    line-height: 1.5;
+    background: white;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    background-color: white;
+    margin-top: auto;
+    color: #6c757d;
+    font-size: 14px;
+  }
+
+  /* Адаптивность для мобильных устройств */
+  @media (max-width: 768px) {
+    .preview-grid {
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .form-section {
+      padding: 20px;
+    }
+
+    .site-header h1 {
+      font-size: 20px;
+    }
+
+    .logo-left, .logo-right {
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .preview-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .preview-images {
+      padding: 0 10px;
+    }
+  }
+
+  /* Анимации */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .preview-item {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .preview-item:nth-child(1) { animation-delay: 0.1s; }
+  .preview-item:nth-child(2) { animation-delay: 0.2s; }
+  .preview-item:nth-child(3) { animation-delay: 0.3s; }
+  .preview-item:nth-child(4) { animation-delay: 0.4s; }
+</style>
+
 
   </style>
 </body>
 </html>
+
 
