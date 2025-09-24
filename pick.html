@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>FIBA Fantasy - Выбор лиги</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -16,7 +16,6 @@
       --black: #1c1c1c;
       --white: #ffffff;
     }
-
     @font-face {
       font-family: 'Petrov Sans';
       src: url('PetrovSans-Trial-Bold.otf') format('opentype');
@@ -24,13 +23,11 @@
       font-style: normal;
       font-display: swap;
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     body {
       font-family: 'Petrov Sans', Arial, sans-serif;
       display: flex;
@@ -39,7 +36,6 @@
       background-color: var(--black);
       color: var(--white);
     }
-
     /* Хэдер */
     header {
       width: 100%;
@@ -52,69 +48,62 @@
       position: relative;
       z-index: 10;
     }
-
     .header-logo img {
       height: 50px;
     }
-/* Стили для изображений в блоках лиг */
-.league-block-front img,
-.league-block-back img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: absolute;
-    top: 0;
-    left: 0;
-    border-radius: 8px;
-}
-
-.league-block-front,
-.league-block-back {
-    position: relative;
-    overflow: hidden;
-}
-
-.league-block-front::after,
-.league-block-back::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    );
-    z-index: 1;
-}
-
-.league-block-front .league-title,
-.league-block-back .league-description {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    padding: 20px;
-    color: var(--white);
-    font-weight: bold;
-}
-
-/* Альтернативный вариант - изображение как фон */
-.league-block-front.with-bg {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.league-block-back.with-bg {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
+    /* Стили для изображений в блоках лиг */
+    .league-block-front img,
+    .league-block-back img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 8px;
+    }
+    .league-block-front,
+    .league-block-back {
+        position: relative;
+        overflow: hidden;
+    }
+    .league-block-front::after,
+    .league-block-back::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        z-index: 1;
+    }
+    .league-block-front .league-title,
+    .league-block-back .league-description {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        padding: 20px;
+        color: var(--white);
+        font-weight: bold;
+    }
+    /* Альтернативный вариант - изображение как фон */
+    .league-block-front.with-bg {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    .league-block-back.with-bg {
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
     .account-link {
       color: var(--yellow);
       text-decoration: none;
       font-weight: bold;
       font-size: 18px;
     }
-
     /* Переключатель языка */
     .language-switcher {
       position: absolute;
@@ -124,7 +113,6 @@
       gap: 5px;
       z-index: 1000;
     }
-
     .lang-btn {
       padding: 5px 10px;
       border: 1px solid #ccc;
@@ -134,28 +122,23 @@
       font-size: 12px;
       font-family: 'Petrov Sans', Arial, sans-serif;
     }
-
     .lang-btn.active {
       background: var(--yellow);
       color: var(--black);
       border-color: var(--yellow);
     }
-
     .lang-btn:hover {
       background: #f0f0f0;
     }
-
     .lang-btn.active:hover {
       background: #e6d600;
     }
-
     /* Основной контейнер */
     .main-container {
       display: flex;
       flex: 1;
       position: relative;
     }
-
     /* Боковая панель (aside) */
     aside {
       position: absolute;
@@ -187,17 +170,14 @@
       gap: 8px;
       margin-bottom: 10px;
     }
-
     .sidebar-item:hover {
       background-color: rgba(255, 255, 255, 0.2);
     }
-
     .sidebar-item img {
       width: 40px;
       height: 40px;
       border-radius: 4px;
     }
-
     .sidebar-item span {
       font-size: 14px;
       display: none;
@@ -224,21 +204,18 @@
       margin-top: 30px;
       perspective: 1000px;
     }
-
     .league-row {
       display: flex;
       gap: 90px;
       justify-content: center;
       margin-bottom: 30px;
     }
-
     .league-block-container {
       width: 300px;
       height: 200px;
       position: relative;
       perspective: 1000px;
     }
-
     .league-block {
       width: 100%;
       height: 100%;
@@ -249,11 +226,9 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       cursor: pointer;
     }
-
     .league-block:hover {
       transform: rotateY(180deg);
     }
-
     .league-block-front, .league-block-back {
       position: absolute;
       width: 100%;
@@ -268,19 +243,16 @@
       font-weight: bold;
       color: var(--white);
     }
-
     .league-block-front {
       background-color: var(--purple);
       font-size: 20px;
     }
-
     .league-block-back {
       background-color: rgba(100, 60, 220, 0.8);
       transform: rotateY(180deg);
       font-size: 16px;
       text-align: center;
     }
-
     /* Футер */
     footer {
       width: 100%;
@@ -297,16 +269,13 @@
       position: relative;
       z-index: 10;
     }
-
     footer a {
       color: var(--white);
       text-decoration: none;
     }
-
     footer a:hover {
       text-decoration: underline;
     }
-	
   </style>
 </head>
 <body>
@@ -321,153 +290,86 @@
       <button id="switch-to-ru" class="lang-btn active">RU</button>
     </div>
   </header>
-
   <!-- Основной контейнер -->
   <div class="main-container">
      <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут" data-translate-alt="sidebar.scout">
-        <span data-translate="sidebar.scout">Скаут</span>
+        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
+        <span>Скаут</span>
       </div>
-	  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
-        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости" data-translate-alt="sidebar.news">
-        <span data-translate="sidebar.news">Новости</span>
+      <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
+        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
+        <span>Новости</span>
       </div>
       <div class="sidebar-item" onclick="window.location.href='index.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход" data-translate-alt="sidebar.logout">
-        <span data-translate="sidebar.logout">Выход</span>
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+        <span>Выход</span>
       </div>
       <div id="user-leagues"></div>
     </aside>
-
     <!-- Основной контент -->
     <main>
-	<div class="league-blocks">
-	  <div class="league-row">
-	    <!-- Фэнтези по ролям -->
-	    <div class="league-block-container">
-	      <div class="league-block" onclick="window.location.href='roles.html'">
-			<div class="league-block-front" data-translate="leagues.roles_front">
-			  <img src="https://image2url.com/images/1758736575986-e847d70e-f7bb-4a43-8e4e-d91394b2869f.png" alt="Роли" data-translate-alt="leagues.roles_front">
-			</div>
-	        <div class="league-block-back" data-translate="leagues.roles_back">
-	           РОЛИ — УНИКАЛЬНАЯ ФИШКА НАШЕГО ФЭНТЕЗИ ФОРМАТА. НИКАКИХ ПОЗИЦИЙ, ПОДБИРАЙ ИГРОКОВ ПОД НУЖНУЮ РОЛЬ!
-	        </div>
-	      </div>
-	    </div>
-	    
-	    <!-- Фэнтези по очкам -->
-	    <div class="league-block-container">
-	      <div class="league-block" onclick="window.location.href='scoring.html'">
-			<div class="league-block-front" data-translate="leagues.scoring_front">
-			  <img src="https://image2url.com/images/1758736510984-19bade9e-1338-414c-afcc-77377b1725a4.png" alt="Классика" data-translate-alt="leagues.scoring_front">
-			</div>
-	        <div class="league-block-back" data-translate="leagues.scoring_back">
-	          КЛАССИЧЕСКОЕ ФЭНТЕЗИ — СОБЕРИ СОСТАВ ПО ПОЗИЦИЯМ И НАБЕРИ МАКСИМУМ ФЭНТЕЗИ-ОЧКОВ!
-	        </div>
-	      </div>
-	    </div>
-	  </div>
-	</div>
+      <div class="league-blocks">
+        <div class="league-row">
+          <!-- Фэнтези по ролям -->
+          <div class="league-block-container">
+            <div class="league-block" onclick="window.location.href='roles.html'">
+              <div class="league-block-front">
+                <img src="https://image2url.com/images/1758736575986-e847d70e-f7bb-4a43-8e4e-d91394b2869f.png" alt="Роли">
+              </div>
+              <div class="league-block-back">
+                РОЛИ — УНИКАЛЬНАЯ ФИШКА НАШЕГО ФЭНТЕЗИ ФОРМАТА. НИКАКИХ ПОЗИЦИЙ, ПОДБИРАЙ ИГРОКОВ ПОД НУЖНУЮ РОЛЬ!
+              </div>
+            </div>
+          </div>
+
+          <!-- Фэнтези по очкам -->
+          <div class="league-block-container">
+            <div class="league-block" onclick="window.location.href='scoring.html'">
+              <div class="league-block-front">
+                <img src="https://image2url.com/images/1758736510984-19bade9e-1338-414c-afcc-77377b1725a4.png" alt="Классика">
+              </div>
+              <div class="league-block-back">
+                КЛАССИЧЕСКОЕ ФЭНТЕЗИ — СОБЕРИ СОСТАВ ПО ПОЗИЦИЯМ И НАБЕРИ МАКСИМУМ ФЭНТЕЗИ-ОЧКОВ!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
   <footer>
-    <a href="pick.html" data-translate="footer.home">Главная</a>
-    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/" data-translate="footer.news">Новости</a>
-    <a href="https://vtb-league.com/ru/schedule/" data-translate="footer.results">Результаты</a>
-    <a href="https://vtb-league.com/ru/standings/" data-translate="footer.standings">Таблица</a>
+    <a href="pick.html">Главная</a>
+    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
+    <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
+    <a href="https://vtb-league.com/ru/standings/">Таблица</a>
     <a href="https://t.me/lineupfantasy">Разработчик</a>
   </footer>
-
   <!-- Supabase Client -->
   <script>
-    // Объект с переводами
-    const translations = {
-      ru: {
-        'sidebar.scout': 'Скаут',
-        'sidebar.news': 'Новости',
-        'sidebar.logout': 'Выход',
-        'footer.home': 'Главная',
-        'footer.news': 'Новости',
-        'footer.results': 'Результаты',
-        'footer.standings': 'Таблица',
-        'footer.developer': 'Разработчик',
-        'alerts.auth_required': 'Пожалуйста, авторизуйтесь.',
-        'alerts.leagues_error': 'Ошибка загрузки лиг пользователя:',
-        'alerts.leagues_info_error': 'Ошибка загрузки лиг:'
-      },
-      en: {
-        'sidebar.scout': 'Scout',
-        'sidebar.news': 'News',
-        'sidebar.logout': 'Logout',
-        'footer.home': 'Home',
-        'footer.news': 'News',
-        'footer.results': 'Results',
-        'footer.standings': 'Standings',
-        'footer.developer': 'Developer',
-        'alerts.auth_required': 'Please log in.',
-        'alerts.leagues_error': 'Error loading user leagues:',
-        'alerts.leagues_info_error': 'Error loading leagues:'
-      }
-    };
-
-    // Функция переключения языка
-    function switchLanguage(lang) {
-      // Обновляем текстовое содержимое
-      const textElements = document.querySelectorAll('[data-translate]');
-      textElements.forEach(element => {
-        const key = element.getAttribute('data-translate');
-        if (translations[lang] && translations[lang][key]) {
-          element.textContent = translations[lang][key];
-        }
-      });
-
-      // Обновляем alt тексты для картинок
-      const altElements = document.querySelectorAll('[data-translate-alt]');
-      altElements.forEach(element => {
-        const key = element.getAttribute('data-translate-alt');
-        if (translations[lang] && translations[lang][key]) {
-          element.alt = translations[lang][key];
-        }
-      });
-
-      // Обновляем активную кнопку языка
-      document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.getElementById(`switch-to-${lang}`).classList.add('active');
-
-      // Сохраняем выбор языка
-      localStorage.setItem('preferred-language', lang);
-      document.documentElement.setAttribute('lang', lang);
-    }
-
-    // Функция для показа уведомлений с переводом
-    function showTranslatedAlert(messageKey, additionalText = '') {
-      const lang = localStorage.getItem('preferred-language') || 'ru';
-      const message = translations[lang][messageKey] + additionalText;
-      alert(message);
-    }
-
     // Инициализация Supabase
     const SUPABASE_URL = 'https://svnnneohwcuxirsximkp.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bm5uZW9od2N1eGlyc3hpbWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjM0NTcsImV4cCI6MjA3MjYzOTQ1N30.9H5aI1gj0FHGAC6NM08BbMno26ZdueNg7G1PnTDItpA';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     document.addEventListener("DOMContentLoaded", async () => {
-      // Инициализация языка
-      const savedLang = localStorage.getItem('preferred-language') || 'ru';
-      switchLanguage(savedLang);
-
       // Обработчики для кнопок переключения языка
-      document.getElementById('switch-to-en').addEventListener('click', () => switchLanguage('en'));
-      document.getElementById('switch-to-ru').addEventListener('click', () => switchLanguage('ru'));
+      document.getElementById('switch-to-en').addEventListener('click', () => {
+        document.getElementById('switch-to-en').classList.add('active');
+        document.getElementById('switch-to-ru').classList.remove('active');
+        localStorage.setItem('preferred-language', 'en');
+      });
+
+      document.getElementById('switch-to-ru').addEventListener('click', () => {
+        document.getElementById('switch-to-ru').classList.add('active');
+        document.getElementById('switch-to-en').classList.remove('active');
+        localStorage.setItem('preferred-language', 'ru');
+      });
 
       // Получаем текущего пользователя
       const { data: { user } } = await supabase.auth.getUser();
-
       if (!user) {
-        showTranslatedAlert('alerts.auth_required');
+        alert('Пожалуйста, авторизуйтесь.');
         window.location.href = "index.html";
         return;
       }
@@ -480,7 +382,7 @@
 
       if (userLeaguesError) {
         console.error("Ошибка загрузки лиг пользователя:", userLeaguesError);
-        showTranslatedAlert('alerts.leagues_error', userLeaguesError.message);
+        alert('Ошибка загрузки лиг пользователя: ' + userLeaguesError.message);
         return;
       }
 
@@ -493,7 +395,7 @@
 
       if (leaguesError) {
         console.error("Ошибка загрузки лиг:", leaguesError);
-        showTranslatedAlert('alerts.leagues_info_error', leaguesError.message);
+        alert('Ошибка загрузки лиг: ' + leaguesError.message);
         return;
       }
 
@@ -507,7 +409,6 @@
           <span>${league.name}</span>
         `;
         leagueItem.onclick = () => {
-          // Переход на страницу лиги
           window.location.href = `league.html?id=${league.id}`;
         };
         sidebar.insertBefore(leagueItem, sidebar.firstChild);
@@ -516,19 +417,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
