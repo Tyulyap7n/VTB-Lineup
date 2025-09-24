@@ -48,29 +48,27 @@
       <button type="submit" class="btn-secondary" data-translate="auth.login_button">Войти</button>
     </form>
   </section>
-
-  <!-- Блок с картинками (строго под формами) -->
 <section class="preview-images">
   <div class="preview-grid">
     <div class="preview-item">
       <div class="preview-img-wrapper">
         <img src="https://image2url.com/images/1758717333004-ff447783-920f-4514-abfc-8eeddadf78b2.jpg"
-             alt="Команда"
+             alt="Превью 1"
              loading="lazy"
              decoding="async"
              onerror="this.remove()">
       </div>
-      <p>Играй с нами и начни с выбора формата! Правила которых вы можете прочитать на странице</p>
+      <p data-translate="images.team_building_text">Играй с нами и начни с выбора формата! Одновременно можете участвовать в двух форматах, правила которых написаны на их страничках!</p>
     </div>
     <div class="preview-item">
       <div class="preview-img-wrapper">
         <img src="https://zbs.bet/wp-content/uploads/2021/09/statistika-v-basketbole.jpg"
-             alt="Статистика"
+             alt="Страничка турнира"
              loading="lazy"
              decoding="async"
              onerror="this.remove()">
       </div>
-      <p>Выбирайте лучших игроков и соревнуйтесь с друзьями на нашей уникальной фэнтези-платформе!</p>
+      <p data-translate="images.player_stats_text">Выбирайте лучших игроков Единой Лиги ВТБ, игроков своих любимых команд, зови друзей и соревнуйтесь между собой!</p>
     </div>
     <div class="preview-item">
       <div class="preview-img-wrapper">
@@ -80,7 +78,7 @@
              decoding="async"
              onerror="this.remove()">
       </div>
-      <p>Не знаете игроков или сомневаетесь в выборе каких-либо спортсменов? Не беда! Есть возможность посмотреть наш краткий фэнтези-отчёт по каждому игроку лиги!</p>
+      <p data-translate="images.player_stats">Не знаете игроков? Не беда! Мы сделали краткий фэнтези-репорт (Скаут) по каждому игроку лиги</p>
     </div>
     <div class="preview-item">
       <div class="preview-img-wrapper">
@@ -90,7 +88,7 @@
              decoding="async"
              onerror="this.remove()">
       </div>
-      <p>Посмотреть расписание можно под своим составом в любом из форматов лиги</p>
+      <p data-translate="images.league_rating_text">Посмотреть расписание вы можете внизу каждого формата, под своим составом. Бейдж возле команды означает, что команда в туре имеет 2 и более игры</p>
     </div>
   </div>
 </section>
@@ -351,241 +349,92 @@ document.addEventListener('DOMContentLoaded', () => {
   .lang-btn.active:hover {
     background: #0056b3;
   }
+/* Стили только для блока preview-images */
+.preview-images {
+  width: 100%;
+  margin: 30px auto 0;
+  padding: 0 20px;
+}
 
-  /* Новые стили для адаптивности */
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f8f9fa;
-    color: #333;
-    line-height: 1.6;
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.preview-item {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-img-wrapper {
+  height: 180px;
+  overflow: hidden;
+}
+
+.preview-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.preview-item:hover .preview-img-wrapper img {
+  transform: scale(1.05);
+}
+
+.preview-item p {
+  padding: 15px;
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+  background: white;
+}
+
+/* Анимация появления */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-
-  .auth-page {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
+}
 
-  .site-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background-color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: relative;
-  }
+.preview-item {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
 
-  .site-header h1 {
-    margin: 0;
-    font-size: 24px;
-    color: #2c3e50;
-  }
+.preview-item:nth-child(1) { animation-delay: 0.1s; }
+.preview-item:nth-child(2) { animation-delay: 0.2s; }
+.preview-item:nth-child(3) { animation-delay: 0.3s; }
+.preview-item:nth-child(4) { animation-delay: 0.4s; }
 
-  .logo-left, .logo-right {
-    width: 50px;
-    height: 50px;
-    margin: 0 15px;
-  }
-
-  .logo-left img, .logo-right img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-
-  main.auth-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 30px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-  }
-
-  .form-section {
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: 20px;
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  }
-
-  .form-section h2 {
-    margin-top: 0;
-    color: #2c3e50;
-    text-align: center;
-    font-size: 22px;
-  }
-
-  .form-section form {
-    display: flex;
-    flex-direction: column;
+/* Адаптивность */
+@media (max-width: 768px) {
+  .preview-grid {
+    grid-template-columns: 1fr;
     gap: 15px;
   }
+}
 
-  .form-section input {
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
-    transition: border-color 0.3s;
-  }
-
-  .form-section input:focus {
-    border-color: #007bff;
-    outline: none;
-  }
-
-  .btn-primary, .btn-secondary {
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s;
-  }
-
-  .btn-primary {
-    background-color: #007bff;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background-color: #0056b3;
-  }
-
-  .btn-secondary {
-    background-color: #6c757d;
-    color: white;
-  }
-
-  .btn-secondary:hover {
-    background-color: #5a6268;
-  }
-
-  /* Стили для блока с фотографиями */
-  .preview-images {
-    width: 100%;
-    margin-top: 30px;
-    padding: 0 20px;
-  }
-
-  .preview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  .preview-item {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    height: auto;
-  }
-
-  .preview-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  }
-
-  .preview-img-wrapper {
-    height: 180px;
-    overflow: hidden;
-  }
-
-  .preview-img-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .preview-item:hover .preview-img-wrapper img {
-    transform: scale(1.05);
-  }
-
-  .preview-item p {
-    padding: 15px;
-    margin: 0;
-    font-size: 14px;
-    color: #495057;
-    line-height: 1.5;
-    background: white;
-  }
-
-  footer {
-    text-align: center;
-    padding: 20px;
-    background-color: white;
-    margin-top: auto;
-    color: #6c757d;
-    font-size: 14px;
-  }
-
-  /* Адаптивность для мобильных устройств */
-  @media (max-width: 768px) {
-    .preview-grid {
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-
-    .form-section {
-      padding: 20px;
-    }
-
-    .site-header h1 {
-      font-size: 20px;
-    }
-
-    .logo-left, .logo-right {
-      width: 40px;
-      height: 40px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    .preview-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .preview-images {
-      padding: 0 10px;
-    }
-  }
-
-  /* Анимации */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .preview-item {
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-
-  .preview-item:nth-child(1) { animation-delay: 0.1s; }
-  .preview-item:nth-child(2) { animation-delay: 0.2s; }
-  .preview-item:nth-child(3) { animation-delay: 0.3s; }
-  .preview-item:nth-child(4) { animation-delay: 0.4s; }
 </style>
 
 
   </style>
 </body>
 </html>
+
 
 
 
