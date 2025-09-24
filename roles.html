@@ -4481,16 +4481,21 @@ async function renderPlayersTable() {
     `;
 
     try {
-        const teamFilterValue = document.getElementById('filter-team')?.value || '';
-        const positionFilterValue = document.getElementById('filter-position')?.value || '';
+    const teamFilterValue = document.getElementById('filter-team')?.value || '';
+    const positionFilterValue = document.getElementById('filter-position')?.value || '';
 
-        // Фильтруем игроков
-        let filteredPlayers = players.filter(player => {
-            const teamMatch = !teamFilterValue || player.teams?.name === teamFilterValue;
-            const positionMatch = !positionFilterValue || player.position === positionFilterValue;
-            return teamMatch && positionMatch;
-        });
+    let filteredPlayers = players.filter(player => {
+        const teamMatch = !teamFilterValue || player.teams?.name === teamFilterValue;
+        const positionMatch = !positionFilterValue || player.position === positionFilterValue;
+        return teamMatch && positionMatch;
+    });
 
+    // Пагинация
+    const playersPerPage = 8;
+    const startIndex = (currentPage - 1) * playersPerPage;
+    const endIndex = startIndex + playersPerPage;
+    const playersToShow = filteredPlayers.slice(startIndex, endIndex);
+		
         if (filteredPlayers.length === 0) {
             tableBody.innerHTML = `
                 <tr>
@@ -4648,6 +4653,7 @@ function updatePaginationControls(totalPlayers) {
     document.getElementById('prev-page').disabled = currentPage === 1;
     document.getElementById('next-page').disabled = currentPage === totalPages;
 }
+
 
 
 function calculatePlayerAverage(player) {
@@ -4897,6 +4903,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
