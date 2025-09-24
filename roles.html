@@ -4044,6 +4044,12 @@ function openRoleSelector(playerId, buttonElement) {
     selector.style.left = `${buttonRect.left - 80}px`;
     selector.style.top = `${buttonRect.top - 76}px`;
 
+    // Показываем или скрываем кнопку "Сюрприз" в зависимости от цены игрока
+    const surpriseButton = selector.querySelector('button[onclick="assignToRole(\'Surprise\')"]');
+    if (surpriseButton) {
+        surpriseButton.style.display = currentSelectedPlayer.price >= 8 ? 'none' : 'block';
+    }
+
     // Показываем селектор и оверлей
     selector.classList.add("show");
     overlay.classList.add("show");
@@ -4051,9 +4057,6 @@ function openRoleSelector(playerId, buttonElement) {
 
     console.log('Селектор открыт для игрока:', currentSelectedPlayer.first_name, currentSelectedPlayer.last_name);
 }
-
-
-
 
 // Закрытие кругового селектора ролей
 function closeRoleSelector() {
@@ -4895,6 +4898,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
