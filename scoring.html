@@ -1942,9 +1942,9 @@ main {
               <label class="position-filter">Позиция
                 <select id="filter-position">
                   <option value="">Все</option>
-                  <option value="G">Защитник (G)</option>
-                  <option value="F">Нападающий (F)</option>
-                  <option value="C">Центровой (C)</option>
+                  <option value="З">Защитник (З)</option>
+                  <option value="Ф">Форвард (Ф)</option>
+                  <option value="Ц">Центровой (Ц)</option>
                 </select>
               </label>
         </div>
@@ -1987,27 +1987,27 @@ main {
         <div id="selected-players-list" class="selected-players-grid">
           <div class="empty-slot" id="empty-slot-1">
             <div class="empty-slot-text">—</div>
-            <div class="role-label">G</div>
+            <div class="role-label">З</div>
           </div>
           <div class="empty-slot" id="empty-slot-2">
             <div class="empty-slot-text">—</div>
-            <div class="role-label">G</div>
+            <div class="role-label">З</div>
           </div>
           <div class="empty-slot" id="empty-slot-3">
             <div class="empty-slot-text">—</div>
-            <div class="role-label">F</div>
+            <div class="role-label">Ф</div>
           </div>
           <div class="empty-slot" id="empty-slot-4">
             <div class="empty-slot-text">—</div>
-            <div class="role-label">F</div>
+            <div class="role-label">Ф</div>
           </div>
           <div class="empty-slot" id="empty-slot-5">
             <div class="empty-slot-text">—</div>
-            <div class="role-label">C</div>
+            <div class="role-label">Ц</div>
           </div>
           <div class="empty-slot" id="empty-slot-6">
             <div class="empty-slot-text">—</div>
-            <div class="role-label">FLEX</div>
+            <div class="role-label">УНВ</div>
           </div>
         </div>
       </div>
@@ -2147,10 +2147,10 @@ main {
         <strong>Состав:</strong>
         <p>Требования к позициям:</p>
         <ul>
-          <li>2 защитника (G)</li>
-          <li>2 нападающих (F)</li>
-          <li>1 центровой (C)</li>
-          <li>1 универсал (FLEX: может быть G, F или C)</li>
+          <li>2 защитника (З)</li>
+          <li>2 форварда (Ф)</li>
+          <li>1 центровой (Ц)</li>
+          <li>1 универсал (УНВ: может быть З, Ф или Ц)</li>
         </ul>
       </div>
 
@@ -2230,10 +2230,10 @@ main {
     let players = [];
     let managersCount = 0;
     let currentPositions = {
-      G: 0,
-      F: 0,
-      C: 0,
-      FLEX: 0
+      З: 0,
+      Ф: 0,
+      Ц: 0,
+      УНВ: 0
     };
     let autoSaveTimeout = null;
     let currentSort = {
@@ -2254,51 +2254,50 @@ let isLoading = false;
 let hasMorePlayers = true;
 let currentRoster = {
   players: [], // Массив всех выбранных игроков
-  positions: { G: 0, F: 0, C: 0, FLEX: 0 } // Текущее количество игроков по позициям
+  positions: { З: 0, Ф: 0, Ц: 0, УНВ: 0 } // Текущее количество игроков по позициям
 };
 const positionRequirements = {
-  G: 2,
-  F: 2,
-  C: 1,
-  FLEX: 1
+  З: 2,
+  Ф: 2,
+  Ц: 1,
+  УНВ: 1
 };
 function validateTeamComposition() {
   // Проверяем количество игроков
   const actualPlayers = currentRoster.players.filter(p => p !== null);
   if (actualPlayers.length !== 6) {
-    showNotification(`Должно быть ровно 6 игроков. Сейчас: ${actualPlayers.length}`, false);
     return false;
   }
 
   // Сбрасываем текущие позиции
-  currentRoster.positions = { G: 0, F: 0, C: 0, FLEX: 0 };
+  currentRoster.positions = { З: 0, Ф: 0, Ц: 0, УНВ: 0 };
 
   // Подсчитываем позиции
   actualPlayers.forEach(player => {
-    if (player.position === 'G') {
-      currentRoster.positions.G++;
-    } else if (player.position === 'F') {
-      currentRoster.positions.F++;
-    } else if (player.position === 'C') {
-      currentRoster.positions.C++;
+    if (player.position === 'З') {
+      currentRoster.positions.З++;
+    } else if (player.position === 'Ф') {
+      currentRoster.positions.Ф++;
+    } else if (player.position === 'Ц') {
+      currentRoster.positions.Ц++;
     } else {
-      currentRoster.positions.FLEX++;
+      currentRoster.positions.УНВ++;
     }
   });
 
   // Проверяем требования к позициям
-  if (currentRoster.positions.G < positionRequirements.G) {
-    showNotification(`Нужно ${positionRequirements.G} разыгрывающих (G). Сейчас: ${currentRoster.positions.G}`, false);
+  if (currentRoster.positions.З < positionRequirements.З) {
+    showNotification(`Нужно ${positionRequirements.З} защитников (З). Сейчас: ${currentRoster.positions.З}`, false);
     return false;
   }
 
-  if (currentRoster.positions.F < positionRequirements.F) {
-    showNotification(`Нужно ${positionRequirements.F} нападающих (F). Сейчас: ${currentRoster.positions.F}`, false);
+  if (currentRoster.positions.Ф < positionRequirements.Ф) {
+    showNotification(`Нужно ${positionRequirements.Ф} форвадов (Ф). Сейчас: ${currentRoster.positions.Ф}`, false);
     return false;
   }
 
-  if (currentRoster.positions.C < positionRequirements.C) {
-    showNotification(`Нужно ${positionRequirements.C} центрового (C). Сейчас: ${currentRoster.positions.C}`, false);
+  if (currentRoster.positions.Ц < positionRequirements.Ц) {
+    showNotification(`Нужно ${positionRequirements.Ц} центрового (Ц). Сейчас: ${currentRoster.positions.Ц}`, false);
     return false;
   }
 
@@ -3319,14 +3318,14 @@ function removePlayer(index) {
   const player = currentRoster.players[index];
 
   // Уменьшаем счетчик позиции
-  if (player.position === 'G') {
-    currentRoster.positions.G--;
-  } else if (player.position === 'F') {
-    currentRoster.positions.F--;
-  } else if (player.position === 'C') {
-    currentRoster.positions.C--;
+  if (player.position === 'З') {
+    currentRoster.positions.З--;
+  } else if (player.position === 'Ф') {
+    currentRoster.positions.Ф--;
+  } else if (player.position === 'Ц') {
+    currentRoster.positions.Ц--;
   } else {
-    currentRoster.positions.FLEX--;
+    currentRoster.positions.УНВ--;
   }
 
   // Удаляем игрока из массива
@@ -3349,7 +3348,7 @@ function updateSelectedPlayersUI() {
   selectedPlayersList.innerHTML = '';
 
   // Создаем 6 слотов (G, G, F, F, C, FLEX)
-  const slotConfig = ['G', 'G', 'F', 'F', 'C', 'FLEX'];
+  const slotConfig = ['З', 'З', 'Ф', 'Ф', 'Ц', 'УНВ'];
 
   slotConfig.forEach((requiredPosition, index) => {
     const slot = document.createElement('div');
@@ -3393,7 +3392,6 @@ async function saveRosterToDatabase() {
 
     // Проверка на количество игроков
     if (currentRoster.players.length !== 6) {
-      showNotification(`Ошибка: должно быть ровно 6 игроков в составе. Сейчас выбрано: ${currentRoster.players.length}`, false);
       updateSaveStatus(`Ошибка: нужно ${6 - currentRoster.players.length} игроков`, 'error-status');
       return false;
     }
@@ -3585,16 +3583,16 @@ async function loadSavedRoster() {
     currentRoster.players = players;
 
     // Обновляем счетчики позиций
-    currentRoster.positions = { G: 0, F: 0, C: 0, FLEX: 0 };
+    currentRoster.positions = { З: 0, Ф: 0, Ц: 0, УНВ: 0 };
     players.forEach(player => {
-      if (player.position === 'G') {
-        currentRoster.positions.G++;
-      } else if (player.position === 'F') {
-        currentRoster.positions.F++;
-      } else if (player.position === 'C') {
-        currentRoster.positions.C++;
+      if (player.position === 'З') {
+        currentRoster.positions.З++;
+      } else if (player.position === 'Ф') {
+        currentRoster.positions.Ф++;
+      } else if (player.position === 'Ц') {
+        currentRoster.positions.Ц++;
       } else {
-        currentRoster.positions.FLEX++;
+        currentRoster.positions.УНВ++;
       }
     });
 
@@ -4110,9 +4108,9 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
       const slotPosition = slotElement.querySelector('.role-label').textContent;
       console.log('Проверка слота:', i+1, 'Позиция:', slotPosition);
       
-      if ((position === 'G' && slotPosition === 'G') ||
-          (position === 'F' && slotPosition === 'F') ||
-          (position === 'C' && slotPosition === 'C')) {
+      if ((position === 'З' && slotPosition === 'З') ||
+          (position === 'Ф' && slotPosition === 'Ф') ||
+          (position === 'Ц' && slotPosition === 'Ц')) {
         targetSlotIndex = i;
         break;
       }
@@ -4127,9 +4125,9 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
         if (!slotElement) continue;
         
         const slotPosition = slotElement.querySelector('.role-label').textContent;
-        if (slotPosition === 'FLEX') {
+        if (slotPosition === 'УНВ') {
           // Проверяем совместимость позиции с FLEX
-          if ((position === 'G' || position === 'F' || position === 'C')) {
+          if ((position === 'З' || position === 'Ф' || position === 'Ц')) {
             targetSlotIndex = i;
             break;
           }
@@ -4558,4 +4556,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
