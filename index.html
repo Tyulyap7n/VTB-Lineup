@@ -111,26 +111,26 @@
 </head>
 <body class="auth-page">
   <header class="site-header">
-    <h1 data-translate="site.title">LineUP Fantasy Leagues</h1>
+    <h1>LineUP Fantasy Leagues</h1>
   </header>
   <main class="auth-container">
     <!-- Форма регистрации -->
     <section class="form-section">
-      <h2 data-translate="auth.register">Регистрация</h2>
+      <h2>Регистрация</h2>
       <form id="register-form">
-        <input type="text" id="register-username" placeholder="Никнейм" required data-translate-placeholder="placeholder.username">
-        <input type="email" id="register-email" placeholder="Email" required data-translate-placeholder="placeholder.email">
-        <input type="password" id="register-password" placeholder="Пароль" required data-translate-placeholder="placeholder.password">
-        <button type="submit" class="btn-primary" data-translate="auth.register_button">Зарегистрироваться</button>
+        <input type="text" id="register-username" placeholder="Никнейм" required>
+        <input type="email" id="register-email" placeholder="Email" required>
+        <input type="password" id="register-password" placeholder="Пароль" required>
+        <button type="submit" class="btn-primary">Зарегистрироваться</button>
       </form>
     </section>
     <!-- Форма входа -->
     <section class="form-section">
-      <h2 data-translate="auth.login">Вход</h2>
+      <h2>Вход</h2>
       <form id="login-form">
-        <input type="email" id="login-email" placeholder="Email" required data-translate-placeholder="placeholder.email">
-        <input type="password" id="login-password" placeholder="Пароль" required data-translate-placeholder="placeholder.password">
-        <button type="submit" class="btn-secondary" data-translate="auth.login_button">Войти</button>
+        <input type="email" id="login-email" placeholder="Email" required>
+        <input type="password" id="login-password" placeholder="Пароль" required>
+        <button type="submit" class="btn-secondary">Войти</button>
       </form>
     </section>
     <section class="preview-images">
@@ -143,7 +143,7 @@
                  decoding="async"
                  onerror="this.remove()">
           </div>
-          <p data-translate="images.team_building_text">Играй с нами и начни с выбора формата! Одновременно можете участвовать в двух форматах, правила которых написаны на их страничках!</p>
+          <p>Играй с нами и начни с выбора формата! Одновременно можете участвовать в двух форматах, правила которых написаны на их страничках!</p>
         </div>
         <div class="preview-item">
           <div class="preview-img-wrapper">
@@ -153,7 +153,7 @@
                  decoding="async"
                  onerror="this.remove()">
           </div>
-          <p data-translate="images.player_stats_text">Выбирайте лучших игроков Единой Лиги ВТБ, игроков своих любимых команд, зови друзей и соревнуйтесь между собой!</p>
+          <p>Выбирайте лучших игроков Единой Лиги ВТБ, игроков своих любимых команд, зови друзей и соревнуйтесь между собой!</p>
         </div>
         <div class="preview-item">
           <div class="preview-img-wrapper">
@@ -163,7 +163,7 @@
                  decoding="async"
                  onerror="this.remove()">
           </div>
-          <p data-translate="images.player_stats">Не знаете игроков? Не беда! Мы сделали краткий фэнтези-репорт (Скаут) по каждому игроку лиги</p>
+          <p>Не знаете игроков? Не беда! Мы сделали краткий фэнтези-репорт (Скаут) по каждому игроку лиги</p>
         </div>
         <div class="preview-item">
           <div class="preview-img-wrapper">
@@ -173,35 +173,53 @@
                  decoding="async"
                  onerror="this.remove()">
           </div>
-          <p data-translate="images.league_rating_text">Посмотреть расписание вы можете внизу каждого формата, под своим составом. Бейдж возле команды означает, что команда в туре имеет 2 и более игры</p>
+          <p>Посмотреть расписание вы можете внизу каждого формата, под своим составом. Бейдж возле команды означает, что команда в туре имеет 2 и более игры</p>
         </div>
       </div>
     </section>
   </main>
   <footer>
-    <p data-translate="footer.copyright">© 2025 LineUP Fantasy Leagues</p>
+    <p>© 2025 LineUP Fantasy Leagues</p>
   </footer>
   <!-- Скрипты -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabaseClient.js"></script>
   <script>
-      // Создание записи user_team
-      async function ensureUserTeam(user) {
-        if (!user?.id) return;
-        try {
-          const { data: existingTeam } = await supabase
-            .from('user_teams')
-            .select('*')
-            .eq('user_id', user.id)
-            .single();
-          if (!existingTeam) {
-            const username = user.user_metadata?.username || (localStorage.getItem('preferred-language') === 'en' ? "Player" : "Игрок");
-            await supabase.from('user_teams').insert([{ user_id: user.id, team_name: username }]);
-          }
-        } catch (err) {
-          console.error("Ошибка user_team:", err);
+    // Создание записи user_team
+    async function ensureUserTeam(user) {
+      if (!user?.id) return;
+      try {
+        const { data: existingTeam } = await supabase
+          .from('user_teams')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        if (!existingTeam) {
+          const username = user.user_metadata?.username || "Игрок";
+          await supabase.from('user_teams').insert([{ user_id: user.id, team_name: username }]);
         }
+      } catch (err) {
+        console.error("Ошибка user_team:", err);
       }
+    }
+
+    // Проверка клиента Supabase
+    const ensureClient = () => {
+      if (!window.supabase || !window.supabase.auth) {
+        alert("Ошибка инициализации Supabase");
+        return false;
+      }
+      return true;
+    };
+
+    // Функция для показа уведомлений
+    function showAlert(message) {
+      alert(message);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const registerForm = document.getElementById("register-form");
+      const loginForm = document.getElementById("login-form");
 
       // Регистрация
       registerForm?.addEventListener("submit", async (e) => {
@@ -217,14 +235,14 @@
             options: { data: { username } }
           });
           if (error) {
-            showTranslatedAlert('alerts.registration_error', error.message);
+            showAlert('Ошибка регистрации: ' + error.message);
             return;
           }
           if (data?.user) await ensureUserTeam(data.user);
-          showTranslatedAlert('alerts.registration_success');
+          showAlert('Регистрация успешна! Подтвердите email, затем войдите.');
         } catch (err) {
           console.error("Ошибка регистрации:", err);
-          showTranslatedAlert('alerts.registration_failed');
+          showAlert('Не удалось завершить регистрацию.');
         }
       });
 
@@ -237,23 +255,22 @@
         try {
           const { data, error } = await supabase.auth.signInWithPassword({ email, password });
           if (error) {
-            showTranslatedAlert('alerts.login_error', error.message);
+            showAlert('Ошибка входа: ' + error.message);
             return;
           }
           const user = data.user || data.session?.user;
           if (!user) {
-            showTranslatedAlert('alerts.user_error');
+            showAlert('Не удалось получить пользователя.');
             return;
           }
           await ensureUserTeam(user);
           window.location.href = "pick.html";
         } catch (err) {
           console.error("Ошибка входа:", err);
-          showTranslatedAlert('alerts.login_failed');
+          showAlert('Не удалось войти.');
         }
       });
     });
   </script>
 </body>
 </html>
-
