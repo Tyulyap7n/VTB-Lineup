@@ -4041,8 +4041,8 @@ function openRoleSelector(playerId, buttonElement) {
     const buttonRect = buttonElement.getBoundingClientRect();
 
     // Позиционируем селектор рядом с кнопкой
-    selector.style.left = `${buttonRect.left + window.scrollX - 80}px`;
-    selector.style.top = `${buttonRect.top + window.scrollY - 76}px`;
+    selector.style.left = `${buttonRect.left - 80}px`;
+    selector.style.top = `${buttonRect.top - 76}px`;
 
     // Показываем селектор и оверлей
     selector.classList.add("show");
@@ -4051,6 +4051,7 @@ function openRoleSelector(playerId, buttonElement) {
 
     console.log('Селектор открыт для игрока:', currentSelectedPlayer.first_name, currentSelectedPlayer.last_name);
 }
+
 
 
 
@@ -4894,6 +4895,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
