@@ -4906,8 +4906,6 @@ async function renderPlayersTable() {
             });
         }
 
-        // Пагинация: вычисляем индексы начала и конца для текущей страницы
-        const playersPerPage = 8;
         const startIndex = (currentPage - 1) * playersPerPage;
         const endIndex = startIndex + playersPerPage;
         const playersToShow = filteredPlayers.slice(startIndex, endIndex);
@@ -5273,6 +5271,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
