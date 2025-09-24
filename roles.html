@@ -2720,52 +2720,44 @@ function renderPlayers() {
     }
 
     // Функция отрисовки таблицы с пагинацией
-    function renderPlayersTable() {
-        const tableBody = document.getElementById('players-table-body');
-        if (!tableBody) return;
+function renderPlayersTable() {
+  const tableBody = document.getElementById('players-table-body');
+  if (!tableBody) return;
 
-        // Сортируем игроков если нужно
-        if (currentSort.column) {
-            filteredPlayers.sort((a, b) => {
-                let valA = getSortValue(a, currentSort.column);
-                let valB = getSortValue(b, currentSort.column);
-                
-                if (currentSort.direction === 'asc') {
-                    return valA > valB ? 1 : -1;
-                } else {
-                    return valA < valB ? 1 : -1;
-                }
-            });
-        }
+  // Фильтрация
+  let filteredPlayers = [...allPlayers];
+  const teamFilterValue = document.getElementById('filter-team')?.value || '';
+  if (teamFilterValue) {
+    filteredPlayers = filteredPlayers.filter(player => player.teams?.name === teamFilterValue);
+  }
 
-        // Вычисляем пагинацию
-        const startIndex = (currentPage - 1) * playersPerPage;
-        const endIndex = startIndex + playersPerPage;
-        const playersToShow = filteredPlayers.slice(startIndex, endIndex);
-        totalPages = Math.ceil(filteredPlayers.length / playersPerPage);
+  // Сортировка
+  if (currentSort.column) {
+    filteredPlayers.sort((a, b) => {
+      const aValue = getSortValue(a, currentSort.column);
+      const bValue = getSortValue(b, currentSort.column);
+      return currentSort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+    });
+  }
 
-        // Очищаем таблицу
-        tableBody.innerHTML = '';
+  // Пагинация
+  const startIndex = (currentPage - 1) * playersPerPage;
+  const endIndex = startIndex + playersPerPage;
+  const playersToShow = filteredPlayers.slice(startIndex, endIndex);
 
-        if (playersToShow.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="13" style="text-align: center; padding: 20px;">
-                        Игроки не найдены
-                    </td>
-                </tr>
-            `;
-        } else {
-            // Заполняем таблицу
-            playersToShow.forEach(player => {
-                const row = createPlayerRow(player);
-                tableBody.appendChild(row);
-            });
-        }
+  // Очистка таблицы
+  tableBody.innerHTML = '';
 
-        // Обновляем элементы пагинации
-        updatePaginationControls();
-    }
+  // Заполнение таблицы
+  playersToShow.forEach(player => {
+    const row = createPlayerRow(player);
+    tableBody.appendChild(row);
+  });
+
+  // Обновление элементов пагинации
+  updatePaginationControls(filteredPlayers.length);
+}
+
 
     // Функция для получения значения для сортировки
     function getSortValue(player, column) {
@@ -2875,23 +2867,26 @@ function renderPlayers() {
         }
     }
 
-    function updatePaginationControls() {
-        const pageInfo = document.getElementById('page-info');
-        const prevButton = document.getElementById('prev-page');
-        const nextButton = document.getElementById('next-page');
+   function updatePaginationControls(totalPlayers) {
+  const playersPerPage = 8;
+  const totalPages = Math.ceil(totalPlayers / playersPerPage);
 
-        if (pageInfo) {
-            pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
-        }
-        
-        if (prevButton) {
-            prevButton.disabled = currentPage === 1;
-        }
-        
-        if (nextButton) {
-            nextButton.disabled = currentPage === totalPages;
-        }
-    }
+  const pageInfo = document.getElementById('page-info');
+  const prevButton = document.getElementById('prev-page');
+  const nextButton = document.getElementById('next-page');
+
+  if (pageInfo) {
+    pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
+  }
+
+  if (prevButton) {
+    prevButton.disabled = currentPage === 1;
+  }
+
+  if (nextButton) {
+    nextButton.disabled = currentPage === totalPages;
+  }
+}
 
     // Функция сортировки таблицы
     function sortTable(column) {
@@ -3870,78 +3865,6 @@ async function viewTeamDetails(teamId, tourId) {
     showNotification('Ошибка просмотра состава', false);
   }
 }
-
-    // Функция переключения языка
-    function switchLanguage(lang) {
-      // Обновляем текстовое содержимое
-      const textElements = document.querySelectorAll('[data-translate]');
-      textElements.forEach(element => {
-        const key = element.getAttribute('data-translate');
-        if (translations[lang] && translations[lang][key]) {
-          element.textContent = translations[lang][key];
-        }
-      });
-
-      // Обновляем placeholder'ы
-      const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
-      placeholderElements.forEach(element => {
-        const key = element.getAttribute('data-translate-placeholder');
-        if (translations[lang] && translations[lang][key]) {
-          element.placeholder = translations[lang][key];
-        }
-      });
-
-      // Обновляем alt тексты для картинок
-      const altElements = document.querySelectorAll('[data-translate-alt]');
-      altElements.forEach(element => {
-        const key = element.getAttribute('data-translate-alt');
-        if (translations[lang] && translations[lang][key]) {
-          element.alt = translations[lang][key];
-        }
-      });
-
-      // Обновляем активную кнопку языка
-      document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.getElementById(`switch-to-${lang}`).classList.add('active');
-
-      // Сохраняем выбор языка
-      localStorage.setItem('preferred-language', lang);
-      document.documentElement.setAttribute('lang', lang);
-
-      // Перерисовываем таблицу с новым языком
-      if (typeof renderPlayersTable === 'function') {
-        renderPlayersTable();
-      }
-    }
-
-    // Функция для получения переведенного текста
-    function getTranslatedText(key, params = {}) {
-      const lang = localStorage.getItem('preferred-language') || 'ru';
-      let text = translations[lang][key] || key;
-      
-      // Заменяем параметры в тексте
-      Object.keys(params).forEach(param => {
-        text = text.replace(`{${param}}`, params[param]);
-      });
-      
-      return text;
-    }
-
-    // Функция для показа уведомлений с переводом
-    function showNotification(messageKey, isSuccess = true, params = {}) {
-      const message = getTranslatedText(messageKey, params);
-      const notification = document.getElementById('notification');
-      notification.textContent = message;
-      notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
-      notification.classList.add('show');
-      
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
-    }
-
     // Функция для обновления статуса сохранения
     function updateSaveStatus(messageKey, status = '', params = {}) {
       const message = getTranslatedText(messageKey, params);
@@ -5266,6 +5189,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
