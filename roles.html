@@ -2297,7 +2297,7 @@ main {
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
     <a href="https://vtb-league.com/ru/schedule/">Результаты</a>
     <a href="https://vtb-league.com/ru/standings/">Таблица</a>
-    <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Разработчик</a>
+    <a href="https://t.me/lineupfantasy">Разработчик</a>
   </footer>
   
 <script>
@@ -4253,11 +4253,6 @@ function filterPlayersByTeam() {
     }
   });
 }
-
-// Модифицированная функция renderPlayersTable
-/**
- * Отображает таблицу игроков с учетом текущих фильтров и сортировки
- */
 async function renderPlayersTable() {
   const tableBody = document.getElementById("players-table-body");
   const lang = localStorage.getItem('preferred-language') || 'ru';
@@ -4283,7 +4278,7 @@ async function renderPlayersTable() {
       .select('*, teams(name, name_en, logo_url)');
 
     if (playersError) throw playersError;
-    
+
     if (!players || players.length === 0) {
       tableBody.innerHTML = `
         <tr>
@@ -4299,7 +4294,7 @@ async function renderPlayersTable() {
     let filteredPlayers = players;
     if (teamFilterValue) {
       filteredPlayers = players.filter(player => {
-        const teamName = lang === 'en' && player.teams?.name_en ? 
+        const teamName = lang === 'en' && player.teams?.name_en ?
           player.teams.name_en : player.teams?.name;
         return teamName === teamFilterValue;
       });
@@ -4344,37 +4339,32 @@ async function renderPlayersTable() {
           case 'name':
             const aFirstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
             const aLastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
-            const bFirstName = lang === 'en' && b.first_name_en ? b.first_name_en : b.first_name;
-            const bLastName = lang === 'en' && b.last_name_en ? b.last_name_en : b.last_name;
             return `${aFirstName} ${aLastName}`.toLowerCase();
-
           case 'price':
             return player.price || 0;
-
           case 'avg':
-            return stats.reduce((sum, s) => sum + (s.points || 0), 0) / Math.max(stats.length, 1);
-
+            return stats.reduce((sum, s) => sum + (
+              (s.points || 0) +
+              1.5 * (s.assists || 0) +
+              1.3 * (s.rebounds || 0) +
+              3 * (s.steals || 0) +
+              3 * (s.blocks || 0) -
+              2 * (s.turnover || 0)
+            ), 0) / Math.max(stats.length, 1);
           case 'points':
             return stats.reduce((sum, s) => sum + (s.points || 0), 0) / Math.max(stats.length, 1);
-
           case 'threes':
             return stats.reduce((sum, s) => sum + (s.threes || 0), 0) / Math.max(stats.length, 1);
-
           case 'assists':
             return stats.reduce((sum, s) => sum + (s.assists || 0), 0) / Math.max(stats.length, 1);
-
           case 'rebounds':
             return stats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / Math.max(stats.length, 1);
-
           case 'steals':
             return stats.reduce((sum, s) => sum + (s.steals || 0), 0) / Math.max(stats.length, 1);
-
           case 'blocks':
             return stats.reduce((sum, s) => sum + (s.blocks || 0), 0) / Math.max(stats.length, 1);
-
           case 'turnovers':
             return stats.reduce((sum, s) => sum + (s.turnover || 0), 0) / Math.max(stats.length, 1);
-
           default:
             return 0;
         }
@@ -4396,74 +4386,81 @@ async function renderPlayersTable() {
     });
 
     // 8. Отрисовка отсортированных и отфильтрованных игроков
-    tableBody.innerHTML = filteredPlayers
-      .map(player => {
-        const playerStats = statsByPlayer[player.id] || [];
-        const gamesCount = playerStats.length;
+    tableBody.innerHTML = '';
 
-        // Вспомогательная функция для расчета средних значений
-        const calcAvg = (prop) => {
-          if (gamesCount === 0) return '0';
-          const sum = playerStats.reduce((sum, s) => sum + (s[prop] || 0), 0);
-          return (sum / gamesCount).toFixed(1);
-        };
+    // Обрабатываем каждого игрока
+    filteredPlayers.forEach(player => {
+      const playerStats = statsByPlayer[player.id] || [];
+      const gamesCount = playerStats.length;
 
-        // Получаем данные на нужном языке
-        const firstName = lang === 'en' && player.first_name_en ? player.first_name_en : player.first_name;
-        const lastName = lang === 'en' && player.last_name_en ? player.last_name_en : player.last_name;
-        const teamName = lang === 'en' && player.teams?.name_en ? player.teams.name_en : player.teams?.name;
-		  // Рассчитываем средний показатель (AVG)
-          const avgAvg = gamesCount > 0 ?
-            (playerStats.reduce((sum, s) =>
-              sum + (
-                (s.points || 0) +
-                1.5 * (s.assists || 0) +
-                1.3 * (s.rebounds || 0) +
-                3 * (s.steals || 0) +
-                3 * (s.blocks || 0) -
-                2 * (s.turnover || 0)
-              ), 0) / gamesCount).toFixed(1) : 0;
-        return `
-          <tr>
-            <td>
-              <button class="select-button"
-                      onclick="openRoleSelector(${player.id}, '${firstName} ${lastName}', this)">
-                +
-              </button>
-            </td>
-            <td>
-              <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
-                   alt="${firstName} ${lastName}"
-                   width="40" height="40" style="border-radius: 50%;">
-            </td>
-            <td>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                ${player.teams?.logo_url ?
-                  `<img src="${player.teams.logo_url}"
-                       alt="${teamName}"
-                       width="24" height="24"
-                       style="border-radius: 50%;">` : ''}
-                <span class="player-name-cell"
-                      onclick="openPlayerPopup(${player.id})"
-                      style="cursor: pointer;">
-                  ${firstName} ${lastName}
-                </span>
-              </div>
-            </td>
-            <td>${player.price || 0}$</td>
-			<td>${avgAvg}</td>
-            <td>${calcAvg('points')}</td>
-            <td>${calcAvg('threes')}</td>
-            <td>${calcAvg('assists')}</td>
-            <td>${calcAvg('rebounds')}</td>
-            <td>${calcAvg('steals')}</td>
-            <td>${calcAvg('blocks')}</td>
-            <td>${calcAvg('turnover')}</td>
-            <td>${gamesCount > 0 ? Math.round((1 / gamesCount) * 100) : 0}%</td>
-          </tr>
-        `;
-      })
-      .join('');
+      // Рассчитываем средние значения
+      const avgPoints = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgThrees = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgAssists = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgRebounds = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgSteals = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgBlocks = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : 0;
+      const avgTurnover = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : 0;
+
+      // Рассчитываем средний показатель (AVG)
+      const avgAvg = gamesCount > 0 ?
+        (playerStats.reduce((sum, s) =>
+          sum + (
+            (s.points || 0) +
+            1.5 * (s.assists || 0) +
+            1.3 * (s.rebounds || 0) +
+            3 * (s.steals || 0) +
+            3 * (s.blocks || 0) -
+            2 * (s.turnover || 0)
+          ), 0) / gamesCount).toFixed(1) : 0;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>
+          <button class="select-button"
+                  onclick="openRoleSelector(${player.id}, '${player.first_name.replace(/'/g, "\\'")} ${player.last_name.replace(/'/g, "\\'")}', this)">
+            +
+          </button>
+        </td>
+        <td>
+          <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
+               alt="${player.first_name} ${player.last_name}"
+               width="40" height="40" style="border-radius: 50%;">
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            ${player.teams?.logo_url ?
+              `<img src="${player.teams.logo_url}"
+                   alt="${player.teams.name}"
+                   width="24" height="24"
+                   style="border-radius: 50%;">` : ''}
+            <span class="player-name-cell"
+                  onclick="openPlayerPopup(${player.id})"
+                  style="cursor: pointer;">
+              ${player.first_name} ${player.last_name} (${player.position})
+            </span>
+          </div>
+        </td>
+        <td>${player.price || 0}$</td>
+        <td>${avgAvg}</td>
+        <td>${avgPoints}</td>
+        <td>${avgThrees}</td>
+        <td>${avgAssists}</td>
+        <td>${avgRebounds}</td>
+        <td>${avgSteals}</td>
+        <td>${avgBlocks}</td>
+        <td>${avgTurnover}</td>
+        <td>${gamesCount > 0 ? Math.round((1 / gamesCount) * 100) : 0}%</td>
+      `;
+      tableBody.appendChild(row);
+    });
 
     // 9. Обновляем заголовки таблицы с учетом языка
     updateTableHeaders(lang);
@@ -4715,6 +4712,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
