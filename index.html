@@ -185,65 +185,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabaseClient.js"></script>
   <script>
-    // Функция переключения языка
-    function switchLanguage(lang) {
-      const textElements = document.querySelectorAll('[data-translate]');
-      textElements.forEach(element => {
-        const key = element.getAttribute('data-translate');
-        if (translations[lang] && translations[lang][key]) {
-          element.textContent = translations[lang][key];
-        }
-      });
-
-      const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
-      placeholderElements.forEach(element => {
-        const key = element.getAttribute('data-translate-placeholder');
-        if (translations[lang] && translations[lang][key]) {
-          element.placeholder = translations[lang][key];
-        }
-      });
-
-      const altElements = document.querySelectorAll('[data-translate-alt]');
-      altElements.forEach(element => {
-        const key = element.getAttribute('data-translate-alt');
-        if (translations[lang] && translations[lang][key]) {
-          element.alt = translations[lang][key];
-        }
-      });
-
-      document.querySelectorAll('.lang-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.getElementById(`switch-to-${lang}`).classList.add('active');
-      localStorage.setItem('preferred-language', lang);
-      document.documentElement.setAttribute('lang', lang);
-    }
-
-    // Функция для показа уведомлений с переводом
-    function showTranslatedAlert(messageKey, additionalText = '') {
-      const lang = localStorage.getItem('preferred-language') || 'ru';
-      const message = translations[lang][messageKey] + additionalText;
-      alert(message);
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const savedLang = localStorage.getItem('preferred-language') || 'ru';
-      switchLanguage(savedLang);
-
-      document.getElementById('switch-to-en').addEventListener('click', () => switchLanguage('en'));
-      document.getElementById('switch-to-ru').addEventListener('click', () => switchLanguage('ru'));
-
-      const registerForm = document.getElementById("register-form");
-      const loginForm = document.getElementById("login-form");
-
-      const ensureClient = () => {
-        if (!window.supabase || !window.supabase.auth) {
-          showTranslatedAlert('alerts.supabase_error');
-          return false;
-        }
-        return true;
-      };
-
       // Создание записи user_team
       async function ensureUserTeam(user) {
         if (!user?.id) return;
@@ -315,3 +256,4 @@
   </script>
 </body>
 </html>
+
