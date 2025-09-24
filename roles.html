@@ -3990,26 +3990,32 @@ function closeRules() {
       return true;
     }
 
-    // Открытие кругового селектора ролей
 // Открытие кругового селектора ролей
-function openRoleSelector(playerId, playerName, buttonElement) {
-  currentSelectedPlayer = players.find((p) => p.id === playerId);
-  if (!currentSelectedPlayer) return;
+function openRoleSelector(playerId, buttonElement) {
+    // Находим игрока по ID
+    currentSelectedPlayer = players.find((p) => p.id === playerId);
+    if (!currentSelectedPlayer) {
+        showNotification('Игрок не найден', false);
+        return;
+    }
 
-  const selector = document.getElementById("role-selector");
-  const overlay = document.getElementById("role-overlay");
+    const selector = document.getElementById("role-selector");
+    const overlay = document.getElementById("role-overlay");
 
-  // Получаем координаты кнопки "+"
-  const buttonRect = buttonElement.getBoundingClientRect();
+    // Получаем координаты кнопки "+"
+    const buttonRect = buttonElement.getBoundingClientRect();
 
-  // Позиционируем селектор рядом с кнопкой
-  selector.style.position = "fixed";
-  selector.style.left = `${buttonRect.left + window.scrollX - 80}px`; // Центрируем относительно кнопки
-  selector.style.top = `${buttonRect.top + window.scrollY - 76}px`; // Центрируем относительно кнопки
+    // Позиционируем селектор рядом с кнопкой
+    selector.style.position = "fixed";
+    selector.style.left = `${buttonRect.left + window.scrollX - 80}px`;
+    selector.style.top = `${buttonRect.top + window.scrollY - 76}px`;
 
-  selector.classList.add("show");
-  overlay.classList.add("show");
-  overlay.onclick = closeRoleSelector;
+    // Показываем селектор и оверлей
+    selector.classList.add("show");
+    overlay.classList.add("show");
+    overlay.onclick = closeRoleSelector;
+    
+    console.log('Селектор открыт для игрока:', currentSelectedPlayer.first_name, currentSelectedPlayer.last_name);
 }
 
 
@@ -4522,18 +4528,10 @@ async function renderPlayersTable() {
             const row = document.createElement("tr");
             
             // Сохраняем оригинальный вызов функции добавления игрока
-            row.innerHTML = `
-                <td>
-                    <button class="select-button" onclick="addPlayerToTeam(
-                        ${player.id},
-                        '${player.first_name.replace(/'/g, "\\'")}',
-                        '${player.last_name.replace(/'/g, "\\'")}',
-                        ${player.price},
-                        '${player.photo_url || ''}',
-                        '${player.teams?.name || ''}',
-                        '${player.position || ''}'
-                    )">+</button>
-                </td>
+row.innerHTML = `
+    <td>
+        <button class="select-button" onclick="openRoleSelector(${player.id}, this)">+</button>
+    </td>
                 <td>
                     <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
                          alt="${player.first_name} ${player.last_name}"
@@ -4851,6 +4849,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
