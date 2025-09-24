@@ -350,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
     background: #0056b3;
   }
 /* Стили только для блока preview-images */
+/* Стили только для блока preview-images */
 .preview-images {
   width: 100%;
   margin: 30px auto 0;
@@ -372,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
+  min-height: 250px; /* Минимальная высота для контейнера */
 }
 
 .preview-img-wrapper {
@@ -397,6 +399,8 @@ document.addEventListener('DOMContentLoaded', () => {
   color: #333;
   line-height: 1.4;
   background: white;
+  flex-grow: 1; /* Позволяет тексту занимать оставшееся пространство */
+  display: block; /* Гарантирует отображение */
 }
 
 /* Анимация появления */
@@ -428,12 +432,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 }
 
+
 </style>
 
 
   </style>
 </body>
 </html>
+
 
 
 
