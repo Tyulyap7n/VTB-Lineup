@@ -5,320 +5,313 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="image/img.jpg" type="image/jpg">
   <title>LineUP Fantasy League's - Вход и Регистрация</title>
-  
   <link rel="stylesheet" href="style.css">
-  
+  <style>
+    /* Стили для переключателя языка */
+    .language-switcher {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 5px;
+      z-index: 1000;
+    }
+    .lang-btn {
+      padding: 5px 10px;
+      border: 1px solid #ccc;
+      background: white;
+      cursor: pointer;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+    .lang-btn.active {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    .lang-btn:hover {
+      background: #f0f0f0;
+    }
+    .lang-btn.active:hover {
+      background: #0056b3;
+    }
+
+    /* Стили только для блока preview-images */
+    .preview-images {
+      width: 100%;
+      margin: 30px auto 0;
+      padding: 0 20px;
+    }
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .preview-item {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 250px;
+    }
+    .preview-img-wrapper {
+      height: 180px;
+      overflow: hidden;
+    }
+    .preview-img-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .preview-item:hover .preview-img-wrapper img {
+      transform: scale(1.05);
+    }
+    .preview-item p {
+      padding: 15px;
+      margin: 0;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.4;
+      background: white;
+      flex-grow: 1;
+      display: block;
+    }
+    /* Анимация появления */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .preview-item {
+      animation: fadeInUp 0.5s ease-out forwards;
+    }
+    .preview-item:nth-child(1) { animation-delay: 0.1s; }
+    .preview-item:nth-child(2) { animation-delay: 0.2s; }
+    .preview-item:nth-child(3) { animation-delay: 0.3s; }
+    .preview-item:nth-child(4) { animation-delay: 0.4s; }
+    /* Адаптивность */
+    @media (max-width: 768px) {
+      .preview-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+    }
+  </style>
 </head>
 <body class="auth-page">
-
-
   <header class="site-header">
-    <div class="logo-left">
-      <img src="logo-left.png" alt="Logo Left" loading="lazy" decoding="async" onerror="this.remove()">
-    </div>
     <h1 data-translate="site.title">LineUP Fantasy Leagues</h1>
-    <div class="logo-right">
-      <img src="logo-right.png" alt="Logo Right" loading="lazy" decoding="async" onerror="this.remove()">
-    </div>
   </header>
-
-<main class="auth-container">
-  <!-- Форма регистрации -->
-  <section class="form-section">
-    <h2 data-translate="auth.register">Регистрация</h2>
-    <form id="register-form">
-      <input type="text" id="register-username" placeholder="Никнейм" required data-translate-placeholder="placeholder.username">
-      <input type="email" id="register-email" placeholder="Email" required data-translate-placeholder="placeholder.email">
-      <input type="password" id="register-password" placeholder="Пароль" required data-translate-placeholder="placeholder.password">
-      <button type="submit" class="btn-primary" data-translate="auth.register_button">Зарегистрироваться</button>
-    </form>
-  </section>
-
-  <!-- Форма входа -->
-  <section class="form-section">
-    <h2 data-translate="auth.login">Вход</h2>
-    <form id="login-form">
-      <input type="email" id="login-email" placeholder="Email" required data-translate-placeholder="placeholder.email">
-      <input type="password" id="login-password" placeholder="Пароль" required data-translate-placeholder="placeholder.password">
-      <button type="submit" class="btn-secondary" data-translate="auth.login_button">Войти</button>
-    </form>
-  </section>
-<section class="preview-images">
-  <div class="preview-grid">
-    <div class="preview-item">
-      <div class="preview-img-wrapper">
-        <img src="https://image2url.com/images/1758717333004-ff447783-920f-4514-abfc-8eeddadf78b2.jpg"
-             alt="Превью 1"
-             loading="lazy"
-             decoding="async"
-             onerror="this.remove()">
+  <main class="auth-container">
+    <!-- Форма регистрации -->
+    <section class="form-section">
+      <h2 data-translate="auth.register">Регистрация</h2>
+      <form id="register-form">
+        <input type="text" id="register-username" placeholder="Никнейм" required data-translate-placeholder="placeholder.username">
+        <input type="email" id="register-email" placeholder="Email" required data-translate-placeholder="placeholder.email">
+        <input type="password" id="register-password" placeholder="Пароль" required data-translate-placeholder="placeholder.password">
+        <button type="submit" class="btn-primary" data-translate="auth.register_button">Зарегистрироваться</button>
+      </form>
+    </section>
+    <!-- Форма входа -->
+    <section class="form-section">
+      <h2 data-translate="auth.login">Вход</h2>
+      <form id="login-form">
+        <input type="email" id="login-email" placeholder="Email" required data-translate-placeholder="placeholder.email">
+        <input type="password" id="login-password" placeholder="Пароль" required data-translate-placeholder="placeholder.password">
+        <button type="submit" class="btn-secondary" data-translate="auth.login_button">Войти</button>
+      </form>
+    </section>
+    <section class="preview-images">
+      <div class="preview-grid">
+        <div class="preview-item">
+          <div class="preview-img-wrapper">
+            <img src="https://image2url.com/images/1758717333004-ff447783-920f-4514-abfc-8eeddadf78b2.jpg"
+                 alt="Превью 1"
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.remove()">
+          </div>
+          <p data-translate="images.team_building_text">Играй с нами и начни с выбора формата! Одновременно можете участвовать в двух форматах, правила которых написаны на их страничках!</p>
+        </div>
+        <div class="preview-item">
+          <div class="preview-img-wrapper">
+            <img src="https://zbs.bet/wp-content/uploads/2021/09/statistika-v-basketbole.jpg"
+                 alt="Страничка турнира"
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.remove()">
+          </div>
+          <p data-translate="images.player_stats_text">Выбирайте лучших игроков Единой Лиги ВТБ, игроков своих любимых команд, зови друзей и соревнуйтесь между собой!</p>
+        </div>
+        <div class="preview-item">
+          <div class="preview-img-wrapper">
+            <img src="https://image2url.com/images/1758728427190-28e12519-2b91-478b-bf0a-805f68b051b5.jpg"
+                 alt="Скаут"
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.remove()">
+          </div>
+          <p data-translate="images.player_stats">Не знаете игроков? Не беда! Мы сделали краткий фэнтези-репорт (Скаут) по каждому игроку лиги</p>
+        </div>
+        <div class="preview-item">
+          <div class="preview-img-wrapper">
+            <img src="https://image2url.com/images/1758728338910-19363759-c4c2-4186-9b36-d0c605087d95.jpg"
+                 alt="Расписание"
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.remove()">
+          </div>
+          <p data-translate="images.league_rating_text">Посмотреть расписание вы можете внизу каждого формата, под своим составом. Бейдж возле команды означает, что команда в туре имеет 2 и более игры</p>
+        </div>
       </div>
-      <p data-translate="images.team_building_text">Играй с нами и начни с выбора формата! Одновременно можете участвовать в двух форматах, правила которых написаны на их страничках!</p>
-    </div>
-    <div class="preview-item">
-      <div class="preview-img-wrapper">
-        <img src="https://zbs.bet/wp-content/uploads/2021/09/statistika-v-basketbole.jpg"
-             alt="Страничка турнира"
-             loading="lazy"
-             decoding="async"
-             onerror="this.remove()">
-      </div>
-      <p data-translate="images.player_stats_text">Выбирайте лучших игроков Единой Лиги ВТБ, игроков своих любимых команд, зови друзей и соревнуйтесь между собой!</p>
-    </div>
-    <div class="preview-item">
-      <div class="preview-img-wrapper">
-        <img src="https://image2url.com/images/1758728427190-28e12519-2b91-478b-bf0a-805f68b051b5.jpg"
-             alt="Скаут"
-             loading="lazy"
-             decoding="async"
-             onerror="this.remove()">
-      </div>
-      <p data-translate="images.player_stats">Не знаете игроков? Не беда! Мы сделали краткий фэнтези-репорт (Скаут) по каждому игроку лиги</p>
-    </div>
-    <div class="preview-item">
-      <div class="preview-img-wrapper">
-        <img src="https://image2url.com/images/1758728338910-19363759-c4c2-4186-9b36-d0c605087d95.jpg"
-             alt="Расписание"
-             loading="lazy"
-             decoding="async"
-             onerror="this.remove()">
-      </div>
-      <p data-translate="images.league_rating_text">Посмотреть расписание вы можете внизу каждого формата, под своим составом. Бейдж возле команды означает, что команда в туре имеет 2 и более игры</p>
-    </div>
-  </div>
-</section>
-
-</main>
-
+    </section>
+  </main>
   <footer>
     <p data-translate="footer.copyright">© 2025 LineUP Fantasy Leagues</p>
   </footer>
-
   <!-- Скрипты -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabaseClient.js"></script>
   <script>
-    // Создание записи user_team
-    async function ensureUserTeam(user) {
-      if (!user?.id) return;
-      try {
-        const { data: existingTeam } = await supabase
-          .from('user_teams')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (!existingTeam) {
-          const username = user.user_metadata?.username || (localStorage.getItem('preferred-language') === 'en' ? "Player" : "Игрок");
-          await supabase.from('user_teams').insert([{ user_id: user.id, team_name: username }]);
+    // Функция переключения языка
+    function switchLanguage(lang) {
+      const textElements = document.querySelectorAll('[data-translate]');
+      textElements.forEach(element => {
+        const key = element.getAttribute('data-translate');
+        if (translations[lang] && translations[lang][key]) {
+          element.textContent = translations[lang][key];
         }
-      } catch (err) {
-        console.error("Ошибка user_team:", err);
-      }
+      });
+
+      const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+      placeholderElements.forEach(element => {
+        const key = element.getAttribute('data-translate-placeholder');
+        if (translations[lang] && translations[lang][key]) {
+          element.placeholder = translations[lang][key];
+        }
+      });
+
+      const altElements = document.querySelectorAll('[data-translate-alt]');
+      altElements.forEach(element => {
+        const key = element.getAttribute('data-translate-alt');
+        if (translations[lang] && translations[lang][key]) {
+          element.alt = translations[lang][key];
+        }
+      });
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`switch-to-${lang}`).classList.add('active');
+      localStorage.setItem('preferred-language', lang);
+      document.documentElement.setAttribute('lang', lang);
     }
 
-    // Регистрация
-    registerForm?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!ensureClient()) return;
+    // Функция для показа уведомлений с переводом
+    function showTranslatedAlert(messageKey, additionalText = '') {
+      const lang = localStorage.getItem('preferred-language') || 'ru';
+      const message = translations[lang][messageKey] + additionalText;
+      alert(message);
+    }
 
-      const username = document.getElementById("register-username").value.trim();
-      const email = document.getElementById("register-email").value.trim();
-      const password = document.getElementById("register-password").value;
+    document.addEventListener("DOMContentLoaded", () => {
+      const savedLang = localStorage.getItem('preferred-language') || 'ru';
+      switchLanguage(savedLang);
 
-      try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { data: { username } }
-        });
+      document.getElementById('switch-to-en').addEventListener('click', () => switchLanguage('en'));
+      document.getElementById('switch-to-ru').addEventListener('click', () => switchLanguage('ru'));
 
-        if (error) { 
-          showTranslatedAlert('alerts.registration_error', error.message); 
-          return; 
+      const registerForm = document.getElementById("register-form");
+      const loginForm = document.getElementById("login-form");
+
+      const ensureClient = () => {
+        if (!window.supabase || !window.supabase.auth) {
+          showTranslatedAlert('alerts.supabase_error');
+          return false;
         }
-        if (data?.user) await ensureUserTeam(data.user);
+        return true;
+      };
 
-        showTranslatedAlert('alerts.registration_success');
-      } catch (err) {
-        console.error("Ошибка регистрации:", err);
-        showTranslatedAlert('alerts.registration_failed');
+      // Создание записи user_team
+      async function ensureUserTeam(user) {
+        if (!user?.id) return;
+        try {
+          const { data: existingTeam } = await supabase
+            .from('user_teams')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+          if (!existingTeam) {
+            const username = user.user_metadata?.username || (localStorage.getItem('preferred-language') === 'en' ? "Player" : "Игрок");
+            await supabase.from('user_teams').insert([{ user_id: user.id, team_name: username }]);
+          }
+        } catch (err) {
+          console.error("Ошибка user_team:", err);
+        }
       }
-    });
 
-    // Вход
-    loginForm?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!ensureClient()) return;
-
-      const email = document.getElementById("login-email").value.trim();
-      const password = document.getElementById("login-password").value;
-
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) { 
-          showTranslatedAlert('alerts.login_error', error.message); 
-          return; 
+      // Регистрация
+      registerForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!ensureClient()) return;
+        const username = document.getElementById("register-username").value.trim();
+        const email = document.getElementById("register-email").value.trim();
+        const password = document.getElementById("register-password").value;
+        try {
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { username } }
+          });
+          if (error) {
+            showTranslatedAlert('alerts.registration_error', error.message);
+            return;
+          }
+          if (data?.user) await ensureUserTeam(data.user);
+          showTranslatedAlert('alerts.registration_success');
+        } catch (err) {
+          console.error("Ошибка регистрации:", err);
+          showTranslatedAlert('alerts.registration_failed');
         }
+      });
 
-        const user = data.user || data.session?.user;
-        if (!user) { 
-          showTranslatedAlert('alerts.user_error'); 
-          return; 
+      // Вход
+      loginForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!ensureClient()) return;
+        const email = document.getElementById("login-email").value.trim();
+        const password = document.getElementById("login-password").value;
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            showTranslatedAlert('alerts.login_error', error.message);
+            return;
+          }
+          const user = data.user || data.session?.user;
+          if (!user) {
+            showTranslatedAlert('alerts.user_error');
+            return;
+          }
+          await ensureUserTeam(user);
+          window.location.href = "pick.html";
+        } catch (err) {
+          console.error("Ошибка входа:", err);
+          showTranslatedAlert('alerts.login_failed');
         }
-
-        await ensureUserTeam(user);
-
-        // редирект на дашборд
-        window.location.href = "pick.html";
-
-      } catch (err) {
-        console.error("Ошибка входа:", err);
-        showTranslatedAlert('alerts.login_failed');
-      }
+      });
     });
-  });
-    // Паралакс-эффект при скролле
-document.addEventListener('DOMContentLoaded', () => {
-  const previewItems = document.querySelectorAll('.preview-item');
-
-  window.addEventListener('scroll', () => {
-    const scrollPosition = window.scrollY;
-
-    previewItems.forEach((item, index) => {
-      const speed = 0.05 * (index + 1);
-      const offset = scrollPosition * speed;
-      item.style.transform = `translateY(${offset}px) translateZ(-${20 * index}px) scale(${1 - (0.02 * index)})`;
-    });
-  });
-});
-
   </script>
-
-  <style>
-<style>
-  /* Стили для переключателя языка (оставляем без изменений) */
-  .language-switcher {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 5px;
-    z-index: 1000;
-  }
-  .lang-btn {
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    background: white;
-    cursor: pointer;
-    border-radius: 3px;
-    font-size: 12px;
-  }
-  .lang-btn.active {
-    background: #007bff;
-    color: white;
-    border-color: #007bff;
-  }
-  .lang-btn:hover {
-    background: #f0f0f0;
-  }
-  .lang-btn.active:hover {
-    background: #0056b3;
-  }
-/* Стили только для блока preview-images */
-/* Стили только для блока preview-images */
-.preview-images {
-  width: 100%;
-  margin: 30px auto 0;
-  padding: 0 20px;
-}
-
-.preview-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.preview-item {
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  min-height: 250px; /* Минимальная высота для контейнера */
-}
-
-.preview-img-wrapper {
-  height: 180px;
-  overflow: hidden;
-}
-
-.preview-img-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.preview-item:hover .preview-img-wrapper img {
-  transform: scale(1.05);
-}
-
-.preview-item p {
-  padding: 15px;
-  margin: 0;
-  font-size: 14px;
-  color: #333;
-  line-height: 1.4;
-  background: white;
-  flex-grow: 1; /* Позволяет тексту занимать оставшееся пространство */
-  display: block; /* Гарантирует отображение */
-}
-
-/* Анимация появления */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.preview-item {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-.preview-item:nth-child(1) { animation-delay: 0.1s; }
-.preview-item:nth-child(2) { animation-delay: 0.2s; }
-.preview-item:nth-child(3) { animation-delay: 0.3s; }
-.preview-item:nth-child(4) { animation-delay: 0.4s; }
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .preview-grid {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-}
-
-
-</style>
-
-
-  </style>
 </body>
 </html>
-
-
-
-
-
-
-
