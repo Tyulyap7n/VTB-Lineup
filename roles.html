@@ -2349,7 +2349,7 @@ main {
       Rebounder: null,
       Stopper: null,
       Shooter: null,
-      Suprise: null
+      Surprise: null
     };
     let autoSaveTimeout = null;
     let currentSort = {
@@ -2358,13 +2358,15 @@ main {
     };
     let tours = [];
     let currentUserId = null;
-    let currentUserTeamId = null; // Добавляем переменную для ID команды пользователя
-	let currentPage = 1;
-let managersPerPage = 8;
-let totalPages = 1;
-let sortedLeaderboard = [];
-let currentButton = null;
-let currentSelectedPlayer = null;
+    let currentUserTeamId = null;
+    let currentPage = 1;
+    const playersPerPage = 8; // ОДНО объявление константы
+    let totalPages = 1;
+    let sortedLeaderboard = [];
+    let currentButton = null;
+    let currentSelectedPlayer = null;
+    let allPlayers = []; // Все загруженные игроки
+    let filteredPlayers = []; // Отфильтрованные игроки
 	    // Объект с переводами
     const translations = {
       ru: {
@@ -2637,25 +2639,395 @@ function renderPlayers() {
 
   updatePaginationControls();
 }
-async function loadPlayerStats(playerIds) {
-  try {
-    const { data: stats, error } = await supabase
-      .from('player_stats')
-      .select('player_id, points, threes, assists, rebounds, steals, blocks, turnover')
-      .in('player_id', playerIds);
+    // Функция загрузки ВСЕХ игроков
+    async function loadAllPlayers() {
+        try {
+            console.log('Загрузка всех игроков...');
+            
+            const { data: playersData, error: playersError } = await supabase
+                .from('players')
+                .select('*, teams(*)')
+                .order('price', { ascending: false });
 
-    if (error) {
-      console.error("Ошибка загрузки статистики:", error);
-      return [];
+            if (playersError) throw playersError;
+
+            if (!playersData || playersData.length === 0) {
+                console.log('Нет данных игроков');
+                return;
+            }
+
+            // Сохраняем всех игроков
+            allPlayers = playersData;
+            filteredPlayers = [...allPlayers];
+            
+            console.log(`Загружено ${allPlayers.length} игроков`);
+
+            // Загружаем статистику для всех игроков
+            await loadPlayersStats();
+
+        } catch (err) {
+            console.error('Ошибка загрузки игроков:', err);
+            showNotification('Ошибка загрузки данных игроков', false);
+        }
     }
 
-    return stats || [];
+    // Функция загрузки статистики для всех игроков
+    async function loadPlayersStats() {
+        try {
+            const playerIds = allPlayers.map(p => p.id);
+            
+            const { data: stats, error: statsError } = await supabase
+                .from('player_stats')
+                .select('player_id, points, assists, rebounds, steals, blocks, turnover, threes')
+                .in('player_id', playerIds);
 
-  } catch (error) {
-    console.error("Ошибка в loadPlayerStats:", error);
-    return [];
-  }
-}
+            if (statsError) throw statsError;
+
+            // Группируем статистику по игрокам
+            const statsByPlayer = {};
+            if (stats) {
+                stats.forEach(s => {
+                    if (!statsByPlayer[s.player_id]) {
+                        statsByPlayer[s.player_id] = [];
+                    }
+                    statsByPlayer[s.player_id].push(s);
+                });
+            }
+
+            // Добавляем статистику к каждому игроку
+            allPlayers.forEach(player => {
+                player.stats = statsByPlayer[player.id] || [];
+            });
+
+            // Обновляем отображение
+            renderPlayersTable();
+            
+        } catch (error) {
+            console.error('Ошибка загрузки статистики:', error);
+        }
+    }
+
+    // Функция фильтрации игроков
+    function filterPlayers() {
+        const teamFilterValue = document.getElementById('filter-team')?.value || '';
+        
+        filteredPlayers = allPlayers.filter(player => {
+            const teamMatch = !teamFilterValue || 
+                (player.teams && player.teams.name === teamFilterValue);
+            return teamMatch;
+        });
+
+        currentPage = 1; // Сбрасываем на первую страницу
+        renderPlayersTable();
+    }
+
+    // Функция отрисовки таблицы с пагинацией
+    function renderPlayersTable() {
+        const tableBody = document.getElementById('players-table-body');
+        if (!tableBody) return;
+
+        // Сортируем игроков если нужно
+        if (currentSort.column) {
+            filteredPlayers.sort((a, b) => {
+                let valA = getSortValue(a, currentSort.column);
+                let valB = getSortValue(b, currentSort.column);
+                
+                if (currentSort.direction === 'asc') {
+                    return valA > valB ? 1 : -1;
+                } else {
+                    return valA < valB ? 1 : -1;
+                }
+            });
+        }
+
+        // Вычисляем пагинацию
+        const startIndex = (currentPage - 1) * playersPerPage;
+        const endIndex = startIndex + playersPerPage;
+        const playersToShow = filteredPlayers.slice(startIndex, endIndex);
+        totalPages = Math.ceil(filteredPlayers.length / playersPerPage);
+
+        // Очищаем таблицу
+        tableBody.innerHTML = '';
+
+        if (playersToShow.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="13" style="text-align: center; padding: 20px;">
+                        Игроки не найдены
+                    </td>
+                </tr>
+            `;
+        } else {
+            // Заполняем таблицу
+            playersToShow.forEach(player => {
+                const row = createPlayerRow(player);
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Обновляем элементы пагинации
+        updatePaginationControls();
+    }
+
+    // Функция для получения значения для сортировки
+    function getSortValue(player, column) {
+        switch (column) {
+            case 'name':
+                return `${player.first_name} ${player.last_name}`.toLowerCase();
+            case 'price':
+                return player.price || 0;
+            case 'avg':
+                return calculatePlayerAverage(player);
+            case 'points':
+                return calculateStatAverage(player, 'points');
+            case 'threes':
+                return calculateStatAverage(player, 'threes');
+            case 'assists':
+                return calculateStatAverage(player, 'assists');
+            case 'rebounds':
+                return calculateStatAverage(player, 'rebounds');
+            case 'steals':
+                return calculateStatAverage(player, 'steals');
+            case 'blocks':
+                return calculateStatAverage(player, 'blocks');
+            case 'turnovers':
+                return calculateStatAverage(player, 'turnover');
+            default:
+                return 0;
+        }
+    }
+
+    // Функция создания строки игрока
+    function createPlayerRow(player) {
+        const playerStats = player.stats || [];
+        const gamesCount = playerStats.length;
+
+        // Рассчитываем средние значения
+        const avgPoints = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (s.points || 0), 0) / gamesCount).toFixed(1) : '0.0';
+        const avgThrees = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (s.threes || 0), 0) / gamesCount).toFixed(1) : '0.0';
+        const avgAssists = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (s.assists || 0), 0) / gamesCount).toFixed(1) : '0.0';
+        const avgRebounds = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (s.rebounds || 0), 0) / gamesCount).toFixed(1) : '0.0';
+        const avgSteals = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (s.steals || 0), 0) / gamesCount).toFixed(1) : '0.0';
+        const avgBlocks = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (s.blocks || 0), 0) / gamesCount).toFixed(1) : '0.0';
+        const avgTurnover = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (s.turnover || 0), 0) / gamesCount).toFixed(1) : '0.0';
+
+        // Рассчитываем средний показатель (AVG)
+        const avgAvg = gamesCount > 0 ?
+            (playerStats.reduce((sum, s) => sum + (
+                (s.points || 0) +
+                1.5 * (s.assists || 0) +
+                1.3 * (s.rebounds || 0) +
+                3 * (s.steals || 0) +
+                3 * (s.blocks || 0) -
+                2 * (s.turnover || 0)
+            ), 0) / gamesCount).toFixed(1) : '0.0';
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>
+                <button class="select-button" onclick="openRoleSelector(${player.id}, this)">+</button>
+            </td>
+            <td>
+                <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
+                     alt="${player.first_name} ${player.last_name}"
+                     width="40" height="40" style="border-radius: 50%;">
+            </td>
+            <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${player.teams?.logo_url ?
+                        `<img src="${player.teams.logo_url}" alt="${player.teams.name}" width="24" height="24" style="border-radius: 50%;">` : ''}
+                    <span class="player-name-cell" onclick="openPlayerPopup(${player.id})" style="cursor: pointer; color: var(--white); transition: color 0.3s ease;">
+                        ${player.first_name} ${player.last_name} (${player.position})
+                    </span>
+                </div>
+            </td>
+            <td>${player.price || 0}$</td>
+            <td>${avgAvg}</td>
+            <td>${avgPoints}</td>
+            <td>${avgThrees}</td>
+            <td>${avgAssists}</td>
+            <td>${avgRebounds}</td>
+            <td>${avgSteals}</td>
+            <td>${avgBlocks}</td>
+            <td>${avgTurnover}</td>
+            <td>${gamesCount > 0 ? Math.round((1 / gamesCount) * 100) : 0}%</td>
+        `;
+        return row;
+    }
+
+    // Функции пагинации
+    function nextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderPlayersTable();
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            renderPlayersTable();
+        }
+    }
+
+    function updatePaginationControls() {
+        const pageInfo = document.getElementById('page-info');
+        const prevButton = document.getElementById('prev-page');
+        const nextButton = document.getElementById('next-page');
+
+        if (pageInfo) {
+            pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
+        }
+        
+        if (prevButton) {
+            prevButton.disabled = currentPage === 1;
+        }
+        
+        if (nextButton) {
+            nextButton.disabled = currentPage === totalPages;
+        }
+    }
+
+    // Функция сортировки таблицы
+    function sortTable(column) {
+        if (currentSort.column === column) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSort.column = column;
+            currentSort.direction = 'asc';
+        }
+        
+        // Сбрасываем индикаторы сортировки
+        document.querySelectorAll('.players-table th').forEach(h => {
+            h.classList.remove('sort-asc', 'sort-desc');
+        });
+        
+        // Устанавливаем индикатор для текущего столбца
+        const currentHeader = document.querySelector(`th[data-sort="${column}"]`);
+        if (currentHeader) {
+            currentHeader.classList.add(`sort-${currentSort.direction}`);
+        }
+        
+        renderPlayersTable();
+    }
+
+    // Вспомогательные функции для расчетов
+    function calculateStatAverage(player, statName) {
+        const stats = player.stats || [];
+        if (stats.length === 0) return 0;
+        return stats.reduce((sum, s) => sum + (s[statName] || 0), 0) / stats.length;
+    }
+
+    function calculatePlayerAverage(player) {
+        const stats = player.stats || [];
+        if (stats.length === 0) return 0;
+        return stats.reduce((sum, s) => sum + (
+            (s.points || 0) +
+            1.5 * (s.assists || 0) +
+            1.3 * (s.rebounds || 0) +
+            3 * (s.steals || 0) +
+            3 * (s.blocks || 0) -
+            2 * (s.turnover || 0)
+        ), 0) / stats.length;
+    }
+
+    // Инициализация фильтра команд
+    async function initTeamFilter() {
+        try {
+            const { data: teams, error } = await supabase
+                .from('teams')
+                .select('name')
+                .order('name');
+
+            if (error) throw error;
+
+            const teamFilter = document.getElementById('filter-team');
+            if (teamFilter) {
+                // Очищаем существующие опции (кроме "Все")
+                teamFilter.innerHTML = '<option value="">Все</option>';
+
+                // Добавляем команды в фильтр
+                teams.forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.name;
+                    option.textContent = team.name;
+                    teamFilter.appendChild(option);
+                });
+
+                // Добавляем обработчик изменения фильтра
+                teamFilter.addEventListener('change', filterPlayers);
+            }
+        } catch (error) {
+            console.error("Ошибка инициализации фильтра команд:", error);
+        }
+    }
+
+    // Инициализация при загрузке страницы
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            // Инициализация языка
+            const savedLang = localStorage.getItem('preferred-language') || 'ru';
+            switchLanguage(savedLang);
+
+            // Проверяем авторизацию пользователя
+            const { data: { user }, error: userError } = await supabase.auth.getUser();
+            if (userError || !user) {
+                showNotification('alerts.auth_required', false);
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+                return;
+            }
+
+            // Инициализируем фильтр команд
+            await initTeamFilter();
+
+            // Загружаем всех игроков
+            await loadAllPlayers();
+
+            // Загружаем роли
+            await loadRoles();
+
+            // Загружаем количество менеджеров
+            await loadManagersCount();
+
+            // Загружаем текущую команду пользователя
+            await loadUserTeam(user.id);
+
+            // Загружаем сохраненный состав
+            setTimeout(() => {
+                loadSavedRoster();
+            }, 1000);
+
+            // Загружаем матчи текущего тура
+            await loadCurrentTourMatches();
+
+            // Обработчик для кнопки ручного сохранения
+            document.getElementById('save-roster')?.addEventListener('click', function() {
+                saveRosterToDatabase();
+            });
+
+            // Добавляем обработчики сортировки для заголовков таблицы
+            document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+                header.addEventListener('click', () => {
+                    const column = header.getAttribute('data-sort');
+                    sortTable(column);
+                });
+            });
+
+            console.log("Страница успешно инициализирована");
+
+        } catch (error) {
+            console.error("Ошибка инициализации:", error);
+        }
+    });
 
 // Функция для отображения страницы лидерборда
 function renderLeaderboardPage(page) {
@@ -4903,6 +5275,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
