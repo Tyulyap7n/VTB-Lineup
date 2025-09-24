@@ -1258,10 +1258,10 @@ main {
   );
   z-index: 1200;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
-  /* Убираем фиксированное позиционирование по центру */
   left: 0;
   top: 0;
 }
+
 
 
 .role-selector.show {
@@ -4026,7 +4026,6 @@ function closeRules() {
       return true;
     }
 
-// Открытие кругового селектора ролей
 function openRoleSelector(playerId, buttonElement) {
     // Находим игрока по ID
     currentSelectedPlayer = players.find((p) => p.id === playerId);
@@ -4038,11 +4037,10 @@ function openRoleSelector(playerId, buttonElement) {
     const selector = document.getElementById("role-selector");
     const overlay = document.getElementById("role-overlay");
 
-    // Получаем координаты кнопки "+"
+    // Получаем координаты кнопки "+" относительно окна браузера
     const buttonRect = buttonElement.getBoundingClientRect();
 
     // Позиционируем селектор рядом с кнопкой
-    selector.style.position = "fixed";
     selector.style.left = `${buttonRect.left + window.scrollX - 80}px`;
     selector.style.top = `${buttonRect.top + window.scrollY - 76}px`;
 
@@ -4050,9 +4048,10 @@ function openRoleSelector(playerId, buttonElement) {
     selector.classList.add("show");
     overlay.classList.add("show");
     overlay.onclick = closeRoleSelector;
-    
+
     console.log('Селектор открыт для игрока:', currentSelectedPlayer.first_name, currentSelectedPlayer.last_name);
 }
+
 
 
 // Закрытие кругового селектора ролей
@@ -4895,6 +4894,7 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
 
 
