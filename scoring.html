@@ -2428,18 +2428,19 @@ async function renderPlayersPage(page = 1) {
       const position = player.position || '';
 
       const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>
-          <button class="select-button" onclick="addPlayerToTeam(
-            ${player.id},
-            '${firstName}',
-            '${lastName}',
-            ${player.price || 0},
-            '${photo}',
-            '${teamName}',
-            '${position}'
-          )">+</button>
-        </td>
+		// В функции renderPlayersPage обновите строку с кнопкой:
+		row.innerHTML = `
+		  <td>
+			<button class="select-button" onclick="addPlayerToTeam(
+			  ${player.id},
+			  '${(player.first_name || '').replace(/'/g, "\\'").replace(/\n/g, '').replace(/\r/g, '')}',
+			  '${(player.last_name || '').replace(/'/g, "\\'").replace(/\n/g, '').replace(/\r/g, '')}',
+			  ${player.price || 0},
+			  '${player.photo_url || ''}',
+			  '${(player.teams?.name || '').replace(/'/g, "\\'").replace(/\n/g, '').replace(/\r/g, '')}',
+			  '${(player.position || '').replace(/'/g, "\\'").replace(/\n/g, '').replace(/\r/g, '')}'
+			)">+</button>
+		  </td>
         <td>
           <img src="${photo}" alt="${firstName} ${lastName}" width="40" height="40" style="border-radius:50%;">
         </td>
@@ -2635,6 +2636,40 @@ function validateTeamComposition() {
 
   return true;
 }
+// Функция для проверки проблемных игроков
+function checkProblemPlayers() {
+  console.log('=== ПРОВЕРКА ПРОБЛЕМНЫХ ИГРОКОВ ===');
+  
+  // Находим игроков из команд 4 и 6
+  const problemTeamPlayers = players.filter(p => p.teams?.id === 4 || p.teams?.id === 6);
+  
+  problemTeamPlayers.forEach(player => {
+    console.log('Проверка игрока:', {
+      id: player.id,
+      name: `${player.first_name} ${player.last_name}`,
+      teamId: player.teams?.id,
+      teamName: player.teams?.name,
+      position: player.position,
+      price: player.price,
+      hasApostrophe: (player.first_name && player.first_name.includes("'")) || 
+                    (player.last_name && player.last_name.includes("'"))
+    });
+    
+    // Проверяем, есть ли проблемные символы
+    const problemChars = ["'", '"', '`', '\n', '\r', '\t'];
+    problemChars.forEach(char => {
+      if (player.first_name && player.first_name.includes(char)) {
+        console.warn(`Проблемный символ в имени: "${char}"`);
+      }
+      if (player.last_name && player.last_name.includes(char)) {
+        console.warn(`Проблемный символ в фамилии: "${char}"`);
+      }
+    });
+  });
+}
+
+// Вызовите после загрузки данных
+setTimeout(checkProblemPlayers, 3000);
 // Функция для отображения страницы лидерборда
 function renderLeaderboardPage(page) {
   const tableBody = document.getElementById('leaderboard-body');
@@ -4334,14 +4369,29 @@ function filterPlayersByTeam() {
     }
   });
 }
-    // Обновленная функция добавления игрока
-// Исправленная функция добавления игрока
+// Исправленная функция addPlayerToTeam с обработкой переводов строк
 function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamName, position) {
   try {
-    console.log('Добавление игрока:', { playerId, firstName, position });
+    console.log('=== ДОБАВЛЕНИЕ ИГРОКА ===');
     
+    // Безопасная обработка строк - убираем проблемные символы
+    const safeFirstName = (firstName || '').replace(/['"`\n\r]/g, '').trim();
+    const safeLastName = (lastName || '').replace(/['"`\n\r]/g, '').trim();
+    const safeTeamName = (teamName || '').replace(/['"`\n\r]/g, '').trim(); // Убираем \n
+    const safePosition = (position || '').replace(/['"`\n\r]/g, '').trim();
+    
+    console.log('Данные игрока:', { 
+      playerId, 
+      firstName: safeFirstName, 
+      lastName: safeLastName, 
+      price, 
+      teamName: safeTeamName, 
+      position: safePosition 
+    });
+
     // Проверка на дублирование игроков
-    if (currentRoster.players.some(p => p && p.id === playerId)) {
+    const isDuplicate = currentRoster.players.some(p => p && p.id === playerId);
+    if (isDuplicate) {
       showNotification('Этот игрок уже выбран', false);
       return false;
     }
@@ -4354,38 +4404,35 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
     }
 
     // Проверка бюджета
-    const spentBudget = actualPlayers.reduce((sum, p) => sum + p.price, 0);
-    if (spentBudget + price > 70) {
+    const spentBudget = actualPlayers.reduce((sum, p) => sum + (p.price || 0), 0);
+    if (spentBudget + (price || 0) > 70) {
       showNotification('Превышен бюджет в 70$', false);
       return false;
     }
 
     // Проверка лимита игроков из одной команды
-    const teamCount = actualPlayers.filter(p => p.teamName === teamName).length;
+    const teamCount = actualPlayers.filter(p => p.teamName === safeTeamName).length;
     if (teamCount >= 3) {
-      showNotification(`Лимит игроков из команды ${teamName} исчерпан (максимум 3)`, false);
+      showNotification(`Лимит игроков из команды ${safeTeamName} исчерпан (максимум 3)`, false);
       return false;
     }
 
     // Находим доступный слот для позиции игрока
     let targetSlotIndex = -1;
+    const slotConfig = ['З', 'З', 'Ф', 'Ф', 'Ц', 'УНВ'];
     
     // Сначала ищем точное соответствие позиции
     for (let i = 0; i < 6; i++) {
-      if (currentRoster.players[i]) continue; // Слот занят
-      
+      if (currentRoster.players[i]) continue;
+
       const slotElement = document.getElementById(`empty-slot-${i+1}`);
-      if (!slotElement) {
-        console.error('Слот не найден:', `empty-slot-${i+1}`);
-        continue;
-      }
+      if (!slotElement) continue;
       
       const slotPosition = slotElement.querySelector('.role-label').textContent;
-      console.log('Проверка слота:', i+1, 'Позиция:', slotPosition);
       
-      if ((position === 'З' && slotPosition === 'З') ||
-          (position === 'Ф' && slotPosition === 'Ф') ||
-          (position === 'Ц' && slotPosition === 'Ц')) {
+      if ((safePosition === 'З' && slotPosition === 'З') ||
+          (safePosition === 'Ф' && slotPosition === 'Ф') ||
+          (safePosition === 'Ц' && slotPosition === 'Ц')) {
         targetSlotIndex = i;
         break;
       }
@@ -4401,8 +4448,7 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
         
         const slotPosition = slotElement.querySelector('.role-label').textContent;
         if (slotPosition === 'УНВ') {
-          // Проверяем совместимость позиции с FLEX
-          if ((position === 'З' || position === 'Ф' || position === 'Ц')) {
+          if (safePosition === 'З' || safePosition === 'Ф' || safePosition === 'Ц') {
             targetSlotIndex = i;
             break;
           }
@@ -4411,19 +4457,19 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
     }
 
     if (targetSlotIndex === -1) {
-      showNotification(`Нет доступных слотов для позиции ${position}`, false);
+      showNotification(`Нет доступных слотов для позиции ${safePosition}`, false);
       return false;
     }
 
-    // Добавляем игрока в массив
+    // Добавляем игрока в массив с безопасными данными
     const newPlayer = {
       id: playerId,
-      first_name: firstName,
-      last_name: lastName,
-      price: price,
-      photo_url: photoUrl,
-      teamName: teamName,
-      position: position
+      first_name: safeFirstName,
+      last_name: safeLastName,
+      price: price || 0,
+      photo_url: photoUrl || 'https://via.placeholder.com/50',
+      teamName: safeTeamName,
+      position: safePosition
     };
 
     currentRoster.players[targetSlotIndex] = newPlayer;
@@ -4432,10 +4478,10 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
     updateSelectedPlayersUI();
     updateSpentBudget();
     
-    // ИСПРАВЛЕНИЕ: Правильное название функции
-    saveRoster(); // Было: saveroster()
+    // Сохраняем состав
+    saveRoster();
     
-    showNotification(`${firstName} ${lastName} добавлен в команду`, true);
+    showNotification(`${safeFirstName} ${safeLastName} добавлен в команду`, true);
     return true;
     
   } catch (error) {
@@ -4443,7 +4489,7 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
     showNotification('Ошибка добавления игрока', false);
     return false;
   }
-}// В функции renderPlayersTable обновите начало:
+}
     async function renderPlayersTable() {
       const tableBody = document.getElementById("players-table-body");
       tableBody.innerHTML = "<tr></tr>";
