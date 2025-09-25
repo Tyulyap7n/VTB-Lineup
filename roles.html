@@ -4036,20 +4036,36 @@ function closeRules() {
         return false;
     }
 
+    // Проверка бюджета
+    const spentBudget = Object.values(currentRoster).reduce(
+        (sum, p) => (p ? sum + p.price : sum),
+        0
+    );
+
+    if (spentBudget - (currentRoster[role] ? currentRoster[role].price : 0) + player.price > 70) {
+        showNotification("Превышен бюджет в 70$", false);
+        return false;
+    }
+
     // Обновляем текущий состав
     currentRoster[role] = player;
 
     // Обновляем UI
     const slot = document.getElementById(`slot-${role}`);
     const emptySlot = slot.querySelector('.empty-slot');
+    const oldPlayerInfo = slot.querySelector('.player-info');
 
-    // Скрываем текст и отображаем информацию об игроке
+    // Удаляем информацию о старом игроке, если она есть
+    if (oldPlayerInfo) {
+        oldPlayerInfo.remove();
+    }
+
+    // Скрываем текст и отображаем информацию о новом игроке
     emptySlot.style.display = 'none';
 
-    // Создаем элемент с информацией об игроке
+    // Создаем элемент с информацией о новом игроке
     const playerInfo = document.createElement('div');
     playerInfo.className = 'player-info';
-
     playerInfo.innerHTML = `
         <img src="${player.photo_url || 'https://via.placeholder.com/50'}" alt="${player.first_name} ${player.last_name}" class="player-photo">
         <div class="player-name">${player.first_name} ${player.last_name}</div>
@@ -4080,6 +4096,7 @@ function closeRules() {
     showNotification(`${player.first_name} ${player.last_name} назначен на роль ${role}`, true);
     return true;
 }
+
 
 
 function openRoleSelector(playerId, buttonElement) {
