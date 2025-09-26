@@ -87,52 +87,6 @@
         color: var(--white);
         font-weight: bold;
     }
-    /* Альтернативный вариант - изображение как фон */
-    .league-block-front.with-bg {
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
-    .league-block-back.with-bg {
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-    }
-    .account-link {
-      color: var(--yellow);
-      text-decoration: none;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    /* Переключатель языка */
-    .language-switcher {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      gap: 5px;
-      z-index: 1000;
-    }
-    .lang-btn {
-      padding: 5px 10px;
-      border: 1px solid #ccc;
-      background: white;
-      cursor: pointer;
-      border-radius: 3px;
-      font-size: 12px;
-      font-family: 'Petrov Sans', Arial, sans-serif;
-    }
-    .lang-btn.active {
-      background: var(--yellow);
-      color: var(--black);
-      border-color: var(--yellow);
-    }
-    .lang-btn:hover {
-      background: #f0f0f0;
-    }
-    .lang-btn.active:hover {
-      background: #e6d600;
-    }
     /* Основной контейнер */
     .main-container {
       display: flex;
@@ -156,31 +110,67 @@
       overflow-x: hidden;
       transition: width 0.3s ease, padding 0.3s ease;
     }
+    aside:hover {
+      width: 250px;
+      padding: 20px 10px;
+    }
+    aside:hover .sidebar-item span {
+      display: block;
+    }
+    aside:hover .sidebar-item {
+      flex-direction: row;
+      justify-content: flex-start;
+      padding: 12px 15px;
+      gap: 15px;
+    }
     .sidebar-item {
       width: 100%;
       padding: 12px;
       text-align: center;
       color: var(--white);
       cursor: pointer;
-      transition: background-color 0.2s ease;
+      transition: all 0.3s ease;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 8px;
       margin-bottom: 10px;
+      border-radius: 6px;
     }
     .sidebar-item:hover {
       background-color: rgba(255, 255, 255, 0.2);
+      transform: translateX(5px);
     }
     .sidebar-item img {
       width: 40px;
       height: 40px;
-      border-radius: 4px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
     }
     .sidebar-item span {
       font-size: 14px;
       display: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    .sidebar-section {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+    .sidebar-title {
+      color: var(--yellow);
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      text-align: center;
+      display: none;
+    }
+    aside:hover .sidebar-title {
+      display: block;
     }
     /* Основной контент */
     main {
@@ -193,6 +183,10 @@
       background-color: var(--black);
       flex: 1;
       transition: margin-left 0.3s ease, width 0.3s ease;
+    }
+    aside:hover ~ main {
+      margin-left: 250px;
+      width: calc(100% - 250px);
     }
     /* Блоки лиг */
     .league-blocks {
@@ -253,6 +247,198 @@
       font-size: 16px;
       text-align: center;
     }
+    /* Блок создания/вступления в лигу */
+    .league-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-top: 40px;
+      width: 100%;
+      max-width: 500px;
+    }
+    .league-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      width: 100%;
+    }
+    .league-btn {
+      background-color: var(--purple);
+      color: var(--white);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .league-btn:hover {
+      background-color: #5a36c7;
+    }
+    .join-section {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      justify-content: center;
+    }
+    .code-input {
+      background: transparent;
+      border: 2px solid var(--purple);
+      color: var(--white);
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      font-size: 16px;
+      width: 200px;
+      text-align: center;
+    }
+    .code-input::placeholder {
+      color: #aaa;
+    }
+    .join-btn {
+      background-color: var(--purple);
+      color: var(--white);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .join-btn:hover {
+      background-color: #5a36c7;
+    }
+    /* Модальное окно */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+    }
+    .modal-content {
+      background-color: var(--black);
+      margin: 5% auto;
+      padding: 30px;
+      border: 2px solid var(--purple);
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      right: 15px;
+    }
+    .close:hover {
+      color: var(--white);
+    }
+    .modal-title {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--white);
+      font-size: 24px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--white);
+      font-size: 16px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid var(--purple);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--white);
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      font-size: 16px;
+    }
+    .logo-upload {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 2px solid var(--purple);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--black);
+    }
+    .logo-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+    .upload-btn {
+      background-color: var(--purple);
+      color: var(--white);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      font-size: 14px;
+    }
+    .format-select {
+      display: flex;
+      gap: 10px;
+    }
+    .format-option {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      border: 2px solid var(--purple);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .format-option.selected {
+      background-color: var(--purple);
+    }
+    .create-btn {
+      width: 100%;
+      background-color: var(--purple);
+      color: var(--white);
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+    .create-btn:hover {
+      background-color: #5a36c7;
+    }
+    .create-btn:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+    }
     /* Футер */
     footer {
       width: 100%;
@@ -288,19 +474,26 @@
   <!-- Основной контейнер -->
   <div class="main-container">
      <aside id="leagues-sidebar">
-      <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
-        <span>Скаут</span>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Навигация</div>
+        <div class="sidebar-item" onclick="window.location.href='scout.html'">
+          <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
+          <span>Скаут</span>
+        </div>
+        <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
+          <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
+          <span>Новости</span>
+        </div>
+        <div class="sidebar-item" onclick="window.location.href='index.html'">
+          <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+          <span>Выход</span>
+        </div>
       </div>
-      <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
-        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
-        <span>Новости</span>
+      
+      <div class="sidebar-section">
+        <div class="sidebar-title">Мои лиги</div>
+        <div id="user-leagues"></div>
       </div>
-      <div class="sidebar-item" onclick="window.location.href='index.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
-        <span>Выход</span>
-      </div>
-      <div id="user-leagues"></div>
     </aside>
     <!-- Основной контент -->
     <main>
@@ -331,8 +524,57 @@
           </div>
         </div>
       </div>
+
+      <!-- Блок создания/вступления в лигу -->
+      <div class="league-actions">
+        <div class="league-buttons">
+          <button class="league-btn" id="create-league-btn">Создать лигу</button>
+          <button class="league-btn" id="join-league-btn">Вступить в лигу</button>
+        </div>
+        
+        <div class="join-section" id="join-section" style="display: none;">
+          <input type="text" class="code-input" id="league-code" placeholder="Введите код лиги">
+          <button class="join-btn" id="join-confirm-btn">Вступить</button>
+        </div>
+      </div>
     </main>
   </div>
+
+  <!-- Модальное окно создания лиги -->
+  <div id="create-league-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="close-modal">&times;</span>
+      <h2 class="modal-title">Создание лиги</h2>
+      <form id="create-league-form">
+        <div class="form-group">
+          <label class="form-label">Логотип лиги</label>
+          <div class="logo-upload">
+            <div class="logo-preview" id="logo-preview">
+              <span style="color: #aaa;">Лого</span>
+            </div>
+            <input type="file" id="logo-upload" accept="image/*" style="display: none;">
+            <button type="button" class="upload-btn" id="upload-trigger">Загрузить</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Название лиги</label>
+          <input type="text" class="form-input" id="league-name" placeholder="Введите название лиги" required>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Формат лиги</label>
+          <div class="format-select">
+            <div class="format-option" data-format="Roles">Roles</div>
+            <div class="format-option" data-format="Classic">Classic</div>
+          </div>
+        </div>
+        
+        <button type="submit" class="create-btn" id="create-confirm-btn" disabled>Создать лигу</button>
+      </form>
+    </div>
+  </div>
+
   <footer>
     <a href="pick.html">Главная</a>
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
@@ -340,6 +582,7 @@
     <a href="https://vtb-league.com/ru/standings/">Таблица</a>
     <a href="https://t.me/lineupfantasy">Разработчик</a>
   </footer>
+
   <!-- Supabase Client -->
   <script>
     // Инициализация Supabase
@@ -347,8 +590,11 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2bm5uZW9od2N1eGlyc3hpbWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwNjM0NTcsImV4cCI6MjA3MjYzOTQ1N30.9H5aI1gj0FHGAC6NM08BbMno26ZdueNg7G1PnTDItpA';
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    document.addEventListener("DOMContentLoaded", async () => {
+    // Переменные для хранения данных
+    let selectedFormat = null;
+    let logoFile = null;
 
+    document.addEventListener("DOMContentLoaded", async () => {
       // Получаем текущего пользователя
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -358,46 +604,395 @@
       }
 
       // Загружаем лиги пользователя
-      const { data: userLeagues, error: userLeaguesError } = await supabase
-        .from('user_leagues')
-        .select('league_id')
-        .eq('user_id', user.id);
+      await loadUserLeagues(user.id);
 
-      if (userLeaguesError) {
-        console.error("Ошибка загрузки лиг пользователя:", userLeaguesError);
-        alert('Ошибка загрузки лиг пользователя: ' + userLeaguesError.message);
-        return;
+      // Обработчики событий для создания/вступления в лигу
+      const createLeagueBtn = document.getElementById('create-league-btn');
+      const joinLeagueBtn = document.getElementById('join-league-btn');
+      const joinSection = document.getElementById('join-section');
+      const joinConfirmBtn = document.getElementById('join-confirm-btn');
+      const leagueCodeInput = document.getElementById('league-code');
+      
+      const modal = document.getElementById('create-league-modal');
+      const closeModal = document.getElementById('close-modal');
+      const uploadTrigger = document.getElementById('upload-trigger');
+      const logoUpload = document.getElementById('logo-upload');
+      const logoPreview = document.getElementById('logo-preview');
+      const leagueNameInput = document.getElementById('league-name');
+      const formatOptions = document.querySelectorAll('.format-option');
+      const createConfirmBtn = document.getElementById('create-confirm-btn');
+      const createLeagueForm = document.getElementById('create-league-form');
+
+      // Функция загрузки лиг пользователя
+      async function loadUserLeagues(userId) {
+        try {
+          const { data: userLeagues, error: userLeaguesError } = await supabase
+            .from('user_leagues')
+            .select(`
+              league_id,
+              leagues (
+                id,
+                name,
+                logo_url,
+                format,
+                created_at
+              )
+            `)
+            .eq('user_id', userId)
+            .order('joined_at', { ascending: false });
+
+          if (userLeaguesError) throw userLeaguesError;
+
+          const userLeaguesContainer = document.getElementById('user-leagues');
+          userLeaguesContainer.innerHTML = '';
+
+          if (userLeagues.length === 0) {
+            userLeaguesContainer.innerHTML = `
+              <div class="sidebar-item">
+                <img src="https://cdn-icons-png.flaticon.com/512/1828/1828665.png" alt="Нет лиг">
+                <span>Нет активных лиг</span>
+              </div>
+            `;
+            return;
+          }
+
+          userLeagues.forEach(userLeague => {
+            const league = userLeague.leagues;
+            const leagueItem = document.createElement('div');
+            leagueItem.className = 'sidebar-item';
+            leagueItem.innerHTML = `
+              <img src="${league.logo_url || 'https://cdn-icons-png.flaticon.com/512/1828/1828665.png'}" 
+                   alt="${league.name}" 
+                   onerror="this.src='https://cdn-icons-png.flaticon.com/512/1828/1828665.png'">
+              <span>${league.name}</span>
+            `;
+				leagueItem.onclick = () => {
+				  // Для Roles формата
+				  if (league.format === 'Roles') {
+					window.location.href = `roles.html?league_id=${league.id}`;
+				  } 
+				  // Для Classic формата  
+				  else if (league.format === 'Classic') {
+					window.location.href = `scoring.html?league_id=${league.id}`;
+				  }
+				};
+            userLeaguesContainer.appendChild(leagueItem);
+          });
+
+        } catch (error) {
+          console.error("Ошибка загрузки лиг пользователя:", error);
+          const userLeaguesContainer = document.getElementById('user-leagues');
+          userLeaguesContainer.innerHTML = `
+            <div class="sidebar-item">
+              <img src="https://cdn-icons-png.flaticon.com/512/1178/1178479.png" alt="Ошибка">
+              <span>Ошибка загрузки</span>
+            </div>
+          `;
+        }
       }
 
-      // Получаем информацию о лигах
-      const leagueIds = userLeagues.map(ul => ul.league_id);
-      const { data: leagues, error: leaguesError } = await supabase
-        .from('leagues')
-        .select('id, name, logo_url')
-        .in('id', leagueIds);
-
-      if (leaguesError) {
-        console.error("Ошибка загрузки лиг:", leaguesError);
-        alert('Ошибка загрузки лиг: ' + leaguesError.message);
-        return;
+      // Функция перенаправления на страницу лиги
+      function redirectToLeaguePage(leagueId, format) {
+        if (format === 'Roles') {
+          window.location.href = `roles.html?league_id=${leagueId}`;
+        } else if (format === 'Classic') {
+          window.location.href = `scoring.html?league_id=${leagueId}`;
+        } else {
+          // Fallback на общую страницу лиги
+          window.location.href = `league.html?id=${leagueId}`;
+        }
       }
 
-      // Добавляем лиги в боковую панель
-      const sidebar = document.getElementById('leagues-sidebar');
-      leagues.forEach(league => {
-        const leagueItem = document.createElement('div');
-        leagueItem.className = 'sidebar-item';
-        leagueItem.innerHTML = `
-          <img src="${league.logo_url || 'https://via.placeholder.com/40'}" alt="${league.name}">
-          <span>${league.name}</span>
-        `;
-        leagueItem.onclick = () => {
-          window.location.href = `league.html?id=${league.id}`;
-        };
-        sidebar.insertBefore(leagueItem, sidebar.firstChild);
+      // Функция для создания бакета, если он не существует
+      async function ensureBucketExists() {
+        try {
+          const { data, error } = await supabase.storage
+            .from('league-logos')
+            .list();
+          
+          if (error && error.message.includes('bucket not found')) {
+            console.log('Бакет не существует, используем альтернативный метод загрузки');
+            return false;
+          }
+          return true;
+        } catch (error) {
+          console.log('Ошибка проверки бакета:', error);
+          return false;
+        }
+      }
+
+      // Функция для загрузки логотипа
+      async function uploadLogo(file, userId) {
+        const bucketExists = await ensureBucketExists();
+        
+        if (!bucketExists) {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resolve({
+                success: true,
+                url: e.target.result,
+                method: 'dataurl'
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+
+        try {
+          const logoFileName = `league-logos/${userId}/${Date.now()}_${file.name}`;
+          const { data: logoData, error: uploadError } = await supabase.storage
+            .from('league-logos')
+            .upload(logoFileName, file);
+
+          if (uploadError) {
+            throw uploadError;
+          }
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('league-logos')
+            .getPublicUrl(logoFileName);
+
+          return {
+            success: true,
+            url: publicUrl,
+            method: 'supabase'
+          };
+        } catch (error) {
+          console.error('Ошибка загрузки в Supabase Storage:', error);
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              resolve({
+                success: true,
+                url: e.target.result,
+                method: 'dataurl_fallback'
+              });
+            };
+            reader.readAsDataURL(file);
+          });
+        }
+      }
+
+      // Переключение между кнопками
+      createLeagueBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+        joinSection.style.display = 'none';
+      });
+
+      joinLeagueBtn.addEventListener('click', () => {
+        joinSection.style.display = joinSection.style.display === 'none' ? 'flex' : 'none';
+        modal.style.display = 'none';
+      });
+
+      // Закрытие модального окна
+      closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+      window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+
+      // Загрузка логотипа
+      uploadTrigger.addEventListener('click', () => {
+        logoUpload.click();
+      });
+
+      logoUpload.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          logoFile = file;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            logoPreview.innerHTML = `<img src="${e.target.result}" alt="Логотип">`;
+          };
+          reader.readAsDataURL(file);
+          checkFormValidity();
+        }
+      });
+
+      // Выбор формата
+      formatOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          formatOptions.forEach(opt => opt.classList.remove('selected'));
+          option.classList.add('selected');
+          selectedFormat = option.getAttribute('data-format');
+          checkFormValidity();
+        });
+      });
+
+      // Проверка валидности формы
+      function checkFormValidity() {
+        const isNameValid = leagueNameInput.value.trim().length > 0;
+        const isFormatSelected = selectedFormat !== null;
+        const isLogoUploaded = logoFile !== null;
+        
+        createConfirmBtn.disabled = !(isNameValid && isFormatSelected && isLogoUploaded);
+      }
+
+      leagueNameInput.addEventListener('input', checkFormValidity);
+
+      // Создание лиги
+      createLeagueForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        if (!logoFile || !selectedFormat || !leagueNameInput.value.trim()) {
+          alert('Пожалуйста, заполните все поля!');
+          return;
+        }
+
+        createConfirmBtn.disabled = true;
+        createConfirmBtn.textContent = 'Создание...';
+
+        try {
+          // Загружаем логотип
+          const uploadResult = await uploadLogo(logoFile, user.id);
+          
+          if (!uploadResult.success) {
+            throw new Error('Не удалось загрузить логотип');
+          }
+
+          let logoUrl = uploadResult.url;
+
+          // Создаем лигу в базе данных
+          const { data: leagueData, error: leagueError } = await supabase
+            .from('leagues')
+            .insert([
+              {
+                name: leagueNameInput.value.trim(),
+                logo_url: logoUrl,
+                format: selectedFormat,
+                created_by: user.id
+              }
+            ])
+            .select();
+
+          if (leagueError) {
+            throw new Error('Ошибка создания лиги: ' + leagueError.message);
+          }
+
+          // Добавляем пользователя в лигу как администратора
+          const leagueId = leagueData[0].id;
+          const { error: userLeagueError } = await supabase
+            .from('user_leagues')
+            .insert([
+              {
+                user_id: user.id,
+                league_id: leagueId,
+                role: 'admin'
+              }
+            ]);
+
+          if (userLeagueError) {
+            throw new Error('Ошибка добавления в лигу: ' + userLeagueError.message);
+          }
+
+          alert('Лига успешно создана!');
+          modal.style.display = 'none';
+          
+          // Сбрасываем форму
+          logoFile = null;
+          selectedFormat = null;
+          leagueNameInput.value = '';
+          logoPreview.innerHTML = '<span style="color: #aaa;">Лого</span>';
+          formatOptions.forEach(opt => opt.classList.remove('selected'));
+          
+          // Обновляем список лиг
+          await loadUserLeagues(user.id);
+          
+          // Перенаправляем на соответствующую страницу формата
+          if (selectedFormat === 'Roles') {
+            window.location.href = `roles.html?league_id=${leagueId}`;
+          } else if (selectedFormat === 'Classic') {
+            window.location.href = `scoring.html?league_id=${leagueId}`;
+          }
+
+        } catch (error) {
+          console.error('Ошибка создания лиги:', error);
+          alert('Ошибка создания лиги: ' + error.message);
+        } finally {
+          createConfirmBtn.disabled = false;
+          createConfirmBtn.textContent = 'Создать лигу';
+        }
+      });
+
+      // Вступление в лигу
+      joinConfirmBtn.addEventListener('click', async () => {
+        const code = leagueCodeInput.value.trim().toUpperCase();
+        
+        if (!code) {
+          alert('Пожалуйста, введите код лиги!');
+          return;
+        }
+
+        joinConfirmBtn.disabled = true;
+        joinConfirmBtn.textContent = 'Вступление...';
+
+        try {
+          // Ищем лигу по коду
+          const { data: leagueData, error: leagueError } = await supabase
+            .from('leagues')
+            .select('id, name, logo_url, format')
+            .eq('code', code)
+            .single();
+
+          if (leagueError) {
+            throw new Error('Лига с таким кодом не найдена!');
+          }
+
+          // Проверяем, не состоит ли пользователь уже в этой лиге
+          const { data: existingMembership } = await supabase
+            .from('user_leagues')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('league_id', leagueData.id)
+            .single();
+
+          if (existingMembership) {
+            throw new Error('Вы уже состоите в этой лиге!');
+          }
+
+          // Добавляем пользователя в лигу
+          const { error: joinError } = await supabase
+            .from('user_leagues')
+            .insert([
+              {
+                user_id: user.id,
+                league_id: leagueData.id,
+                role: 'member'
+              }
+            ]);
+
+          if (joinError) {
+            throw new Error('Ошибка вступления в лигу: ' + joinError.message);
+          }
+
+          alert(`Вы успешно вступили в лигу "${leagueData.name}"!`);
+          leagueCodeInput.value = '';
+          joinSection.style.display = 'none';
+          
+          // Обновляем список лиг
+          await loadUserLeagues(user.id);
+          
+          // Перенаправляем на соответствующую страницу формата
+          if (leagueData.format === 'Roles') {
+            window.location.href = `roles.html?league_id=${leagueData.id}`;
+          } else if (leagueData.format === 'Classic') {
+            window.location.href = `scoring.html?league_id=${leagueData.id}`;
+          }
+
+        } catch (error) {
+          console.error('Ошибка вступления в лигу:', error);
+          alert(error.message);
+        } finally {
+          joinConfirmBtn.disabled = false;
+          joinConfirmBtn.textContent = 'Вступить';
+        }
       });
     });
   </script>
 </body>
 </html>
-
