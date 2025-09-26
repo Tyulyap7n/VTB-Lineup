@@ -3720,6 +3720,8 @@ async function saveRoster() {
 
     if (deleteError) {
       console.error("Ошибка удаления старого состава:", deleteError);
+      showNotification("Ошибка сохранения состава", false);
+      return;
     }
 
     // Формируем массив для вставки
@@ -3740,12 +3742,14 @@ async function saveRoster() {
     } else {
       showNotification("Состав успешно сохранен!", true);
       // Анимация успешного сохранения
-      anime({
-        targets: '#save-roster',
-        scale: [1.1, 1],
-        duration: 500,
-        easing: 'easeOutElastic(1, .8)'
-      });
+      if (typeof anime !== 'undefined') {
+        anime({
+          targets: '#save-roster',
+          scale: [1.1, 1],
+          duration: 500,
+          easing: 'easeOutElastic(1, .8)'
+        });
+      }
     }
 
   } catch (err) {
@@ -4094,9 +4098,6 @@ function closeRules() {
     await loadRoles();
     await loadManagersCount();
     await loadUserTeam(user.id);
-    
-    // Загружаем первую страницу
-    await loadPlayersPage(1);
     
     // Загружаем матчи
     await loadCurrentTourMatches();
@@ -4879,5 +4880,4 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
-
 
