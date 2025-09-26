@@ -3515,7 +3515,6 @@ async function viewTeamDetails(teamId, tourId) {
       updateSpentBudget();
       };
 
-    // Функция для сохранения состава в Supabase
 async function saveRosterToDatabase() {
   try {
     updateSaveStatus('Сохранение...', 'saving');
@@ -3523,6 +3522,8 @@ async function saveRosterToDatabase() {
     // Проверка на количество игроков (должно быть ровно 6)
     const selectedPlayersCount = Object.values(currentRoster).filter(player => player !== null).length;
     if (selectedPlayersCount !== 6) {
+      showNotification('Ошибка: необходимо выбрать ровно 6 игроков', false);
+      updateSaveStatus('Ошибка: нужно 6 игроков', 'error-status');
       return false;
     }
 
@@ -3536,21 +3537,8 @@ async function saveRosterToDatabase() {
     // Получаем текущего пользователя
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
-      showNotification('Ошибка: пользователь не авторизован', false);
+      showNotification("Ошибка: пожалуйста, авторизуйтесь", false);
       updateSaveStatus('Ошибка: не авторизован', 'error-status');
-      return false;
-    }
-
-    // Получаем текущего менеджера
-    const { data: manager, error: managerError } = await supabase
-      .from('managers')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    if (managerError || !manager) {
-      showNotification('Ошибка: менеджер не найден', false);
-      updateSaveStatus('Ошибка: менеджер не найден', 'error-status');
       return false;
     }
 
@@ -3558,7 +3546,7 @@ async function saveRosterToDatabase() {
     let teamId;
     const { data: existingTeam, error: fetchTeamError } = await supabase
       .from('user_teams')
-      .select('id')
+      .select('id, team_name')
       .eq('user_id', user.id)
       .maybeSingle();
 
@@ -3571,12 +3559,15 @@ async function saveRosterToDatabase() {
 
     // Если команды нет, создаём её
     if (!existingTeam) {
+      // Получаем email пользователя для имени команды
+      const userName = user.email ? user.email.split('@')[0] : 'Пользователь';
+      
       const { data: newTeam, error: createTeamError } = await supabase
         .from('user_teams')
         .insert([{
           user_id: user.id,
-          team_name: `Команда ${manager.name}`,
-          manager_name: manager.name
+          team_name: `Команда ${userName}`,
+          manager_name: userName
         }])
         .select('id')
         .single();
@@ -3593,58 +3584,13 @@ async function saveRosterToDatabase() {
       teamId = existingTeam.id;
     }
 
-// Получаем текущий тур
-let currentTour;
-const now = new Date();
-
-// Ищем текущий тур
-const { data: tours, error: fetchToursError } = await supabase
-  .from('tours')
-  .select('*')
-  .order('start_time', { ascending: true });
-
-if (fetchToursError || !tours) {
-  console.error('Ошибка получения туров:', fetchToursError);
-  showNotification('Ошибка получения туров', false);
-  updateSaveStatus('Ошибка получения тура', 'error-status');
-  return false;
-}
-
-// Находим актуальный тур
-for (const tour of tours) {
-  const startTime = new Date(tour.start_time);
-  const endTime = new Date(tour.end_time);
-
-  if (now >= startTime && now <= endTime) {
-    currentTour = tour;
-    break;
-  }
-}
-
-// Если текущий тур не найден, ищем ближайший будущий тур
-if (!currentTour) {
-  for (const tour of tours) {
-    const startTime = new Date(tour.start_time);
-    if (now < startTime) {
-      currentTour = tour;
-      break;
+    // Получаем текущий тур
+    const currentTour = await getCurrentTour();
+    if (!currentTour) {
+      showNotification('Ошибка: не удалось определить актуальный тур', false);
+      updateSaveStatus('Ошибка: тур не найден', 'error-status');
+      return false;
     }
-  }
-}
-
-// Если будущий тур не найден, ищем последний завершённый тур
-if (!currentTour && tours.length > 0) {
-  currentTour = tours[tours.length - 1];
-}
-
-// Проверяем, что тур найден
-if (!currentTour) {
-  console.error('Тур не найден');
-  showNotification('Ошибка: не удалось определить актуальный тур', false);
-  updateSaveStatus('Ошибка: тур не найден', 'error-status');
-  return false;
-}
-
 
     // Получаем все роли
     const { data: roles, error: fetchRolesError } = await supabase
@@ -3684,12 +3630,18 @@ if (!currentTour) {
     ];
 
     for (const { roleName, player } of roleMappings) {
-      if (!player) continue;
+      if (!player) {
+        showNotification('Ошибка: не все роли заполнены', false);
+        updateSaveStatus('Ошибка: не все роли заполнены', 'error-status');
+        return false;
+      }
 
       const role = roles.find(r => r.name === roleName);
       if (!role) {
         console.error(`Роль ${roleName} не найдена в базе данных`);
-        continue;
+        showNotification('Ошибка: проблема с ролями', false);
+        updateSaveStatus('Ошибка: проблема с ролями', 'error-status');
+        return false;
       }
 
       teamPlayers.push({
@@ -3700,13 +3652,6 @@ if (!currentTour) {
       });
     }
 
-    // Проверяем, что массив не пустой
-    if (teamPlayers.length === 0) {
-      showNotification('Ошибка: нет игроков для сохранения', false);
-      updateSaveStatus('Ошибка: нет игроков', 'error-status');
-      return false;
-    }
-
     // Сохраняем новые связи
     const { error: insertError } = await supabase
       .from('team_players')
@@ -3714,23 +3659,25 @@ if (!currentTour) {
 
     if (insertError) {
       console.error('Ошибка сохранения связей:', insertError);
-      showNotification(`Ошибка сохранения: ${insertError.message}`, false);
+      showNotification('Ошибка сохранения', false);
       updateSaveStatus('Ошибка сохранения', 'error-status');
       return false;
     }
 
     // Успешное сохранение
-    showNotification('Состав успешно сохранен!');
+    showNotification('Состав сохранён', true);
     updateSaveStatus('Сохранено', 'saved');
 
     // Анимация кнопки сохранения
     const saveBtn = document.getElementById('save-roster');
-    anime({
-      targets: saveBtn,
-      background: ['linear-gradient(to right, #4CAF50, #2E7D32)', 'linear-gradient(to right, var(--orange), var(--orange-dark))'],
-      duration: 2000,
-      easing: 'easeInOutQuad'
-    });
+    if (saveBtn) {
+      anime({
+        targets: saveBtn,
+        background: ['linear-gradient(to right, #4CAF50, #2E7D32)', 'linear-gradient(to right, var(--orange), var(--orange-dark))'],
+        duration: 2000,
+        easing: 'easeInOutQuad'
+      });
+    }
 
     setTimeout(() => {
       updateSaveStatus('', '');
@@ -3739,10 +3686,71 @@ if (!currentTour) {
     return true;
   } catch (error) {
     console.error('Непредвиденная ошибка:', error);
-    showNotification('Непредвиденная ошибка при сохранении', false);
+    showNotification('Ошибка', false);
     updateSaveStatus('Ошибка сохранения', 'error-status');
     return false;
   }
+}
+
+// Вспомогательная функция для получения текущего тура
+async function getCurrentTour() {
+  const now = new Date();
+
+  const { data: tours, error: fetchToursError } = await supabase
+    .from('tours')
+    .select('*')
+    .order('start_time', { ascending: true });
+
+  if (fetchToursError || !tours || tours.length === 0) {
+    console.error('Ошибка получения туров:', fetchToursError);
+    return null;
+  }
+
+  // Ищем текущий тур (который сейчас активен)
+  const currentTour = tours.find(tour => {
+    const startTime = new Date(tour.start_time);
+    const endTime = new Date(tour.end_time);
+    return now >= startTime && now <= endTime;
+  });
+
+  if (currentTour) return currentTour;
+
+  // Если текущий тур не найден, ищем ближайший будущий тур
+  const futureTour = tours.find(tour => new Date(tour.start_time) > now);
+  if (futureTour) return futureTour;
+
+  // Если будущий тур не найден, возвращаем последний завершённый тур
+  return tours[tours.length - 1];
+}
+// Вспомогательная функция для получения текущего тура
+async function getCurrentTour() {
+  const now = new Date();
+
+  const { data: tours, error: fetchToursError } = await supabase
+    .from('tours')
+    .select('*')
+    .order('start_time', { ascending: true });
+
+  if (fetchToursError || !tours || tours.length === 0) {
+    console.error('Ошибка получения туров:', fetchToursError);
+    return null;
+  }
+
+  // Ищем текущий тур (который сейчас активен)
+  const currentTour = tours.find(tour => {
+    const startTime = new Date(tour.start_time);
+    const endTime = new Date(tour.end_time);
+    return now >= startTime && now <= endTime;
+  });
+
+  if (currentTour) return currentTour;
+
+  // Если текущий тур не найден, ищем ближайший будущий тур
+  const futureTour = tours.find(tour => new Date(tour.start_time) > now);
+  if (futureTour) return futureTour;
+
+  // Если будущий тур не найден, возвращаем последний завершённый тур
+  return tours[tours.length - 1];
 }
 async function loadCurrentTourRoster() {
   try {
