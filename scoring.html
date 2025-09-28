@@ -768,7 +768,43 @@ main {
   padding: 2px 8px;
   border-radius: 4px;
 }
+/* Стили для пагинации лиги */
+#league-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px 0;
+  gap: 15px;
+  width: 100%;
+}
 
+#league-pagination .pagination-button {
+  padding: 8px 16px;
+  background: linear-gradient(to right, var(--purple), var(--purple-dark));
+  color: var(--white);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#league-pagination .pagination-button:hover:not(:disabled) {
+  background: linear-gradient(to right, var(--purple-light), var(--purple));
+  transform: scale(1.05);
+}
+
+#league-pagination .pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#league-page-info {
+  color: var(--white);
+  font-weight: bold;
+  font-size: 14px;
+}
 .league-header-logo {
   width: 50px;
   height: 50px;
@@ -2341,6 +2377,7 @@ main {
 
     <button class="close-rules" onclick="closeRules()">Закрыть</button>
   </div>
+  
 </div>
 </div>
 
@@ -2367,7 +2404,7 @@ main {
     let currentUserId = null;
     let currentUserTeamId = null; // Добавляем переменную для ID команды пользователя
 
-let managersPerPage = 8;
+let managersPerPage = 10;
 let totalPages = 1;
 let sortedLeaderboard = [];
 let currentButton = null;
@@ -2388,6 +2425,9 @@ const positionRequirements = {
   Ц: 1,
   УНВ: 1
 };
+let leagueCurrentPage = 1;
+let leagueTotalPages = 1;
+let leagueSortedData = [];
 const playersPerPage = 8; // теперь 8 на страницу
 let players = window.players || []; // если уже есть, используем; иначе будем перезаписывать
 let statsByPlayer = {}; // кэш статистик по player_id
@@ -2855,11 +2895,25 @@ setTimeout(checkProblemPlayers, 3000);
 // Функция для отображения страницы лидерборда
 function renderLeaderboardPage(page) {
   const tableBody = document.getElementById('leaderboard-body');
+  if (!tableBody) return;
+
   tableBody.innerHTML = '';
+
+  // Проверяем, есть ли данные
+  if (!window.sortedLeaderboard || window.sortedLeaderboard.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">
+          Данные лидерборда отсутствуют
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   const startIndex = (page - 1) * managersPerPage;
   const endIndex = startIndex + managersPerPage;
-  const pageData = sortedLeaderboard.slice(startIndex, endIndex);
+  const pageData = window.sortedLeaderboard.slice(startIndex, endIndex);
 
   // Заголовок таблицы
   const headerRow = document.createElement('tr');
@@ -2874,34 +2928,47 @@ function renderLeaderboardPage(page) {
   // Данные страницы
   pageData.forEach((entry) => {
     const row = document.createElement('tr');
+    
+    // Добавляем классы для позиций
     if (entry.place === 1) row.classList.add('position-1');
-    if (entry.place === 2) row.classList.add('position-2');
-    if (entry.place === 3) row.classList.add('position-3');
+    else if (entry.place === 2) row.classList.add('position-2');
+    else if (entry.place === 3) row.classList.add('position-3');
+    
     if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
 
-    // Очки по турам (кликабельно)
-    const tourPointsCells = entry.tourPoints
-      .split(' | ')
-      .map((points, tourIndex) => {
-        const tourId = Object.keys(entry.tourPointsById)[tourIndex];
-        return `<span class="tour-points" onclick="viewTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
-      })
-      .join(' | ');
+    // Формируем ячейки с очками по турам
+    let tourPointsCells = '';
+    if (entry.tourPointsById) {
+      tourPointsCells = Object.values(entry.tourPointsById)
+        .map((points, index) => {
+          const tourId = Object.keys(entry.tourPointsById)[index];
+          return `<span class="tour-points" onclick="viewTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
+        })
+        .join(' | ');
+    } else {
+      tourPointsCells = 'Нет данных';
+    }
 
     row.innerHTML = `
       <td>${entry.place}</td>
-      <td>${entry.teamName}</td>
-      <td>${entry.totalPoints}</td>
+      <td>${entry.teamName || 'Без названия'}</td>
+      <td>${entry.totalPoints || '0'}</td>
       <td>${tourPointsCells}</td>
     `;
     tableBody.appendChild(row);
   });
-    // Обновляем информацию о странице
-  document.getElementById('page-info').textContent = `Страница ${page} из ${totalPages}`;
+
+  // Обновляем информацию о странице
+  const pageInfo = document.getElementById('page-info');
+  if (pageInfo) {
+    pageInfo.textContent = `Страница ${page} из ${totalPages}`;
+  }
 
   // Обновляем состояние кнопок пагинации
-  document.getElementById('prev-page').disabled = page === 1;
-  document.getElementById('next-page').disabled = page === totalPages;
+  const prevButton = document.getElementById('prev-page');
+  const nextButton = document.getElementById('next-page');
+  if (prevButton) prevButton.disabled = page === 1;
+  if (nextButton) nextButton.disabled = page === totalPages;
 }
 // Функция для перехода на предыдущую страницу
 function prevPage() {
@@ -2911,7 +2978,6 @@ function prevPage() {
   }
 }
 
-// Функция для перехода на следующую страницу
 function nextPage() {
   if (currentPage < totalPages) {
     currentPage++;
@@ -2975,8 +3041,9 @@ async function showLeaderboard() {
       easing: 'easeOutElastic(1, .8)'
     });
 
-    // Загружаем лидерборд
-    await loadLeaderboard();
+    // Загружаем лидерборд с отладкой
+    await loadLeaderboardWithDebug();
+    
   } catch (error) {
     console.error('Ошибка открытия лидерборда:', error);
     showNotification('Ошибка загрузки лидерборда', false);
@@ -3045,66 +3112,75 @@ async function showLeaderboard() {
 // ИЗМЕНИТЬ функцию - Загрузка лидерборда (новая таблица team_players2)
 async function loadLeaderboard() {
   try {
+    console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА ===');
+
     // 1. Получаем все туры
     const { data: tours, error: toursError } = await supabase
       .from('tours')
       .select('*')
       .order('round_number', { ascending: true });
 
-    if (toursError || !tours) {
+    if (toursError) {
       console.error('Ошибка загрузки туров:', toursError);
       showNotification('Ошибка загрузки туров', false);
       return;
     }
+
+    console.log('Загружено туров:', tours?.length);
 
     // 2. Получаем все команды
     const { data: teams, error: teamsError } = await supabase
       .from('user_teams')
       .select('*');
 
-    if (teamsError || !teams) {
+    if (teamsError) {
       console.error('Ошибка загрузки команд:', teamsError);
       showNotification('Ошибка загрузки команд', false);
       return;
     }
 
-    // 3. Получаем все связи "команда-игрок-тур" (ИЗМЕНЕНО: team_players2)
+    console.log('Загружено команд:', teams?.length);
+
+    // 3. Получаем все связи "команда-игрок-тур"
     const { data: teamPlayers, error: teamPlayersError } = await supabase
       .from('team_players2')
       .select('*');
 
-    if (teamPlayersError || !teamPlayers) {
+    if (teamPlayersError) {
       console.error('Ошибка загрузки связей "команда-игрок":', teamPlayersError);
       showNotification('Ошибка загрузки связей "команда-игрок"', false);
       return;
     }
+
+    console.log('Загружено связей команда-игрок:', teamPlayers?.length);
 
     // 4. Получаем статистику всех игроков
     const { data: playerStats, error: playerStatsError } = await supabase
       .from('player_stats')
       .select('*');
 
-    if (playerStatsError || !playerStats) {
+    if (playerStatsError) {
       console.error('Ошибка загрузки статистики игроков:', playerStatsError);
       showNotification('Ошибка загрузки статистики игроков', false);
       return;
     }
 
-    // 5. Объединяем данные и считаем очки по единой формуле
+    console.log('Загружено статистик игроков:', playerStats?.length);
+
+    // 5. Объединяем данные и считаем очки
     const leaderboardData = {};
 
     for (const team of teams) {
-      // Для каждого тура
       const teamTourPoints = {};
+      let totalPoints = 0;
 
       for (const tour of tours) {
-        // Находим игроков команды для этого тура (ИЗМЕНЕНО: team_players2)
+        // Находим игроков команды для этого тура
         const teamPlayersForTour = teamPlayers.filter(tp =>
           tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-        // Суммируем очки игроков команды за тур по единой формуле
-        let totalPoints = 0;
+        let tourPoints = 0;
 
         for (const tp of teamPlayersForTour) {
           const playerStat = playerStats.find(ps => 
@@ -3112,19 +3188,14 @@ async function loadLeaderboard() {
           );
           
           if (playerStat) {
-            // Используем единую формулу для всех игроков
             const playerPoints = calculatePlayerPoints(playerStat);
-            totalPoints += playerPoints;
+            tourPoints += playerPoints;
           }
         }
 
-        teamTourPoints[tour.id] = totalPoints.toFixed(1);
+        teamTourPoints[tour.id] = tourPoints.toFixed(1);
+        totalPoints += tourPoints;
       }
-
-      // Общие очки команды по всем турам
-      const totalPoints = Object.values(teamTourPoints)
-        .reduce((sum, points) => sum + parseFloat(points), 0)
-        .toFixed(1);
 
       // Формируем строку с очками по турам
       const tourPointsString = tours
@@ -3133,20 +3204,38 @@ async function loadLeaderboard() {
 
       leaderboardData[team.id] = {
         teamName: team.team_name,
-        totalPoints,
+        totalPoints: totalPoints.toFixed(1),
         tourPoints: tourPointsString,
         teamId: team.id,
         tourPointsById: teamTourPoints,
       };
     }
 
+    console.log('Обработано данных команд:', Object.keys(leaderboardData).length);
+
     // 6. Сортируем по общим очкам
     const sortedLeaderboard = Object.values(leaderboardData)
       .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
       .map((data, index) => ({ ...data, place: index + 1 }));
 
+    // Сохраняем данные глобально
+    window.sortedLeaderboard = sortedLeaderboard;
+    
+    // Рассчитываем общее количество страниц
+    totalPages = Math.ceil(sortedLeaderboard.length / managersPerPage);
+    if (totalPages === 0) totalPages = 1;
+    
+    // Устанавливаем текущую страницу
+    currentPage = 1;
+
+    console.log('Отсортировано записей:', sortedLeaderboard.length);
+    console.log('Всего страниц:', totalPages);
+
     // 7. Отображаем таблицу
-    renderLeaderboard(sortedLeaderboard);
+    renderLeaderboardPage(currentPage);
+
+    console.log('=== ЗАВЕРШЕНИЕ ЗАГРУЗКИ ЛИДЕРБОРДА ===');
+
   } catch (error) {
     console.error('Ошибка загрузки лидерборда:', error);
     showNotification('Ошибка загрузки лидерборда', false);
@@ -3818,10 +3907,10 @@ function createLeagueLeaderboardModal() {
         <table class="leaderboard-table">
           <thead>
             <tr>
-              <th>Место</th>
-              <th>Команда</th>
-              <th>Общие очки</th>
-              <th>Очки по турам</th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="league-leaderboard-body">
@@ -3829,6 +3918,8 @@ function createLeagueLeaderboardModal() {
           </tbody>
         </table>
       </div>
+
+      <!-- Пагинация будет добавлена здесь динамически -->
 
       <div id="league-team-details" class="team-details" style="display: none;">
         <h3>Состав команды</h3>
@@ -3873,90 +3964,8 @@ async function showLeagueLeaderboard(leagueId) {
       throw new Error('Лига не найдена');
     }
 
-    // Заполняем заголовок модального окна
-    content.innerHTML = `
-      <div class="league-header">
-        <img id="league-modal-logo" class="league-header-logo"
-             src="${league.logo_url || 'https://via.placeholder.com/50'}"
-             alt="${league.name}">
-        <div class="league-header-info">
-          <h2 id="league-modal-name">${league.name}</h2>
-          <div class="league-code">Код лиги: <span id="league-modal-code">${league.code}</span></div>
-        </div>
-      </div>
-
-      <div class="leaderboard-table-container">
-        <table class="leaderboard-table">
-          <thead>
-            <tr>
-              <th>Место</th>
-              <th>Команда</th>
-              <th>Общие очки</th>
-              <th>Очки по турам</th>
-            </tr>
-          </thead>
-          <tbody id="league-leaderboard-body">
-            <tr>
-              <td colspan="4" style="text-align: center; padding: 20px;">
-                <div class="loader"></div>
-                Загрузка данных...
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div id="league-team-details" class="team-details" style="display: none;">
-        <h3>Состав команды</h3>
-        <div id="league-team-players"></div>
-      </div>
-
-      <button class="close-leaderboard" onclick="closeLeagueLeaderboard()">Закрыть</button>
-    `;
-
-    // Получаем участников лиги
-    const { data: leagueMembers, error: membersError } = await supabase
-      .from('user_leagues')
-      .select('user_id')
-      .eq('league_id', leagueId);
-
-    if (membersError || !leagueMembers || leagueMembers.length === 0) {
-      content.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-          <h3 style="color: var(--yellow);">В лиге нет участников</h3>
-          <button class="close-leaderboard" onclick="closeLeagueLeaderboard()" style="margin-top: 20px;">
-            Закрыть
-          </button>
-        </div>
-      `;
-      return;
-    }
-
-    // Получаем ID пользователей из лиги
-    const userIds = leagueMembers.map(member => member.user_id).filter(id => id);
-
-    // Получаем команды участников лиги
-    const { data: teams, error: teamsError } = await supabase
-      .from('user_teams')
-      .select('*')
-      .in('user_id', userIds);
-
-    if (teamsError || !teams || teams.length === 0) {
-      content.innerHTML = `
-        <div style="text-align: center; padding: 20px;">
-          <h3 style="color: var(--yellow);">У участников лиги нет команд</h3>
-          <button class="close-leaderboard" onclick="closeLeagueLeaderboard()" style="margin-top: 20px;">
-            Закрыть
-          </button>
-        </div>
-      `;
-      return;
-    }
-
-    const teamIds = teams.map(team => team.id).filter(id => id);
-
     // Загружаем данные лидерборда
-    await loadLeagueLeaderboardData(teamIds, league);
+    await loadLeagueLeaderboardData(leagueId, league);
 
     // Анимация появления
     anime({
@@ -3988,7 +3997,8 @@ async function showLeagueLeaderboard(leagueId) {
 
 
 // Исправленная функция для загрузки данных лидерборда лиги
-async function loadLeagueLeaderboardData(teamIds, league) {
+// Исправленная функция для загрузки данных лидерборда лиги
+async function loadLeagueLeaderboardData(leagueId, league) {
   try {
     console.log('Загрузка данных для лиги:', league.name);
 
@@ -4002,15 +4012,30 @@ async function loadLeagueLeaderboardData(teamIds, league) {
       throw new Error('Не удалось загрузить туры');
     }
 
-    // Получаем команды из лиги
+    // Получаем участников лиги
+    const { data: leagueMembers, error: membersError } = await supabase
+      .from('user_leagues')
+      .select('user_id')
+      .eq('league_id', leagueId);
+
+    if (membersError || !leagueMembers || leagueMembers.length === 0) {
+      throw new Error('В лиге нет участников');
+    }
+
+    // Получаем ID пользователей из лиги
+    const userIds = leagueMembers.map(member => member.user_id).filter(id => id);
+
+    // Получаем команды участников лиги
     const { data: teams, error: teamsError } = await supabase
       .from('user_teams')
       .select('*')
-      .in('id', teamIds);
+      .in('user_id', userIds);
 
     if (teamsError || !teams || teams.length === 0) {
-      throw new Error('Нет команд для отображения');
+      throw new Error('У участников лиги нет команд');
     }
+
+    const teamIds = teams.map(team => team.id).filter(id => id);
 
     // Получаем связи команда-игрок из team_players2
     const { data: teamPlayers, error: teamPlayersError } = await supabase
@@ -4019,7 +4044,8 @@ async function loadLeagueLeaderboardData(teamIds, league) {
       .in('team_id', teamIds);
 
     if (teamPlayersError) {
-      throw new Error('Ошибка загрузки составов команд');
+      console.warn('Ошибка загрузки составов команд:', teamPlayersError);
+      // Продолжаем с пустым массивом
     }
 
     // Получаем статистику игроков
@@ -4028,7 +4054,8 @@ async function loadLeagueLeaderboardData(teamIds, league) {
       .select('*');
 
     if (playerStatsError) {
-      throw new Error('Ошибка загрузки статистики игроков');
+      console.warn('Ошибка загрузки статистики игроков:', playerStatsError);
+      // Продолжаем с пустым массивом
     }
 
     // Рассчитываем очки для каждой команды лиги
@@ -4040,16 +4067,16 @@ async function loadLeagueLeaderboardData(teamIds, league) {
 
       for (const tour of tours) {
         // Находим игроков команды для этого тура
-        const teamPlayersForTour = teamPlayers.filter(tp =>
-          tp.team_id === team.id && tp.tour_id === tour.id
+        const teamPlayersForTour = (teamPlayers || []).filter(tp =>
+          tp && tp.team_id === team.id && tp.tour_id === tour.id
         );
 
         let tourPoints = 0;
 
         // Суммируем очки игроков команды за тур
         for (const tp of teamPlayersForTour) {
-          const playerStat = playerStats.find(ps =>
-            ps.player_id === tp.player_id && ps.tour === tour.id
+          const playerStat = (playerStats || []).find(ps =>
+            ps && ps.player_id === tp.player_id && ps.tour === tour.id
           );
 
           if (playerStat) {
@@ -4080,7 +4107,44 @@ async function loadLeagueLeaderboardData(teamIds, league) {
       .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
       .map((data, index) => ({ ...data, place: index + 1 }));
 
-    // Отображаем данные
+    // Заполняем заголовок модального окна
+    const content = document.querySelector('.league-leaderboard-content');
+    content.innerHTML = `
+      <div class="league-header">
+        <img id="league-modal-logo" class="league-header-logo"
+             src="${league.logo_url || 'https://via.placeholder.com/50'}"
+             alt="${league.name}">
+        <div class="league-header-info">
+          <h2 id="league-modal-name">${league.name}</h2>
+          <div class="league-code">Код лиги: <span id="league-modal-code">${league.code}</span></div>
+        </div>
+      </div>
+
+      <div class="leaderboard-table-container">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="league-leaderboard-body">
+            <!-- Данные будут загружены динамически -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="league-team-details" class="team-details" style="display: none;">
+        <h3>Состав команды</h3>
+        <div id="league-team-players"></div>
+      </div>
+
+      <button class="close-leaderboard" onclick="closeLeagueLeaderboard()">Закрыть</button>
+    `;
+
+    // Отображаем данные с пагинацией
     renderLeagueLeaderboard(sortedLeaderboard);
 
   } catch (error) {
@@ -4106,33 +4170,161 @@ function renderLeagueLeaderboard(data) {
     return;
   }
 
-  // Заголовок таблицы (уже есть в HTML, можно убрать отсюда)
+  // Сохраняем данные для пагинации
+  window.leagueSortedLeaderboard = data;
+  leagueTotalPages = Math.ceil(data.length / managersPerPage);
+  leagueCurrentPage = 1;
 
-  // Данные лидерборда
-  data.forEach((entry) => {
+  // Отображаем первую страницу
+  renderLeagueLeaderboardPage(leagueCurrentPage, leagueTotalPages, data);
+}
+
+// Новая функция для отображения страницы лидерборда лиги
+function renderLeagueLeaderboardPage(page, totalPages, data) {
+  const tableBody = document.getElementById('league-leaderboard-body');
+  if (!tableBody) return;
+
+  tableBody.innerHTML = '';
+
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">
+          В лиге пока нет данных для отображения
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  const startIndex = (page - 1) * managersPerPage;
+  const endIndex = startIndex + managersPerPage;
+  const pageData = data.slice(startIndex, endIndex);
+
+  // Заголовок таблицы
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `
+    <th>Место</th>
+    <th>Команда</th>
+    <th>Общие очки</th>
+    <th>Очки по турам</th>
+  `;
+  tableBody.appendChild(headerRow);
+
+  // Данные страницы
+  pageData.forEach((entry) => {
     const row = document.createElement('tr');
 
-    // Добавляем классы для топ-3 и текущего пользователя
+    // Добавляем классы для позиций
     if (entry.place === 1) row.classList.add('position-1');
     else if (entry.place === 2) row.classList.add('position-2');
     else if (entry.place === 3) row.classList.add('position-3');
     if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
 
     // Формируем ячейки с очками по турам
-    const tourPointsCells = entry.tourPoints.split(' | ').map((points, tourIndex) => {
-      const tourId = Object.keys(entry.tourPointsById)[tourIndex];
-      return `<span class="tour-points" onclick="viewLeagueTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
-    }).join(' | ');
+    let tourPointsCells = '';
+    if (entry.tourPointsById) {
+      tourPointsCells = Object.values(entry.tourPointsById)
+        .map((points, index) => {
+          const tourId = Object.keys(entry.tourPointsById)[index];
+          return `<span class="tour-points" onclick="viewLeagueTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
+        })
+        .join(' | ');
+    } else {
+      tourPointsCells = 'Нет данных';
+    }
 
     row.innerHTML = `
       <td>${entry.place}</td>
-      <td>${entry.teamName}</td>
-      <td>${entry.totalPoints}</td>
+      <td>${entry.teamName || 'Без названия'}</td>
+      <td>${entry.totalPoints || '0'}</td>
       <td>${tourPointsCells}</td>
     `;
 
     tableBody.appendChild(row);
   });
+
+  // Добавляем пагинацию для лидерборда лиги
+  addLeaguePagination(page, totalPages);
+}
+function debugLeaderboardData() {
+  console.log('=== ОТЛАДКА ДАННЫХ ЛИДЕРБОРДА ===');
+  console.log('sortedLeaderboard:', window.sortedLeaderboard);
+  console.log('Длина:', window.sortedLeaderboard?.length);
+  console.log('Первые 3 записи:', window.sortedLeaderboard?.slice(0, 3));
+  console.log('Текущая страница:', currentPage);
+  console.log('Всего страниц:', totalPages);
+  console.log('managersPerPage:', managersPerPage);
+  console.log('=== КОНЕЦ ОТЛАДКИ ===');
+}
+
+// Вызываем отладку после загрузки лидерборда
+async function loadLeaderboardWithDebug() {
+  await loadLeaderboard();
+  setTimeout(debugLeaderboardData, 1000);
+}
+function addLeaguePagination(currentPage, totalPages) {
+  // Удаляем старую пагинацию, если есть
+  const oldPagination = document.getElementById('league-pagination');
+  if (oldPagination) {
+    oldPagination.remove();
+  }
+
+  // Создаем новый контейнер пагинации
+  const pagination = document.createElement('div');
+  pagination.id = 'league-pagination';
+  pagination.className = 'pagination';
+  pagination.style.margin = '20px 0';
+  pagination.style.justifyContent = 'center';
+  
+  // Создаем кнопки пагинации
+  const prevButton = document.createElement('button');
+  prevButton.className = 'pagination-button';
+  prevButton.innerHTML = '❮';
+  prevButton.disabled = currentPage === 1;
+  prevButton.onclick = () => leaguePrevPage();
+
+  const pageInfo = document.createElement('span');
+  pageInfo.id = 'league-page-info';
+  pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
+  pageInfo.style.margin = '0 15px';
+  pageInfo.style.color = 'var(--white)';
+  pageInfo.style.fontWeight = 'bold';
+
+  const nextButton = document.createElement('button');
+  nextButton.className = 'pagination-button';
+  nextButton.innerHTML = '❯';
+  nextButton.disabled = currentPage === totalPages;
+  nextButton.onclick = () => leagueNextPage();
+
+  // Добавляем элементы в контейнер
+  pagination.appendChild(prevButton);
+  pagination.appendChild(pageInfo);
+  pagination.appendChild(nextButton);
+
+  // Вставляем пагинацию после таблицы
+  const tableContainer = document.querySelector('#league-leaderboard-modal .leaderboard-table-container');
+  if (tableContainer) {
+    tableContainer.parentNode.insertBefore(pagination, tableContainer.nextSibling);
+  }
+}
+
+// Глобальные переменные для пагинации лиги
+
+
+// Функции для переключения страниц в лиге
+function leaguePrevPage() {
+  if (leagueCurrentPage > 1 && window.leagueSortedLeaderboard) {
+    leagueCurrentPage--;
+    renderLeagueLeaderboardPage(leagueCurrentPage, leagueTotalPages, window.leagueSortedLeaderboard);
+  }
+}
+
+function leagueNextPage() {
+  if (leagueCurrentPage < leagueTotalPages && window.leagueSortedLeaderboard) {
+    leagueCurrentPage++;
+    renderLeagueLeaderboardPage(leagueCurrentPage, leagueTotalPages, window.leagueSortedLeaderboard);
+  }
 }
 // Исправленная функция для просмотра состава команды в лиге
 async function viewLeagueTeamDetails(teamId, tourId) {
