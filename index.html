@@ -36,6 +36,20 @@
       background: #0056b3;
     }
 
+    /* Стили для чекбокса "Запомнить меня" */
+    .remember-me {
+      display: flex;
+      align-items: center;
+      margin: 10px 0 15px;
+      font-size: 15px;
+      color: #eaff00;
+    }
+    .remember-me input {
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
+    }
+
     /* Стили только для блока preview-images */
     .preview-images {
       width: 100%;
@@ -130,6 +144,10 @@
       <form id="login-form">
         <input type="email" id="login-email" placeholder="Email" required>
         <input type="password" id="login-password" placeholder="Пароль" required>
+        <div class="remember-me">
+          <input type="checkbox" id="remember-me">
+          <label for="remember-me">Запомнить меня</label>
+        </div>
         <button type="submit" class="btn-secondary">Войти</button>
       </form>
     </section>
@@ -185,6 +203,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabaseClient.js"></script>
   <script>
+    // Ключи для localStorage
+    const REMEMBER_ME_KEY = 'lineup_remember_me';
+    const SAVED_EMAIL_KEY = 'lineup_saved_email';
+    const SAVED_PASSWORD_KEY = 'lineup_saved_password';
+
     // Создание записи user_team
     async function ensureUserTeam(user) {
       if (!user?.id) return;
@@ -217,9 +240,102 @@
       alert(message);
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
+    // Сохранение данных для автоматического входа
+    function saveCredentials(email, password) {
+      try {
+        localStorage.setItem(REMEMBER_ME_KEY, 'true');
+        localStorage.setItem(SAVED_EMAIL_KEY, email);
+        // В реальном приложении пароли не следует хранить в localStorage
+        // Это демонстрационная версия
+        localStorage.setItem(SAVED_PASSWORD_KEY, password);
+      } catch (e) {
+        console.error('Ошибка сохранения данных:', e);
+      }
+    }
+
+    // Очистка сохраненных данных
+    function clearCredentials() {
+      try {
+        localStorage.removeItem(REMEMBER_ME_KEY);
+        localStorage.removeItem(SAVED_EMAIL_KEY);
+        localStorage.removeItem(SAVED_PASSWORD_KEY);
+      } catch (e) {
+        console.error('Ошибка очистки данных:', e);
+      }
+    }
+
+    // Загрузка сохраненных данных
+    function loadCredentials() {
+      try {
+        const rememberMe = localStorage.getItem(REMEMBER_ME_KEY) === 'true';
+        const savedEmail = localStorage.getItem(SAVED_EMAIL_KEY);
+        const savedPassword = localStorage.getItem(SAVED_PASSWORD_KEY);
+        
+        return {
+          rememberMe,
+          email: savedEmail,
+          password: savedPassword
+        };
+      } catch (e) {
+        console.error('Ошибка загрузки данных:', e);
+        return { rememberMe: false, email: null, password: null };
+      }
+    }
+
+    // Попытка автоматического входа
+    async function tryAutoLogin() {
+      const credentials = loadCredentials();
+      
+      if (credentials.rememberMe && credentials.email && credentials.password) {
+        if (!ensureClient()) return false;
+        
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: credentials.email,
+            password: credentials.password
+          });
+          
+          if (error) {
+            // Если автоматический вход не удался, очищаем сохраненные данные
+            clearCredentials();
+            return false;
+          }
+          
+          if (data.user) {
+            await ensureUserTeam(data.user);
+            window.location.href = "pick.html";
+            return true;
+          }
+        } catch (err) {
+          console.error("Ошибка автоматического входа:", err);
+          clearCredentials();
+          return false;
+        }
+      }
+      return false;
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
       const registerForm = document.getElementById("register-form");
       const loginForm = document.getElementById("login-form");
+      const rememberMeCheckbox = document.getElementById("remember-me");
+
+      // Пытаемся выполнить автоматический вход при загрузке страницы
+      const autoLoginSuccess = await tryAutoLogin();
+      
+      if (!autoLoginSuccess) {
+        // Если автоматический вход не удался, загружаем сохраненные данные в форму
+        const credentials = loadCredentials();
+        if (credentials.email) {
+          document.getElementById('login-email').value = credentials.email;
+        }
+        if (credentials.password) {
+          document.getElementById('login-password').value = credentials.password;
+        }
+        if (credentials.rememberMe) {
+          rememberMeCheckbox.checked = true;
+        }
+      }
 
       // Регистрация
       registerForm?.addEventListener("submit", async (e) => {
@@ -252,6 +368,8 @@
         if (!ensureClient()) return;
         const email = document.getElementById("login-email").value.trim();
         const password = document.getElementById("login-password").value;
+        const rememberMe = rememberMeCheckbox.checked;
+        
         try {
           const { data, error } = await supabase.auth.signInWithPassword({ email, password });
           if (error) {
@@ -263,6 +381,14 @@
             showAlert('Не удалось получить пользователя.');
             return;
           }
+
+          // Сохраняем или очищаем данные в зависимости от выбора "Запомнить меня"
+          if (rememberMe) {
+            saveCredentials(email, password);
+          } else {
+            clearCredentials();
+          }
+
           await ensureUserTeam(user);
           window.location.href = "pick.html";
         } catch (err) {
@@ -274,6 +400,3 @@
   </script>
 </body>
 </html>
-
-
-
