@@ -3156,7 +3156,7 @@ async function loadLeaderboard() {
     console.log('Загружено связей команда-игрок:', teamPlayers?.length);
 
     // 4. Получаем статистику всех игроков
-    const { data: playerStats, error: playerStatsError } = await supabase
+    const { data: allPlayerStats, error: playerStatsError } = await supabase
       .from('player_stats')
       .select('*');
 
@@ -3166,7 +3166,7 @@ async function loadLeaderboard() {
       return;
     }
 
-    console.log('Загружено статистик игроков:', playerStats?.length);
+    console.log('Загружено статистик игроков:', allPlayerStats?.length);
 
     // 5. Объединяем данные и считаем очки
     const leaderboardData = {};
@@ -3184,12 +3184,14 @@ async function loadLeaderboard() {
         let tourPoints = 0;
 
         for (const tp of teamPlayersForTour) {
-          const playerStat = playerStats.find(ps => 
+          // Находим ВСЕ статистики игрока за этот тур
+          const playerStatsForTour = allPlayerStats.filter(ps =>
             ps.player_id === tp.player_id && ps.tour === tour.id
           );
-          
-          if (playerStat) {
-            const playerPoints = calculatePlayerPoints(playerStat);
+
+          if (playerStatsForTour.length > 0) {
+            // Суммируем статистики и рассчитываем очки
+            const playerPoints = calculatePlayerPoints(playerStatsForTour);
             tourPoints += playerPoints;
           }
         }
@@ -3742,7 +3744,7 @@ async function viewTeamDetails(teamId, tourId) {
       return;
     }
 
-    // Загружаем состав команды для этого тура (ИЗМЕНЕНО: team_players2)
+    // Загружаем состав команды для этого тура
     const { data: teamPlayers, error } = await supabase
       .from('team_players2')
       .select('*, players:player_id(*)')
@@ -3754,17 +3756,27 @@ async function viewTeamDetails(teamId, tourId) {
       return;
     }
 
-    // Загружаем статистику игроков за этот тур
-    const { data: playerStats, error: playerStatsError } = await supabase
+    // Загружаем ВСЮ статистику игроков за этот тур
+    const { data: allPlayerStats, error: playerStatsError } = await supabase
       .from('player_stats')
       .select('*')
       .eq('tour', tourId);
 
-    if (playerStatsError || !playerStats) {
+    if (playerStatsError) {
       showNotification('Ошибка загрузки статистики игроков', false);
       return;
     }
     
+    // Группируем статистику по player_id для суммирования дублирующихся записей
+    const playerStatsByPlayerId = {};
+    
+    allPlayerStats.forEach(stat => {
+      if (!playerStatsByPlayerId[stat.player_id]) {
+        playerStatsByPlayerId[stat.player_id] = [];
+      }
+      playerStatsByPlayerId[stat.player_id].push(stat);
+    });
+
     // Рассчитываем очки команды за тур по единой формуле
     let totalTeamPoints = 0;
 
@@ -3775,15 +3787,10 @@ async function viewTeamDetails(teamId, tourId) {
 
     for (const tp of teamPlayers) {
       const player = tp.players;
-      const playerStat = playerStats.find(ps => ps.player_id === player.id);
+      const playerStats = playerStatsByPlayerId[player.id] || [];
 
-      // Рассчитываем очки по единой формуле
-      let playerPoints = 0;
-
-      if (playerStat) {
-        playerPoints = calculatePlayerPoints(playerStat);
-      }
-
+      // Рассчитываем очки по единой формуле (с суммированием дублирующихся записей)
+      const playerPoints = calculatePlayerPoints(playerStats);
       totalTeamPoints += playerPoints;
 
       const playerDiv = document.createElement('div');
@@ -4374,17 +4381,25 @@ async function viewLeagueTeamDetails(teamId, tourId) {
       throw new Error('Ошибка загрузки состава');
     }
 
-    // Загружаем статистику игроков
-    const playerIds = teamPlayers.map(tp => tp.player_id).filter(id => id);
-    const { data: playerStats, error: statsError } = await supabase
+    // Загружаем ВСЮ статистику игроков
+    const { data: allPlayerStats, error: statsError } = await supabase
       .from('player_stats')
       .select('*')
-      .eq('tour', tourId)
-      .in('player_id', playerIds);
+      .eq('tour', tourId);
 
     if (statsError) {
       throw new Error('Ошибка загрузки статистики');
     }
+
+    // Группируем статистику по player_id для суммирования
+    const playerStatsByPlayerId = {};
+    
+    allPlayerStats.forEach(stat => {
+      if (!playerStatsByPlayerId[stat.player_id]) {
+        playerStatsByPlayerId[stat.player_id] = [];
+      }
+      playerStatsByPlayerId[stat.player_id].push(stat);
+    });
 
     // Отображаем состав
     teamPlayersContainer.innerHTML = '';
@@ -4394,15 +4409,10 @@ async function viewLeagueTeamDetails(teamId, tourId) {
       const player = tp.players;
       if (!player) continue;
 
-      const playerStat = playerStats.find(ps =>
-        ps.player_id === player.id && ps.tour === parseInt(tourId)
-      );
+      const playerStats = playerStatsByPlayerId[player.id] || [];
 
-      // Рассчитываем очки игрока
-      const playerPoints = playerStat ?
-        calculatePlayerPoints(playerStat) :
-        0;
-
+      // Рассчитываем очки игрока (с суммированием дублирующихся записей)
+      const playerPoints = calculatePlayerPoints(playerStats);
       totalPoints += playerPoints;
 
       // Создаем элемент игрока
@@ -4411,27 +4421,34 @@ async function viewLeagueTeamDetails(teamId, tourId) {
 
       // Статистика (только ненулевые значения)
       const statsParts = [];
-      if (playerStat) {
-        if (playerStat.points) statsParts.push(`${playerStat.points} очк`);
-        if (playerStat.assists) statsParts.push(`${playerStat.assists} асс`);
-        if (playerStat.rebounds) statsParts.push(`${playerStat.rebounds} подб`);
+      if (playerStats.length > 0) {
+        const summedStats = playerStats.reduce((acc, stat) => {
+          return {
+            points: (acc.points || 0) + (stat.points || 0),
+            assists: (acc.assists || 0) + (stat.assists || 0),
+            rebounds: (acc.rebounds || 0) + (stat.rebounds || 0)
+          };
+        }, {});
+
+        if (summedStats.points) statsParts.push(`${summedStats.points} очк`);
+        if (summedStats.assists) statsParts.push(`${summedStats.assists} асс`);
+        if (summedStats.rebounds) statsParts.push(`${summedStats.rebounds} подб`);
       }
 
-const statsHTML = statsParts.length > 0
-  ? `<div class="team-player-stats">Статистика: ${statsParts.join(', ')}</div>`
-  : '';
+      const statsHTML = statsParts.length > 0
+        ? `<div class="team-player-stats">Статистика: ${statsParts.join(', ')}</div>`
+        : '';
 
-playerDiv.innerHTML = `
-  <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
-       alt="${player.first_name} ${player.last_name}">
-  <div class="team-player-info">
-    <div class="team-player-name">${player.first_name} ${player.last_name} (${player.position})</div>
-    <div class="team-player-stats">Цена: ${player.price || 0}$</div>
-    <div class="team-player-stats">Очки: ${playerPoints.toFixed(1)}</div>
-    ${statsHTML}
-  </div>
-`;
-
+      playerDiv.innerHTML = `
+        <img src="${player.photo_url || 'https://via.placeholder.com/40'}"
+             alt="${player.first_name} ${player.last_name}">
+        <div class="team-player-info">
+          <div class="team-player-name">${player.first_name} ${player.last_name} (${player.position})</div>
+          <div class="team-player-stats">Цена: ${player.price || 0}$</div>
+          <div class="team-player-stats">Очки: ${playerPoints.toFixed(1)}</div>
+          ${statsHTML}
+        </div>
+      `;
 
       teamPlayersContainer.appendChild(playerDiv);
     }
@@ -4459,8 +4476,6 @@ playerDiv.innerHTML = `
     }
   }
 }
-
-
 // Функция для закрытия лидерборда лиги
 function closeLeagueLeaderboard() {
   const modal = document.getElementById('league-leaderboard-modal');
@@ -4498,9 +4513,29 @@ async function checkTourStatus(tourId) {
     return false;
   }
 }
-
-// Функция для расчета очков игрока по единой формуле
 function calculatePlayerPoints(stats) {
+  // Если stats - массив записей, суммируем их
+  if (Array.isArray(stats)) {
+    const summedStats = stats.reduce((acc, stat) => {
+      return {
+        points: (acc.points || 0) + (stat.points || 0),
+        assists: (acc.assists || 0) + (stat.assists || 0),
+        rebounds: (acc.rebounds || 0) + (stat.rebounds || 0),
+        steals: (acc.steals || 0) + (stat.steals || 0),
+        blocks: (acc.blocks || 0) + (stat.blocks || 0),
+        turnover: (acc.turnover || 0) + (stat.turnover || 0)
+      };
+    }, {});
+    
+    return calculatePointsFromStats(summedStats);
+  }
+  
+  // Если stats - одиночная запись
+  return calculatePointsFromStats(stats);
+}
+
+// Вспомогательная функция для расчета очков из статистики
+function calculatePointsFromStats(stats) {
   return (
     (stats.points || 0) +
     1.5 * (stats.assists || 0) +
@@ -5818,5 +5853,3 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
-
-
