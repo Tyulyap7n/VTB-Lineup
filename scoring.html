@@ -2305,11 +2305,11 @@ main {
       </table>
     </div>
     <!-- Пагинация -->
-    <div class="pagination">
-      <button id="prev-page" class="pagination-button" onclick="prevPage()">❮</button>
-      <span id="page-info">Страница 1 из 1</span>
-      <button id="next-page" class="pagination-button" onclick="nextPage()">❯</button>
-    </div>
+<div class="pagination">
+  <button id="prev-page" class="pagination-button" onclick="prevPage()" disabled>❮</button>
+  <span id="page-info">Страница 1 из 1</span>
+  <button id="next-page" class="pagination-button" onclick="nextPage()" disabled>❯</button>
+</div>
     <!-- Блок для отображения состава команды -->
 	<div id="team-details" class="team-details">
 	  <h3>Состав команды</h3>
@@ -2991,10 +2991,14 @@ setTimeout(checkProblemPlayers, 3000);
 // Функция для отображения страницы лидерборда
 function renderLeaderboardPage(page, totalPages, data) {
   const tableBody = document.getElementById('leaderboard-body');
-  if (!tableBody) return;
+  if (!tableBody) {
+    console.error('Элемент leaderboard-body не найден');
+    return;
+  }
 
   tableBody.innerHTML = '';
 
+  // Проверяем наличие данных
   if (!data || data.length === 0) {
     tableBody.innerHTML = `
       <tr>
@@ -3003,14 +3007,36 @@ function renderLeaderboardPage(page, totalPages, data) {
         </td>
       </tr>
     `;
+    
+    // Обновляем информацию о странице
+    const pageInfo = document.getElementById('page-info');
+    if (pageInfo) {
+      pageInfo.textContent = `Страница 1 из 1`;
+    }
+    
+    // Отключаем кнопки пагинации
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+    if (prevButton) prevButton.disabled = true;
+    if (nextButton) nextButton.disabled = true;
+    
     return;
   }
 
+  // Рассчитываем данные для текущей страницы
   const startIndex = (page - 1) * managersPerPage;
   const endIndex = startIndex + managersPerPage;
   const pageData = data.slice(startIndex, endIndex);
 
-  // Заголовок таблицы
+  console.log(`Отображение страницы ${page}:`, {
+    totalData: data.length,
+    startIndex,
+    endIndex,
+    pageDataLength: pageData.length,
+    managersPerPage
+  });
+
+  // Создаем заголовок таблицы
   const headerRow = document.createElement('tr');
   headerRow.innerHTML = `
     <th>Место</th>
@@ -3020,21 +3046,23 @@ function renderLeaderboardPage(page, totalPages, data) {
   `;
   tableBody.appendChild(headerRow);
 
-  // Данные страницы
-  pageData.forEach((entry) => {
+  // Заполняем данными
+  pageData.forEach((entry, index) => {
     const row = document.createElement('tr');
 
     // Добавляем классы для позиций
-    if (entry.place === 1) row.classList.add('position-1');
-    else if (entry.place === 2) row.classList.add('position-2');
-    else if (entry.place === 3) row.classList.add('position-3');
+    const actualPlace = startIndex + index + 1;
+    if (actualPlace === 1) row.classList.add('position-1');
+    else if (actualPlace === 2) row.classList.add('position-2');
+    else if (actualPlace === 3) row.classList.add('position-3');
+    
     if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
 
     // Создаем таблицу с очками по турам
     const tourPointsTable = createTourPointsTable(entry.tourPointsById, entry.teamId, false);
 
     row.innerHTML = `
-      <td>${entry.place}</td>
+      <td>${actualPlace}</td>
       <td>${entry.teamName || 'Без названия'}</td>
       <td>${entry.totalPoints || '0'}</td>
       <td></td>
@@ -3058,6 +3086,8 @@ function renderLeaderboardPage(page, totalPages, data) {
   const nextButton = document.getElementById('next-page');
   if (prevButton) prevButton.disabled = page === 1;
   if (nextButton) nextButton.disabled = page === totalPages;
+
+  console.log(`Пагинация обновлена: страница ${page} из ${totalPages}`);
 }
 
 // Обновленная функция renderLeagueLeaderboardPage
@@ -3124,16 +3154,17 @@ function renderLeagueLeaderboardPage(page, totalPages, data) {
 }
 // Функция для перехода на предыдущую страницу
 function prevPage() {
-  if (currentPage > 1) {
+  if (currentPage > 1 && window.sortedLeaderboard) {
     currentPage--;
-    renderLeaderboardPage(currentPage);
+    renderLeaderboardPage(currentPage, totalPages, window.sortedLeaderboard);
   }
 }
 
+// Функция для перехода на следующую страницу
 function nextPage() {
-  if (currentPage < totalPages) {
+  if (currentPage < totalPages && window.sortedLeaderboard) {
     currentPage++;
-    renderLeaderboardPage(currentPage);
+    renderLeaderboardPage(currentPage, totalPages, window.sortedLeaderboard);
   }
 }
 async function loadPlayerStats(playerId) {
