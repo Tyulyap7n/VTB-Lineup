@@ -5365,9 +5365,9 @@ function closeRules() {
       }
 
       // Проверяем лимит
-      if (sameTeamCount >= 3) {
+      if (sameTeamCount >= 2) {
         // Показываем предупреждение
-        showNotification(`Лимит игроков из команды ${playerTeam} исчерпан (максимум 3)`, false);
+        showNotification(`Лимит игроков из команды ${playerTeam} исчерпан (максимум 2)`, false);
         
         // Показываем предупреждение в UI
         const warningElement = document.getElementById('team-limit-warning');
@@ -6048,4 +6048,5 @@ function calculateTotalStatsFromArray(stats) {
 </body>
 
 </html>
+
 
