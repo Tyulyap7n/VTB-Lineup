@@ -94,23 +94,32 @@
       flex: 1;
       position: relative;
     }
-    /* Боковая панель (aside) */
-    aside {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 5%;
-      height: 100%;
-      background-color: var(--orange);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 0;
-      overflow-y: auto;
-      overflow-x: hidden;
-      transition: width 0.3s ease, padding 0.3s ease;
-    }
+  aside {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: var(--orange);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 80px 10px 20px;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+  }
+
+  aside.open {
+    left: 0;
+  }
+    /* Кнопка меню (только для мобилок) */
+  .menu-toggle {
+    display: none;
+    font-size: 26px;
+    color: var(--white);
+    cursor: pointer;
+  }
     aside:hover {
       width: 250px;
       padding: 20px 10px;
@@ -463,6 +472,75 @@
     footer a:hover {
       text-decoration: underline;
     }
+  @media (max-width: 768px) {
+    header {
+      padding: 10px 15px;
+      height: 60px;
+    }
+
+    .menu-toggle {
+      display: block;
+    }
+
+    .header-logo img {
+      height: 40px;
+    }
+
+    .league-block-container {
+      max-width: 90%;
+      height: 160px;
+    }
+
+    .league-btn {
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .modal-content {
+      width: 90%;
+      margin: 10% auto;
+    }
+
+    .form-input, .code-input {
+      font-size: 15px;
+    }
+
+    .league-actions {
+      width: 100%;
+      padding: 10px;
+    }
+
+    .league-blocks {
+      flex-direction: column;
+    }
+
+    footer {
+      font-size: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+	    .league-row {
+        flex-direction: column;
+		
+        gap: 20px;
+    }
+
+    .league-block-container {
+        width: 300px;
+    }
+  }
+
+  /* Улучшенные анимации */
+  .slide-fade {
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .slide-fade.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
   </style>
 </head>
 <body>
@@ -994,6 +1072,38 @@
         }
       });
     });
+	  document.addEventListener("DOMContentLoaded", () => {
+    const aside = document.querySelector("aside");
+    const main = document.querySelector("main");
+
+    // Создаем кнопку меню
+    const menuBtn = document.createElement("div");
+    menuBtn.classList.add("menu-toggle");
+    menuBtn.innerHTML = "☰";
+    document.querySelector("header").appendChild(menuBtn);
+
+    menuBtn.addEventListener("click", () => {
+      aside.classList.toggle("open");
+      main.style.filter = aside.classList.contains("open") ? "blur(4px)" : "none";
+    });
+
+    // Кликаем вне меню — закрываем
+    main.addEventListener("click", () => {
+      if (aside.classList.contains("open")) {
+        aside.classList.remove("open");
+        main.style.filter = "none";
+      }
+    });
+
+    // Анимация появления элементов при загрузке
+    const animatedEls = document.querySelectorAll(".league-block-container, .league-btn");
+    animatedEls.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add("slide-fade", "visible");
+      }, 100 * i);
+    });
+  });
+
   </script>
 </body>
 </html>
