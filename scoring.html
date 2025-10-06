@@ -5314,9 +5314,9 @@ function closeRules() {
       }
 
       // Проверяем лимит
-      if (sameTeamCount >= 3) {
+      if (sameTeamCount >= 2) {
         // Показываем предупреждение
-        showNotification(`Лимит игроков из команды ${playerTeam} исчерпан (максимум 3)`, false);
+        showNotification(`Лимит игроков из команды ${playerTeam} исчерпан (максимум 2)`, false);
         
         // Показываем предупреждение в UI
         const warningElement = document.getElementById('team-limit-warning');
@@ -5812,8 +5812,8 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
 
     // Проверка лимита игроков из одной команды
     const teamCount = actualPlayers.filter(p => p.teamName === safeTeamName).length;
-    if (teamCount >= 3) {
-      showNotification(`Лимит игроков из команды ${safeTeamName} исчерпан (максимум 3)`, false);
+    if (teamCount >= 2) {
+      showNotification(`Лимит игроков из команды ${safeTeamName} исчерпан (максимум 2)`, false);
       return false;
     }
 
@@ -6278,5 +6278,6 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
