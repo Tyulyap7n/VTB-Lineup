@@ -4217,71 +4217,59 @@ async function showLeagueLeaderboard(leagueId) {
 }
 
 
-// Исправленная функция для загрузки данных лидерборда лиги
-// Исправленная функция для загрузки данных лидерборда лиги
 async function loadLeagueLeaderboardData(leagueId, league) {
   try {
     console.log('Загрузка данных для лиги:', league.name);
 
-    // Получаем все туры
+    // 1. Получаем все туры
     const { data: tours, error: toursError } = await supabase
       .from('tours')
       .select('*')
       .order('round_number', { ascending: true });
+    if (toursError || !tours) throw new Error('Не удалось загрузить туры');
 
-    if (toursError || !tours) {
-      throw new Error('Не удалось загрузить туры');
-    }
-
-    // Получаем участников лиги
+    // 2. Получаем участников лиги
     const { data: leagueMembers, error: membersError } = await supabase
       .from('user_leagues')
       .select('user_id')
       .eq('league_id', leagueId);
-
     if (membersError || !leagueMembers || leagueMembers.length === 0) {
       throw new Error('В лиге нет участников');
     }
 
-    // Получаем ID пользователей из лиги
+    // 3. Получаем ID пользователей из лиги
     const userIds = leagueMembers.map(member => member.user_id).filter(id => id);
 
-    // Получаем команды участников лиги
+    // 4. Получаем команды участников лиги
     const { data: teams, error: teamsError } = await supabase
       .from('user_teams')
       .select('*')
       .in('user_id', userIds);
-
     if (teamsError || !teams || teams.length === 0) {
       throw new Error('У участников лиги нет команд');
     }
 
+    // 5. Получаем связи "команда-игрок-тур" из team_players2
     const teamIds = teams.map(team => team.id).filter(id => id);
-
-    // Получаем связи команда-игрок из team_players2
     const { data: teamPlayers, error: teamPlayersError } = await supabase
       .from('team_players2')
       .select('*')
       .in('team_id', teamIds);
-
     if (teamPlayersError) {
       console.warn('Ошибка загрузки составов команд:', teamPlayersError);
-      // Продолжаем с пустым массивом
     }
 
-    // Получаем статистику игроков
-    const { data: playerStats, error: playerStatsError } = await supabase
+    // 6. **Добавляем загрузку статистики игроков**
+    const { data: allPlayerStats, error: playerStatsError } = await supabase
       .from('player_stats')
       .select('*');
-
     if (playerStatsError) {
       console.warn('Ошибка загрузки статистики игроков:', playerStatsError);
       // Продолжаем с пустым массивом
     }
 
-    // Рассчитываем очки для каждой команды лиги
+    // 7. Рассчитываем очки для каждой команды лиги
     const leaderboardData = {};
-
     for (const team of teams) {
       const teamTourPoints = {};
       let totalPoints = 0;
@@ -4292,18 +4280,21 @@ async function loadLeagueLeaderboardData(leagueId, league) {
           tp && tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-		let tourPoints = 0;
-		for (const tp of teamPlayersForTour) {
-		  // Находим ВСЕ статистики игрока за этот тур
-		  const playerStatsForTour = allPlayerStats.filter(ps =>
-			ps.player_id === tp.player_id && ps.tour === tour.id
-		  );
-		  if (playerStatsForTour.length > 0) {
-			// Суммируем статистики и рассчитываем очки
-			const playerPoints = calculatePlayerPoints(playerStatsForTour);
-			tourPoints += playerPoints;
-		  }
-		}
+        let tourPoints = 0;
+
+        // Суммируем очки игроков команды за тур
+        for (const tp of teamPlayersForTour) {
+          // Находим ВСЕ записи статистики игрока за этот тур
+          const playerStatsForTour = (allPlayerStats || []).filter(ps =>
+            ps && ps.player_id === tp.player_id && ps.tour === tour.id
+          );
+
+          if (playerStatsForTour.length > 0) {
+            // Суммируем все записи статистики игрока за тур
+            const playerPoints = calculatePlayerPoints(playerStatsForTour);
+            tourPoints += playerPoints;
+          }
+        }
 
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
@@ -4340,7 +4331,6 @@ async function loadLeagueLeaderboardData(leagueId, league) {
           <div class="league-code">Код лиги: <span id="league-modal-code">${league.code}</span></div>
         </div>
       </div>
-
       <div class="leaderboard-table-container">
         <table class="leaderboard-table">
           <thead>
@@ -4356,23 +4346,21 @@ async function loadLeagueLeaderboardData(leagueId, league) {
           </tbody>
         </table>
       </div>
-
       <div id="league-team-details" class="team-details" style="display: none;">
         <h3>Состав команды</h3>
         <div id="league-team-players"></div>
       </div>
-
       <button class="close-leaderboard" onclick="closeLeagueLeaderboard()">Закрыть</button>
     `;
 
     // Отображаем данные с пагинацией
     renderLeagueLeaderboard(sortedLeaderboard);
-
   } catch (error) {
     console.error('Ошибка:', error);
     throw error;
   }
 }
+
 // Исправленная функция для отображения лидерборда лиги
 function renderLeagueLeaderboard(data) {
   const tableBody = document.getElementById('league-leaderboard-body');
