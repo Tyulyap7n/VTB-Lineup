@@ -3295,8 +3295,6 @@ async function showLeaderboard() {
     showNotification('Ошибка загрузки лидерборда', false);
   }
 }
-// ИЗМЕНИТЬ функцию - Загрузка лидерборда (новая таблица team_players2)
-// ЗАМЕНИТЕ функцию loadLeaderboard на эту исправленную версию
 async function loadLeaderboard() {
   try {
     console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА ===');
@@ -3382,20 +3380,18 @@ async function loadLeaderboard() {
           tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-        let tourPoints = 0;
-
-        for (const tp of teamPlayersForTour) {
-          // Находим ВСЕ статистики игрока за этот тур
-          const playerStatsForTour = allPlayerStats.filter(ps =>
-            ps.player_id === tp.player_id && ps.tour === tour.id
-          );
-
-          if (playerStatsForTour.length > 0) {
-            // Суммируем статистики и рассчитываем очки
-            const playerPoints = calculatePlayerPoints(playerStatsForTour);
-            tourPoints += playerPoints;
-          }
-        }
+		let tourPoints = 0;
+		for (const tp of teamPlayersForTour) {
+		  // Находим ВСЕ статистики игрока за этот тур
+		  const playerStatsForTour = allPlayerStats.filter(ps =>
+			ps.player_id === tp.player_id && ps.tour === tour.id
+		  );
+		  if (playerStatsForTour.length > 0) {
+			// Суммируем статистики и рассчитываем очки
+			const playerPoints = calculatePlayerPoints(playerStatsForTour);
+			tourPoints += playerPoints;
+		  }
+		}
 
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
@@ -4296,18 +4292,18 @@ async function loadLeagueLeaderboardData(leagueId, league) {
           tp && tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-        let tourPoints = 0;
-
-        // Суммируем очки игроков команды за тур
-        for (const tp of teamPlayersForTour) {
-          const playerStat = (playerStats || []).find(ps =>
-            ps && ps.player_id === tp.player_id && ps.tour === tour.id
-          );
-
-          if (playerStat) {
-            tourPoints += calculatePlayerPoints(playerStat);
-          }
-        }
+		let tourPoints = 0;
+		for (const tp of teamPlayersForTour) {
+		  // Находим ВСЕ статистики игрока за этот тур
+		  const playerStatsForTour = allPlayerStats.filter(ps =>
+			ps.player_id === tp.player_id && ps.tour === tour.id
+		  );
+		  if (playerStatsForTour.length > 0) {
+			// Суммируем статистики и рассчитываем очки
+			const playerPoints = calculatePlayerPoints(playerStatsForTour);
+			tourPoints += playerPoints;
+		  }
+		}
 
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
@@ -6278,6 +6274,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
-
 
 
