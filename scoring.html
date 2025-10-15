@@ -125,8 +125,6 @@
     #empty-slot-4 .role-label { content: "F"; }
     #empty-slot-5 .role-label { content: "C"; }
     #empty-slot-6 .role-label { content: "FLEX"; }
-    
-    /* Хэдер - полная ширина */
     header {
       width: 100%;
       background-color: var(--purple);
@@ -139,28 +137,6 @@
       z-index: 10;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
-    
-    /* Кнопка поддержки в хэдере */
-    .support-btn {
-      background: linear-gradient(to right, var(--orange), var(--orange-dark));
-      color: var(--black);
-      padding: 10px 20px;
-      border-radius: 30px;
-      font-weight: bold;
-      text-decoration: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      font-size: 16px;
-      margin-left: auto;
-      margin-right: 15px;
-    }
-    
-    .support-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-      background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
-    }
-    
 /* Обновленные стили для матчей */
 .match-row {
   display: flex;
@@ -170,10 +146,8 @@
   background: linear-gradient(to right, var(--purple-light), var(--purple));
   border-radius: 10px;
   margin-bottom: 10px;
-  width: 100%;
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
+  width: 135%;
+  margin-left: -80px;
 }
 
 .team-container {
@@ -1026,7 +1000,6 @@ main {
       background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
     }
     
-    /* Футер - полная ширина */
     footer {
       width: 100%;
       background: linear-gradient(to right, var(--purple), var(--purple-dark));
@@ -1117,59 +1090,6 @@ main {
     }
     
     @media (max-width: 768px) {
-      /* Увеличиваем высоту таблицы игроков на мобильных */
-      .players-table {
-        font-size: 16px;
-      }
-      
-      .players-table th, .players-table td {
-        padding: 12px 8px;
-        height: 60px;
-      }
-      
-      /* Располагаем стартовые 6 в одну строку */
-      .selected-players-grid {
-        grid-template-columns: repeat(6, 1fr);
-        gap: 8px;
-      }
-      
-      .player-slot, .empty-slot {
-        min-height: 140px;
-      }
-      
-      .player-photo {
-        width: 60px;
-        height: 60px;
-      }
-      
-      .player-name {
-        font-size: 14px;
-      }
-      
-      .player-price {
-        font-size: 13px;
-      }
-      
-      /* Центрируем матчи тура и кнопку сохранить */
-      .matches-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 100%;
-      }
-      
-      .match-row {
-        width: 95%;
-        margin: 10px auto;
-      }
-      
-      .save-roster-btn-container {
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        margin: 20px 0;
-      }
-      
       .roles-lineup {
         flex-direction: column;
       }
@@ -1193,21 +1113,6 @@ main {
         height: auto;
         gap: 15px;
         padding: 20px;
-      }
-      
-      /* Адаптируем хэдер для мобильных */
-      header {
-        padding: 15px 10px;
-        flex-wrap: wrap;
-        height: auto;
-        min-height: 80px;
-      }
-      
-      .support-btn {
-        margin: 10px auto 0;
-        order: 3;
-        width: 90%;
-        text-align: center;
       }
     }
 /* Модальное окно состава */
@@ -1650,7 +1555,7 @@ main {
 
 .selected-players-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 15px;
   margin-bottom: 20px;
 }
@@ -2252,188 +2157,6 @@ main {
       font-size: 12px;
       display: none;
     }
-    
-    /* Модальное окно поддержки проекта */
-    .support-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.9);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-      backdrop-filter: blur(10px);
-      opacity: 0;
-      animation: modalFadeIn 0.5s ease forwards;
-    }
-    
-    .support-content {
-      background: linear-gradient(to bottom, var(--purple), var(--purple-dark));
-      padding: 40px;
-      border-radius: 20px;
-      text-align: center;
-      max-width: 500px;
-      width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
-      transform: scale(0.9);
-      animation: modalScaleIn 0.5s ease forwards;
-      border: 2px solid var(--yellow);
-      box-shadow: 0 0 30px rgba(253, 230, 0, 0.3);
-    }
-    
-    .support-content h2 {
-      color: var(--yellow);
-      margin-bottom: 20px;
-      text-shadow: 0 0 10px rgba(253, 230, 0, 0.5);
-    }
-    
-    .support-content p {
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    
-    .card-info {
-      background: rgba(0, 0, 0, 0.3);
-      padding: 20px;
-      border-radius: 10px;
-      margin: 20px 0;
-      border: 1px solid var(--yellow);
-    }
-    
-    .card-number {
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--yellow);
-      margin: 10px 0;
-      font-family: monospace;
-    }
-    
-    .copy-btn {
-      background: linear-gradient(to right, var(--orange), var(--orange-dark));
-      color: var(--black);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 30px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      margin-top: 10px;
-    }
-    
-    .copy-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    }
-    
-    .close-support {
-      padding: 10px 20px;
-      background: linear-gradient(to right, var(--orange), var(--orange-dark));
-      color: var(--black);
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      margin-top: 20px;
-    }
-    
-    .close-support:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    }
-	/* ==== УВЕЛИЧЕННЫЙ ХЭДЕР И ФУТЕР ==== */
-header {
-  width: 100vw;
-  left: 0;
-  right: 0;
-  position: relative;
-  padding: 30px 40px;
-  height: auto;
-  justify-content: center;
-  text-align: center;
-}
-
-footer {
-  width: 100vw;
-  left: 0;
-  right: 0;
-  position: relative;
-  padding: 40px 20px;
-  height: auto;
-  font-size: 20px;
-}
-
-/* ==== СТАРТОВЫЕ 6 НА ВСЮ ШИРИНУ ==== */
-.selected-players-container,
-.starting-vi-container {
-  width: 100%;
-  max-width: none !important;
-  margin: 30px auto;
-}
-
-/* ==== СОСТАВ И МАТЧИ ТУРА ПО ЦЕНТРУ ==== */
-h2, .starting-vi {
-  text-align: center;
-  font-size: 2rem;
-}
-
-/* ==== МАТЧИ ТУРА НА ВСЮ ШИРИНУ ==== */
-.matches-container {
-  width: 100%;
-  max-width: none !important;
-  margin: 0 auto;
-  padding: 0 10px;
-}
-
-.match-row {
-  width: 100%;
-  max-width: none !important;
-  border-radius: 15px;
-  font-size: 1.2rem;
-  padding: 15px 20px;
-}
-/* ==== ПОЛНАЯ ШИРИНА НА МОБИЛЬНЫХ ==== */
-@media (max-width: 768px) {
-  header, footer {
-    width: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-  }
-
-  main, .matches-container, .match-row,
-  .selected-players-container, .starting-vi-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    padding: 0 5px !important;
-  }
-
-  .match-row {
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 1.1rem;
-	width: 100% !important;
-  }
-
-  h2, .starting-vi {
-    font-size: 1.6rem !important;
-    text-align: center;
-  }
-
-  .save-roster-btn-container {
-    width: 100% !important;
-    justify-content: center;
-  }
-}
-
-
   </style>
 </head>
 <body>
@@ -2442,8 +2165,6 @@ h2, .starting-vi {
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
     </div>
 	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
-    <!-- Кнопка поддержки проекта -->
-    <a href="#" class="support-btn" onclick="showSupportModal(); return false;">Поддержать проект</a>
   </header>
   <div class="main-container">
      <aside id="leagues-sidebar">
@@ -2552,7 +2273,7 @@ h2, .starting-vi {
       </div>
 
       
-<div style="display: flex; align-items: center; margin: 20px 0;" class="save-roster-btn-container">
+<div style="display: flex; align-items: center; margin: 20px 0;">
   <button id="save-roster" class="save-roster-btn cta">
     <span>Сохранить состав</span>
     <span>
@@ -2754,25 +2475,6 @@ h2, .starting-vi {
   </div>
   
 </div>
-
-<!-- Модальное окно поддержки проекта -->
-<div id="support-modal" class="support-modal">
-  <div class="support-content">
-    <button class="close-rules-btn" onclick="closeSupportModal()">✕</button>
-    <h2>Поддержать проект</h2>
-    <p>Если вам нравится наш проект и вы хотите поддержать его развитие, вы можете сделать пожертвование разработчикам.</p>
-    
-    <div class="card-info">
-      <p><strong>Номер телефона(Альфа-Банк):</strong></p>
-      <div class="card-number" id="card-number">89145031185</div>
-      <button class="copy-btn" onclick="copyCardNumber()">Скопировать номер телефона</button>
-    </div>
-    
-    <p>Любая сумма будет принята с благодарностью и поможет улучшить проект!</p>
-    
-    <button class="close-support" onclick="closeSupportModal()">Закрыть</button>
-  </div>
-</div>
 </div>
 
   <footer>
@@ -2784,47 +2486,6 @@ h2, .starting-vi {
   </footer>
   
 <script>
-    // Функции для работы с модальным окном поддержки
-    function showSupportModal() {
-      const modal = document.getElementById('support-modal');
-      modal.style.display = 'flex';
-      
-      anime({
-        targets: '.support-content',
-        scale: [0.8, 1],
-        opacity: [0, 1],
-        duration: 500,
-        easing: 'easeOutElastic(1, .8)'
-      });
-    }
-    
-    function closeSupportModal() {
-      const modal = document.getElementById('support-modal');
-      const content = document.querySelector('.support-content');
-      
-      anime({
-        targets: content,
-        scale: 0.8,
-        opacity: 0,
-        duration: 300,
-        complete: function() {
-          modal.style.display = 'none';
-          content.style.transform = 'scale(0.9)';
-          content.style.opacity = '0';
-        }
-      });
-    }
-    
-    function copyCardNumber() {
-      const cardNumber = document.getElementById('card-number').textContent;
-      navigator.clipboard.writeText(cardNumber).then(function() {
-        showNotification('Номер карты скопирован!', true);
-      }, function(err) {
-        showNotification('Ошибка копирования', false);
-      });
-    }
-
-    // Остальной JavaScript код остается без изменений
     let selectedPlayers = [];
     let roles = [];
     let managersCount = 0;
