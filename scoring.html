@@ -2160,12 +2160,40 @@ main {
   </style>
 </head>
 <body>
-  <header>
-    <div class="header-logo">
-      <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
-    </div>
-	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
-  </header>
+<header>
+  <div class="header-logo">
+    <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
+  </div>
+
+  <!-- Кнопка "Поддержать проект" в хэдере справа -->
+  <button
+    id="support-project-btn"
+    class="cta"
+    style="
+      background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
+      color: var(--black);
+      box-shadow: 4px 4px 0 var(--black);
+      font-size: 14px;
+      padding: 8px 16px;
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+    "
+    onclick="showSupportInfo()"
+  >
+    <span>Поддержать</span>
+    <span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path class="one" d="M12 4C11.4477 4 11 4.44772 11 5V11H5C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13H11V19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19V13H19C19.5523 13 20 12.5523 20 12C20 11.4477 19.5523 11 19 11H13V5C13 4.44772 12.5523 4 12 4Z" fill="currentColor"/>
+      </svg>
+    </span>
+  </button>
+
+  <a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
+</header>
+
   <div class="main-container">
      <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
@@ -2475,6 +2503,64 @@ main {
   </div>
   
 </div>
+</div>
+<!-- Модальное окно для информации о поддержке -->
+<div id="support-modal" class="rules-modal">
+  <div class="rules-content" style="max-width: 600px;">
+    <button class="close-rules-btn" onclick="closeSupportModal()">✕</button>
+    <h2>Поддержать проект</h2>
+    <div class="rules-list">
+      <p style="text-align: center; margin-bottom: 20px;">
+        Вы можете поддержать развитие проекта, переведя любую сумму на один из кошельков ниже.
+      </p>
+      <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; text-align: center;">
+          <h3 style="color: var(--yellow); margin-bottom: 10px;">Tinkoff</h3>
+          <p style="font-family: monospace; font-size: 18px; word-break: break-all;">5536 9138 1070 5700</p>
+          <button
+            class="cta"
+            style="
+              background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
+              color: var(--black);
+              margin-top: 10px;
+              font-size: 14px;
+              padding: 8px 16px;
+            "
+            onclick="copyToClipboard('5536 9138 1070 5700')"
+          >
+            Скопировать
+          </button>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; text-align: center;">
+          <h3 style="color: var(--yellow); margin-bottom: 10px;">Сбербанк</h3>
+          <p style="font-family: monospace; font-size: 18px; word-break: break-all;">4276 3800 1234 5678</p>
+          <button
+            class="cta"
+            style="
+              background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
+              color: var(--black);
+              margin-top: 10px;
+              font-size: 14px;
+              padding: 8px 16px;
+            "
+            onclick="copyToClipboard('4276 3800 1234 5678')"
+          >
+            Скопировать
+          </button>
+        </div>
+      </div>
+      <p style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--gray);">
+        Спасибо за поддержку! Ваши средства помогут развитию проекта.
+      </p>
+    </div>
+    <button
+      class="close-rules"
+      onclick="closeSupportModal()"
+      style="margin-top: 20px;"
+    >
+      Закрыть
+    </button>
+  </div>
 </div>
 
   <footer>
@@ -2808,6 +2894,49 @@ function getMetricForSort(player, column) {
   }
 }
 
+// Функция для открытия модального окна поддержки
+function showSupportInfo() {
+  const modal = document.getElementById('support-modal');
+  modal.style.display = 'flex';
+
+  anime({
+    targets: '.rules-content',
+    scale: [0.8, 1],
+    opacity: [0, 1],
+    duration: 500,
+    easing: 'easeOutElastic(1, .8)'
+  });
+}
+
+// Функция для закрытия модального окна поддержки
+function closeSupportModal() {
+  const modal = document.getElementById('support-modal');
+  const content = document.querySelector('.rules-content');
+
+  anime({
+    targets: content,
+    scale: 0.8,
+    opacity: 0,
+    duration: 300,
+    complete: function() {
+      modal.style.display = 'none';
+      content.style.transform = 'scale(0.9)';
+      content.style.opacity = '0';
+    }
+  });
+}
+
+// Функция для копирования текста в буфер обмена
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text)
+    .then(() => {
+      showNotification('Номер скопирован!', true);
+    })
+    .catch(err => {
+      console.error('Ошибка копирования: ', err);
+      showNotification('Не удалось скопировать', false);
+    });
+}
 
 // === Загрузка всех игроков + статистики один раз (используется при инициализации) ===
 async function loadPlayersWithStats() {
@@ -6329,4 +6458,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
