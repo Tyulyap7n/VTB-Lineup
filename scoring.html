@@ -524,7 +524,214 @@ main {
   width: 1300px;
   margin: 0 auto;
 }
+    /* Мобильная адаптация */
+    @media (max-width: 768px) {
+      /* Скрываем сайдбар по умолчанию */
+      aside {
+        transform: translateX(-100%);
+        width: 280px;
+        position: fixed;
+        height: 100vh;
+        z-index: 1000;
+        transition: transform 0.3s ease;
+      }
 
+      aside.mobile-open {
+        transform: translateX(0);
+      }
+
+      /* Кнопка открытия сайдбара */
+      .mobile-menu-btn {
+        display: block;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: var(--purple);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      }
+
+      /* Оверлей при открытом сайдбаре */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+
+      /* Адаптируем основной контент */
+      main {
+        margin-left: 0;
+        width: 100%;
+        padding: 80px 10px 20px;
+      }
+
+      .back-button {
+        left: 20px;
+        top: 90px;
+        z-index: 100;
+      }
+
+      /* Ограничиваем максимальную ширину блоков */
+      .table-container.fixed-width,
+      .selected-players-container,
+      .starting-vi-container,
+      .matches-container {
+        max-width: 100%;
+        width: 100%;
+      }
+
+      .players-table {
+        font-size: 12px;
+      }
+
+      .players-table th, 
+      .players-table td {
+        padding: 6px 4px;
+      }
+
+      /* Адаптируем сетку выбранных игроков */
+      .selected-players-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .player-slot,
+      .empty-slot {
+        min-height: 100px;
+        padding: 10px;
+      }
+
+      .player-photo {
+        width: 40px;
+        height: 40px;
+      }
+
+      /* Адаптируем заголовок */
+      header {
+        padding: 15px;
+        height: 70px;
+      }
+
+      .header-logo img {
+        height: 40px;
+      }
+
+      .header-rules-btn {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+
+      /* Адаптируем таблицу игроков */
+      .table-controls {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .filter-row {
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0;
+      }
+
+      .filter-row label {
+        width: 100%;
+      }
+
+      .filter-row select {
+        width: 100%;
+      }
+
+      /* Адаптируем футер */
+      footer {
+        flex-direction: column;
+        gap: 15px;
+        height: auto;
+        padding: 20px;
+      }
+
+      /* Адаптируем модальные окна */
+      .leaderboard-content,
+      .league-leaderboard-content,
+      .rules-content {
+        width: 95%;
+        padding: 20px;
+        margin: 10px;
+      }
+
+      /* Скрываем некоторые столбцы в таблице на мобильных */
+      .players-table th:nth-child(n+7),
+      .players-table td:nth-child(n+7) {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .players-table th:nth-child(n+6),
+      .players-table td:nth-child(n+6) {
+        display: none;
+      }
+
+      .player-name-cell {
+        font-size: 12px;
+      }
+
+      .save-roster-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    /* Стили для кнопки поддержки */
+    .support-btn {
+      background: linear-gradient(45deg, #FFD700, #FFA500);
+      color: var(--black);
+      padding: 12px 24px;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+      margin: 10px 0;
+    }
+
+    .support-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+    }
+
+    .support-btn.mobile {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      animation: pulse 2s infinite;
+    }
+
+    /* Скрываем кнопку поддержки на десктопе в сайдбаре */
+    @media (min-width: 769px) {
+      .support-btn.mobile {
+        display: none;
+      }
+    }
     @keyframes borderAnimation {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -2165,6 +2372,12 @@ main {
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
     </div>
 	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
+	      <a href="https://www.tinkoff.ru/rm/bykhanov.pavel13/0j3ed30768/" 
+       class="support-btn" 
+       target="_blank"
+       onclick="trackSupport()">
+      ❤️ Поддержать проект
+    </a>
   </header>
   <div class="main-container">
      <aside id="leagues-sidebar">
@@ -2476,7 +2689,34 @@ main {
   
 </div>
 </div>
-
+  <div id="support-modal" class="leaderboard-modal">
+    <div class="leaderboard-content">
+      <h2>Поддержать проект</h2>
+      <div style="text-align: center; margin: 20px 0;">
+        <p>Если вам нравится LineUP Fantasy, вы можете поддержать развитие проекта!</p>
+        <div style="display: flex; flex-direction: column; gap: 15px; margin: 25px 0;">
+          <a href="https://www.tinkoff.ru/rm/bykhanov.pavel13/0j3ed30768/" 
+             class="support-btn" 
+             target="_blank"
+             style="font-size: 18px; padding: 15px 30px;"
+             onclick="trackSupport()">
+            💳 Поддержать через Tinkoff
+          </a>
+          
+          <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 10px;">
+            <h4 style="color: var(--yellow); margin-bottom: 10px;">Другие способы:</h4>
+            <p><strong>Telegram:</strong> @lineupfantasy</p>
+            <p><strong>Сбербанк:</strong> 2202 2061 3456 1123</p>
+          </div>
+        </div>
+        
+        <p style="font-size: 14px; color: var(--gray); margin-top: 20px;">
+          Ваша поддержка поможет улучшить функционал и добавить новые возможности!
+        </p>
+      </div>
+      <button class="close-leaderboard" onclick="closeSupportModal()">Закрыть</button>
+    </div>
+  </div>
   <footer>
     <a href="pick.html">Главная</a>
     <a href="https://www.sports.ru/tribuna/blogs/codeandcourt/">Новости</a>
@@ -2612,7 +2852,81 @@ function computePlayerMetrics(player) {
     selection
   };
 }
+    function toggleSidebar() {
+      const sidebar = document.querySelector('aside');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.toggle('mobile-open');
+      overlay.classList.toggle('active');
+    }
 
+    function closeSidebar() {
+      const sidebar = document.querySelector('aside');
+      const overlay = document.getElementById('sidebarOverlay');
+      sidebar.classList.remove('mobile-open');
+      overlay.classList.remove('active');
+    }
+
+    // Функции для поддержки проекта
+    function openSupport() {
+      closeSidebar(); // Закрываем сайдбар на мобильных
+      const modal = document.getElementById('support-modal');
+      modal.style.display = 'flex';
+      
+      anime({
+        targets: '.leaderboard-content',
+        scale: [0.8, 1],
+        opacity: [0, 1],
+        duration: 500,
+        easing: 'easeOutElastic(1, .8)'
+      });
+    }
+
+    function closeSupportModal() {
+      const modal = document.getElementById('support-modal');
+      anime({
+        targets: '.leaderboard-content',
+        scale: 0.8,
+        opacity: 0,
+        duration: 300,
+        complete: function() {
+          modal.style.display = 'none';
+        }
+      });
+    }
+
+    function trackSupport() {
+      // Можно добавить аналитику для отслеживания кликов
+      console.log('Support button clicked');
+      // Например: gtag('event', 'support_click');
+    }
+
+    // Закрытие сайдбара при клике на пункты меню на мобильных
+    document.addEventListener('DOMContentLoaded', function() {
+      const sidebarItems = document.querySelectorAll('.sidebar-item');
+      sidebarItems.forEach(item => {
+        item.addEventListener('click', function() {
+          if (window.innerWidth <= 768) {
+            closeSidebar();
+          }
+        });
+      });
+
+      // Скрываем кнопку поддержки в сайдбаре на мобильных
+      const supportSidebarItem = document.querySelector('.support-sidebar-item');
+      if (window.innerWidth <= 768 && supportSidebarItem) {
+        supportSidebarItem.style.display = 'none';
+      }
+    });
+
+    // Обработчик изменения размера окна
+    window.addEventListener('resize', function() {
+      const supportSidebarItem = document.querySelector('.support-sidebar-item');
+      if (window.innerWidth <= 768 && supportSidebarItem) {
+        supportSidebarItem.style.display = 'none';
+      } else if (supportSidebarItem) {
+        supportSidebarItem.style.display = 'flex';
+      }
+    });
 // --- Построить контролы пагинации (вставляет Prev / Page / Next в .table-controls) ---
 function buildPlayersPaginationControls() {
   if (document.getElementById('players-pagination')) return; // уже есть
@@ -6329,4 +6643,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
