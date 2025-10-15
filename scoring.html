@@ -4917,24 +4917,20 @@ async function checkTourStatus(tourId) {
   }
 }
 function calculatePlayerPoints(stats) {
-  // Если stats - массив записей, суммируем их
-  if (Array.isArray(stats)) {
-    const summedStats = stats.reduce((acc, stat) => {
-      return {
-        points: (acc.points || 0) + (stat.points || 0),
-        assists: (acc.assists || 0) + (stat.assists || 0),
-        rebounds: (acc.rebounds || 0) + (stat.rebounds || 0),
-        steals: (acc.steals || 0) + (stat.steals || 0),
-        blocks: (acc.blocks || 0) + (stat.blocks || 0),
-        turnover: (acc.turnover || 0) + (stat.turnover || 0)
-      };
-    }, {});
-    
-    return calculatePointsFromStats(summedStats);
+  if (!stats || stats.length === 0) {
+    return 0; // Если статистики нет, возвращаем 0 очков
   }
-  
-  // Если stats - одиночная запись
-  return calculatePointsFromStats(stats);
+
+  return stats.reduce((sum, stat) => {
+    return sum + (
+      (stat.points || 0) +
+      1.5 * (stat.assists || 0) +
+      1.3 * (stat.rebounds || 0) +
+      3 * (stat.steals || 0) +
+      3 * (stat.blocks || 0) -
+      2 * (stat.turnover || 0)
+    );
+  }, 0);
 }
 
 // Вспомогательная функция для расчета очков из статистики
@@ -6458,6 +6454,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
