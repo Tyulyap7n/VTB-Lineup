@@ -3972,33 +3972,49 @@ function renderLeaderboard(data) {
   tableBody.appendChild(headerRow);
 
   // Данные лидерборда
-  data.forEach((entry, index) => {
+  data.forEach((entry) => {
     const row = document.createElement('tr');
+
+    // Добавляем классы для позиций
     if (entry.place === 1) row.classList.add('position-1');
     if (entry.place === 2) row.classList.add('position-2');
     if (entry.place === 3) row.classList.add('position-3');
     if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
 
-    // Очки по турам (кликабельно)
-    const tourPointsCells = entry.tourPoints.split(' | ').map((points, tourIndex) => {
-      const tourId = Object.keys(entry.tourPointsById)[tourIndex];
-      return `<span class="tour-points" onclick="viewTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
-    }).join(' | ');
+    // Формируем ячейки с очками по турам
+    let tourPointsCells = '';
+    if (entry.tourPointsById) {
+      // Получаем отсортированные ID туров
+      const sortedTourIds = Object.keys(entry.tourPointsById).sort((a, b) => parseInt(a) - parseInt(b));
 
+      // Формируем очки по турам
+      tourPointsCells = sortedTourIds
+        .map((tourId, index) => {
+          const points = entry.tourPointsById[tourId] || "0";
+          return `<span class="tour-points" onclick="viewTeamDetails('${entry.teamId}', '${tourId}')">${points}</span>`;
+        })
+        .join(' | ');
+    } else {
+      tourPointsCells = 'Нет данных';
+    }
+
+    // Заполняем строку таблицы
     row.innerHTML = `
       <td>${entry.place}</td>
-      <td>${entry.teamName}</td>
-      <td>${entry.totalPoints}</td>
+      <td>${entry.teamName || 'Без названия'}</td>
+      <td>${entry.totalPoints || '0'}</td>
       <td>${tourPointsCells}</td>
     `;
+
     tableBody.appendChild(row);
   });
 
   // Настройка ползунка, если туров больше 5
-  if (tours.length > 5) {
+  if (tours && tours.length > 5) {
     document.getElementById('tour-slider').style.display = 'block';
   }
 }
+
 
 
 async function showLeaderboard() {
@@ -6454,6 +6470,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
