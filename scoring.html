@@ -2157,6 +2157,72 @@ main {
       font-size: 12px;
       display: none;
     }
+/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+@media (max-width: 768px) {
+  body, main, .table-container, .players-table, .selected-players-container, 
+  .leaderboard-content, .leaderboard-table-container, .filter-row, 
+  .selected-players-grid, .matches-container, .team-details {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 10px !important;
+  }
+
+  aside {
+    display: none !important; /* убираем боковую панель */
+  }
+
+  header {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .back-button {
+    position: static;
+    margin: 10px auto;
+    width: 90%;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .players-table table {
+    min-width: unset;
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+  }
+
+  .players-table th, .players-table td {
+    font-size: 12px;
+    padding: 6px;
+  }
+
+  .selected-players-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .empty-slot, .player-slot {
+    min-height: 100px;
+  }
+
+  .leaderboard-content {
+    padding: 20px;
+  }
+
+  footer {
+    flex-direction: column;
+    gap: 10px;
+    height: auto;
+    padding: 20px;
+  }
+}
+
   </style>
 </head>
 <body>
