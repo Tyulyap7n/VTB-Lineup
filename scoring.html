@@ -2490,6 +2490,88 @@ h2,
     font-size: 1.4rem;
   }
 }
+/* === Полная ширина для всех устройств === */
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Хэдер и футер */
+header, footer {
+  width: 100%;
+  max-width: 100%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 20px;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+/* Основные контейнеры */
+.main-container,
+main,
+.selected-players-container,
+.starting-vi-container,
+.matches-container,
+.match-row,
+.table-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* Матчи тура — по центру и на всю ширину */
+.matches-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.match-row {
+  width: 100%;
+  max-width: 100%;
+  border-radius: 0;
+  padding: 12px 4vw;
+  font-size: 1.2rem;
+  box-sizing: border-box;
+}
+
+/* Стартовые 6 — растягиваются */
+.selected-players-grid {
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+/* Центровка заголовков */
+h2, .starting-vi {
+  text-align: center;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+  header, footer {
+    padding: 15px 10px;
+  }
+
+  .match-row {
+    padding: 10px 3vw;
+    font-size: 1rem;
+  }
+
+  .selected-players-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+}
 
 
   </style>
