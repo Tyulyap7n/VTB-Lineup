@@ -4036,6 +4036,263 @@ footer {
         width: calc(100% - 180px);
       }
     }
+    body {
+      font-family: 'Petrov Sans', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background-color: var(--black);
+      color: var(--white);
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(99, 62, 220, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 85% 30%, rgba(254, 100, 28, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 50% 80%, rgba(253, 230, 0, 0.05) 0%, transparent 20%);
+      padding: 0;
+      margin: 0;
+      overflow-x: auto; /* Разрешаем горизонтальный скролл для всей страницы */
+      width: 100%;
+    }
+
+    /* Убираем вертикальную светящуюся полосу при скролле */
+    .table-container::after,
+    .leaderboard-table-container::after {
+      display: none !important;
+    }
+
+    /* Обновленные стили для aside и кнопки меню */
+    .menu-toggle {
+      position: fixed;
+      top: 90px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--black);
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .menu-toggle.hidden {
+      display: none;
+    }
+
+    aside {
+      position: fixed;
+      top: 80px;
+      left: -250px; /* Скрываем за пределами экрана */
+      width: 250px;
+      height: calc(100vh - 80px);
+      background: linear-gradient(to bottom, var(--orange), var(--orange-dark));
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+    }
+
+    aside.active {
+      left: 0; /* Показываем меню */
+    }
+
+    /* Обновляем отступы для основного контента */
+    main {
+      margin-left: 0;
+      margin-top: 80px;
+      width: 100%;
+      padding: 40px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--black);
+      flex: 1;
+      min-height: calc(100vh - 80px);
+      transition: margin-left 0.3s ease;
+      min-width: 1200px; /* Минимальная ширина для горизонтального скролла */
+    }
+
+    main.sidebar-open {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+    }
+
+    /* Скрытие кнопки назад на странице выхода */
+    body.exit-page .back-button,
+    body.exit-page .menu-toggle {
+      display: none !important;
+    }
+
+    /* Обновленные стили для кнопки назад */
+    .back-button {
+      position: fixed;
+      top: 90px;
+      left: 70px;
+      padding: 10px 20px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      color: var(--black);
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      z-index: 950;
+    }
+
+    .back-button.hidden {
+      display: none;
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+      body {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+      }
+
+      main {
+        min-width: 768px; /* Минимальная ширина для мобильных */
+      }
+
+      aside {
+        width: 200px;
+        left: -200px;
+      }
+
+      main.sidebar-open {
+        margin-left: 200px;
+        width: calc(100% - 200px);
+      }
+
+      .menu-toggle {
+        top: 80px;
+        left: 15px;
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+
+      .back-button {
+        top: 80px;
+        left: 60px;
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+
+      /* Мобильная версия для игроков в лидерборде - 2 столбца, 3 ряда */
+      #team-players,
+      #league-team-players {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: repeat(3, auto) !important;
+      }
+
+      .team-player {
+        min-height: 120px;
+        flex-direction: column;
+        text-align: center;
+        padding: 10px;
+      }
+
+      .team-player img {
+        width: 50px;
+        height: 50px;
+        margin-right: 0;
+        margin-bottom: 8px;
+      }
+
+      .team-player-info {
+        text-align: center;
+      }
+
+      .team-player-name {
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
+      .team-player-stats {
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      main {
+        min-width: 480px;
+      }
+
+      aside {
+        width: 180px;
+        left: -180px;
+      }
+
+      main.sidebar-open {
+        margin-left: 180px;
+        width: calc(100% - 180px);
+      }
+
+      .menu-toggle {
+        top: 70px;
+        left: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+      }
+
+      .back-button {
+        top: 70px;
+        left: 50px;
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      /* Еще более компактный вид для очень маленьких экранов */
+      #team-players,
+      #league-team-players {
+        gap: 8px;
+      }
+
+      .team-player {
+        min-height: 100px;
+        padding: 8px;
+      }
+
+      .team-player img {
+        width: 40px;
+        height: 40px;
+      }
+    }
+
+    /* Стили для улучшения свайпа на мобильных устройствах */
+    .swipe-area {
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Улучшение скролла для таблиц */
+    .table-container {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      width: 100%;
+    }
+
+    .table-container.fixed-width {
+      min-width: 1200px;
+    }
   </style>
 </head>
 <body>
@@ -4060,6 +4317,11 @@ footer {
 <!-- Кнопка для открытия/закрытия меню -->
 <button class="menu-toggle" id="menuToggle">☰</button>
 
+<!-- Кнопка назад -->
+<button class="back-button" onclick="goBack()">Назад</button>
+
+<!-- Область для свайпа -->
+<div class="swipe-area" id="swipeArea"></div>
 <aside id="leagues-sidebar">
   <div class="sidebar-item" onclick="window.location.href='scout.html'">
     <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
@@ -4080,7 +4342,6 @@ footer {
   </div>
 </aside>
 <main>
-      <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
 <div class="table-container animate-fadeIn fixed-width">
     <div class="players-table">
       <div class="table-controls">
@@ -4607,15 +4868,26 @@ document.addEventListener('DOMContentLoaded', function() {
       event.stopPropagation();
     });
   }
-  // Добавляем обработчик для красивого закрытия
-  const supportBtn = document.querySelector('.support-btn');
-  supportBtn.addEventListener('mouseenter', function() {
-    this.style.transform = 'translateY(-2px) scale(1.02)';
-  });
   
-  supportBtn.addEventListener('mouseleave', function() {
-    this.style.transform = '';
-  });
+  // Инициализация свайпа для горизонтального скролла
+  initSwipeScroll();
+  
+  // Обновление layout игроков в лидерборде
+  updateTeamPlayersLayout();
+  
+  // Обновление при изменении размера окна
+  window.addEventListener('resize', updateTeamPlayersLayout);
+  
+  // Проверяем, находимся ли мы на странице выхода
+  if (window.location.pathname.includes('index.html') || 
+      window.location.href.includes('index.html')) {
+    document.body.classList.add('exit-page');
+    const backButton = document.querySelector('.back-button');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (backButton) backButton.classList.add('hidden');
+    if (menuToggle) menuToggle.classList.add('hidden');
+  }
 });
 
 // Функция для отслеживания взаимодействий
@@ -6298,6 +6570,8 @@ async function viewTeamDetails(teamId, tourId) {
     players.forEach((player, index) => {
       player.style.animationDelay = `${index * 0.1}s`;
     });
+	    // После загрузки данных обновляем layout
+    setTimeout(updateTeamPlayersLayout, 100);
 
  } catch (error) {
     console.error('Ошибка просмотра состава:', error);
@@ -6929,7 +7203,8 @@ async function viewLeagueTeamDetails(teamId, tourId) {
         player.style.transition = 'all 0.5s ease';
       }, index * 100);
     });
-
+    // После загрузки данных обновляем layout
+    setTimeout(updateTeamPlayersLayout, 100);
  } catch (error) {
     console.error('Ошибка просмотра состава:', error);
     showNotification('Ошибка просмотра состава', false);
@@ -6981,7 +7256,96 @@ function closeSidebarOnClickOutside(event) {
     toggleSidebar();
   }
 }
+function navigateTo(url, isExit = false) {
+  if (isExit) {
+    // Добавляем класс для скрытия кнопок
+    document.body.classList.add('exit-page');
+    
+    // Скрываем кнопки
+    const backButton = document.querySelector('.back-button');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (backButton) backButton.classList.add('hidden');
+    if (menuToggle) menuToggle.classList.add('hidden');
+    
+    // Небольшая задержка для анимации
+    setTimeout(() => {
+      window.location.href = url;
+    }, 100);
+  } else {
+    window.location.href = url;
+  }
+}
+function goBack() {
+  window.history.back();
+}
+function initSwipeScroll() {
+  const swipeArea = document.getElementById('swipeArea');
+  let startX = 0;
+  let startY = 0;
+  let isScrolling = false;
 
+  if (!swipeArea) return;
+
+  swipeArea.style.pointerEvents = 'auto';
+
+  swipeArea.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].pageX;
+    startY = e.touches[0].pageY;
+    isScrolling = false;
+  });
+
+  swipeArea.addEventListener('touchmove', function(e) {
+    if (!startX || !startY) return;
+
+    const x = e.touches[0].pageX;
+    const y = e.touches[0].pageY;
+    
+    const diffX = Math.abs(x - startX);
+    const diffY = Math.abs(y - startY);
+
+    // Если горизонтальное движение больше вертикального - это свайп
+    if (diffX > diffY && diffX > 10) {
+      e.preventDefault();
+      isScrolling = true;
+      
+      // Скроллим всю страницу
+      window.scrollBy(startX - x, 0);
+    }
+  });
+
+  swipeArea.addEventListener('touchend', function() {
+    startX = 0;
+    startY = 0;
+    isScrolling = false;
+  });
+}
+function updateTeamPlayersLayout() {
+  const teamPlayers = document.getElementById('team-players');
+  const leagueTeamPlayers = document.getElementById('league-team-players');
+  
+  if (window.innerWidth <= 768) {
+    // Мобильная версия - 2 колонки, 3 ряда
+    if (teamPlayers) {
+      teamPlayers.style.gridTemplateColumns = 'repeat(2, 1fr)';
+      teamPlayers.style.gridTemplateRows = 'repeat(3, auto)';
+    }
+    if (leagueTeamPlayers) {
+      leagueTeamPlayers.style.gridTemplateColumns = 'repeat(2, 1fr)';
+      leagueTeamPlayers.style.gridTemplateRows = 'repeat(3, auto)';
+    }
+  } else {
+    // Десктоп версия - 3 колонки, 2 ряда
+    if (teamPlayers) {
+      teamPlayers.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      teamPlayers.style.gridTemplateRows = 'repeat(2, auto)';
+    }
+    if (leagueTeamPlayers) {
+      leagueTeamPlayers.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      leagueTeamPlayers.style.gridTemplateRows = 'repeat(2, auto)';
+    }
+  }
+}
 async function debugData() {
   console.log('=== ОТЛАДКА ДАННЫХ ===');
   
