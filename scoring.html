@@ -80,143 +80,7 @@
       50% { transform: translateY(-5px); }
       100% { transform: translateY(0px); }
     }
-	.league-leaderboard-modal .leaderboard-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-  font-size: 14px;
-}
-
-.league-leaderboard-modal .leaderboard-table th, 
-.league-leaderboard-modal .leaderboard-table td {
-  padding: 12px 15px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.league-leaderboard-modal .leaderboard-table th {
-  background-color: rgba(100, 60, 220, 0.5);
-  color: var(--white);
-  font-weight: bold;
-  position: sticky;
-  top: 0;
-}
-
-.league-leaderboard-modal .leaderboard-table tr:nth-child(even) {
-  background-color: rgba(100, 60, 220, 0.1);
-}
-
-.league-leaderboard-modal .leaderboard-table tr:hover {
-  background-color: rgba(100, 60, 220, 0.3);
-}
-
-.league-leaderboard-modal .user-position {
-  background-color: rgba(253, 230, 0, 0.2) !important;
-  font-weight: bold;
-}
-
-.league-leaderboard-modal .position-1 {
-  background-color: rgba(255, 215, 0, 0.3) !important;
-}
-
-.league-leaderboard-modal .position-2 {
-  background-color: rgba(192, 192, 192, 0.3) !important;
-}
-
-.league-leaderboard-modal .position-3 {
-  background-color: rgba(205, 127, 50, 0.3) !important;
-}
-
-/* Контейнер для горизонтальной прокрутки в лигах */
-.league-leaderboard-modal .leaderboard-table-container {
-  width: 100%;
-  overflow-x: auto;
-  margin-bottom: 20px;
-}
-
-/* Стили для таблицы с турами в лигах */
-.league-leaderboard-modal .tour-points-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 10px 0;
-  font-size: 12px;
-}
-
-.league-leaderboard-modal .tour-points-table th {
-  padding: 5px 3px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background-color: rgba(100, 60, 220, 0.3);
-  color: var(--yellow);
-  font-weight: bold;
-}
-
-.league-leaderboard-modal .tour-points-table td {
-  padding: 8px 3px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.league-leaderboard-modal .tour-points-table td:hover {
-  background-color: rgba(253, 230, 0, 0.2);
-  transform: scale(1.05);
-}
-
-.league-leaderboard-modal .tour-header-row {
-  background-color: rgba(100, 60, 220, 0.4) !important;
-}
-
-/* Кликабельные очки менеджера в лигах */
-.league-leaderboard-modal .leaderboard-table td.total-points {
-  cursor: pointer;
-  color: var(--yellow);
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.league-leaderboard-modal .leaderboard-table td.total-points:hover {
-  text-decoration: underline;
-  transform: scale(1.05);
-}
-
-/* Пагинация для лиг */
-.league-leaderboard-modal .pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 20px 0;
-  gap: 15px;
-}
-
-.league-leaderboard-modal .pagination-button {
-  padding: 8px 16px;
-  background: linear-gradient(to right, var(--purple), var(--purple-dark));
-  color: var(--white);
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.league-leaderboard-modal .pagination-button:hover:not(:disabled) {
-  background: linear-gradient(to right, var(--purple-light), var(--purple));
-  transform: scale(1.05);
-}
-
-.league-leaderboard-modal .pagination-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.league-leaderboard-modal #league-page-info {
-  color: var(--white);
-  font-weight: bold;
-  font-size: 14px;
-}
+    
     .animate-fadeIn {
       animation: fadeIn 0.6s ease forwards;
 	  margin-top: -30px;
@@ -455,7 +319,7 @@
       flex: 1;
       position: relative;
     }
-	
+    
     aside {
       position: absolute;
       top: 0;
@@ -812,60 +676,11 @@ main {
       max-width: 50px;
     }
     
-.table-container {
-  overflow-x: auto;
-  width: 100%;
-  margin: 0 auto;
-  position: relative;
-}
-
-.table-container.fixed-width {
-  width: 100%;
-  min-width: 1300px; /* Минимальная ширина для скролла */
-}
-
-/* Стили для скроллбара */
-.table-container::-webkit-scrollbar {
-  height: 8px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: var(--purple-dark);
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: var(--yellow);
-  border-radius: 4px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: var(--yellow-light);
-}
-.scroll-indicator {
-  text-align: center;
-  margin: 10px 0;
-  color: var(--gray);
-  font-size: 12px;
-  animation: pulse 2s infinite;
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .scroll-indicator {
-    display: block;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 1; }
-}
+    /* Контейнер для горизонтальной прокрутки */
+    .table-container {
+      overflow-x: auto;
+      width: 100%;
+    }
     /* Стили для лоадера */
 .loader {
   border: 3px solid rgba(255, 255, 255, 0.3);
@@ -1379,61 +1194,7 @@ main {
       position: sticky;
       top: 0;
     }
-    /* Добавьте эти стили для лучшего UX на мобильных */
-@media (max-width: 480px) {
-  /* Увеличиваем области клика для кнопок */
-  .select-button, 
-  .pagination-button, 
-  .save-roster-btn,
-  .sidebar-item {
-    min-height: 44px; /* Минимальный размер для удобного касания */
-    min-width: 44px;
-  }
-  
-  /* Улучшаем скроллбар для мобильных */
-  .table-container::-webkit-scrollbar {
-    height: 6px;
-  }
-  
-  .table-container::-webkit-scrollbar-thumb {
-    background: var(--yellow);
-    border-radius: 3px;
-  }
-  
-  /* Анимация для индикации скролла */
-  .table-container {
-    position: relative;
-  }
-  
-  .table-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(to bottom, var(--yellow), var(--orange));
-    opacity: 0.6;
-    animation: scrollIndicator 2s infinite;
-  }
-  
-  @keyframes scrollIndicator {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.8; }
-  }
-}
-
-/* Предотвращение zoom при двойном тапе на iOS */
-* {
-  touch-action: manipulation;
-}
-
-/* Улучшение производительности скролла */
-.table-container {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  perspective: 1000;
-}
+    
     .leaderboard-table tr:nth-child(even) {
       background-color: rgba(100, 60, 220, 0.1);
     }
@@ -1641,84 +1402,7 @@ main {
   transform: translateY(-5px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
-/* Исправления для мобильной прокрутки таблицы */
-@media (max-width: 768px) {
-  .table-container.fixed-width {
-    width: 100%;
-    min-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
-  }
-  
-  .players-table {
-    width: auto;
-    min-width: 600px; /* Минимальная ширина для сохранения читаемости */
-  }
-  
-  .players-table table {
-    min-width: 600px;
-  }
-  
-  /* Улучшение отображения на очень маленьких экранах */
-  @media (max-width: 480px) {
-    .players-table table {
-      min-width: 400px;
-    }
-    
-    .players-table th, 
-    .players-table td {
-      padding: 6px 4px;
-      font-size: 11px;
-    }
-    
-    /* Уменьшаем ширину столбцов для мобильных */
-    .players-table th[data-sort="add"],
-    .players-table td:first-child {
-      width: 40px;
-      min-width: 40px;
-      max-width: 40px;
-    }
-    
-    .players-table th[data-sort="photo"],
-    .players-table td:nth-child(2) {
-      width: 45px;
-      min-width: 45px;
-      max-width: 45px;
-    }
-    
-    .players-table th[data-sort="name"],
-    .players-table td:nth-child(3) {
-      width: 120px;
-      min-width: 120px;
-      max-width: 120px;
-    }
-  }
-}
 
-/* Общие улучшения для touch-устройств */
-.table-container {
-  overflow-x: auto;
-  touch-action: pan-x; /* Разрешаем горизонтальный скролл */
-}
-
-/* Улучшение скроллбара для мобильных */
-.table-container::-webkit-scrollbar {
-  height: 6px;
-}
-
-.table-container::-webkit-scrollbar-track {
-  background: var(--purple-dark);
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb {
-  background: var(--yellow);
-  border-radius: 3px;
-}
-
-.table-container::-webkit-scrollbar-thumb:hover {
-  background: var(--yellow-light);
-}
 /* Фото игрока */
 .team-player img {
   width: 40px;
@@ -2366,183 +2050,7 @@ main {
   width: 100%;
   height: 100%;
 }
-.support-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  z-index: 2000;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(10px);
-}
 
-.support-modal-content {
-  background: linear-gradient(135deg, var(--purple), var(--purple-dark));
-  padding: 30px;
-  border-radius: 20px;
-  max-width: 400px;
-  width: 90%;
-  border: 2px solid var(--yellow);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  position: relative;
-}
-
-.support-close-btn {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  background: none;
-  border: none;
-  color: var(--white);
-  font-size: 24px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.support-close-btn:hover {
-  color: var(--orange);
-  transform: scale(1.2);
-}
-
-.support-header {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.support-header h3 {
-  color: var(--yellow);
-  margin-bottom: 8px;
-  font-size: 24px;
-}
-
-.support-header p {
-  color: var(--white);
-  opacity: 0.9;
-  margin: 0;
-}
-
-/* Секция копирования */
-.copy-section {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 20px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.copy-section h4 {
-  color: var(--white);
-  margin-bottom: 15px;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.bank-info {
-  margin-bottom: 15px;
-}
-
-.bank-name {
-  color: var(--gray);
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
-.phone-number {
-  color: var(--yellow);
-  font-size: 18px;
-  font-weight: bold;
-  font-family: monospace;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 8px 12px;
-  border-radius: 8px;
-  margin: 8px 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.recipient-name {
-  color: var(--white);
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-/* Кнопка копирования */
-.copy-btn {
-  width: 100%;
-  padding: 12px 20px;
-  background: linear-gradient(135deg, var(--orange), var(--orange-dark));
-  color: var(--black);
-  border: none;
-  border-radius: 10px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.copy-btn:hover {
-  background: linear-gradient(135deg, var(--yellow), var(--yellow-dark));
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
-
-.copy-btn:active {
-  transform: translateY(0);
-}
-
-.copy-icon {
-  font-size: 16px;
-}
-
-/* Футер */
-.support-footer {
-  text-align: center;
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.support-footer p {
-  color: var(--white);
-  margin: 0;
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-/* Анимации */
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9) translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.support-modal.show {
-  display: flex;
-  animation: modalFadeIn 0.3s ease;
-}
-
-/* Анимация успешного копирования */
-.copy-success {
-  background: linear-gradient(135deg, #4CAF50, #45a049) !important;
-}
-
-.copy-success::after {
-  content: ' ✓';
-}
 .tooltip-text {
   visibility: hidden;
   width: 200px;
@@ -2649,1867 +2157,37 @@ main {
       font-size: 12px;
       display: none;
     }
-@media (max-width: 350px) {
-  /* Еще более компактная таблица */
-  .players-table table {
-    min-width: 300px;
-  }
-
-  .players-table th, 
-  .players-table td {
-    padding: 3px 4px;
-    font-size: 9px;
-  }
-
-  .players-table th[data-sort="name"],
-  .players-table td:nth-child(3) {
-    width: 70px;
-    min-width: 70px;
-    max-width: 70px;
-  }
-
-  /* Уменьшаем все статистические столбцы */
-  .players-table th[data-sort="price"],
-  .players-table th[data-sort="avg"],
-  .players-table th[data-sort="points"],
-  .players-table th[data-sort="threes"],
-  .players-table th[data-sort="assists"],
-  .players-table th[data-sort="rebounds"],
-  .players-table th[data-sort="steals"],
-  .players-table th[data-sort="blocks"],
-  .players-table th[data-sort="turnovers"],
-  .players-table th[data-sort="selection"],
-  .players-table td:nth-child(4),
-  .players-table td:nth-child(5),
-  .players-table td:nth-child(n+6):nth-child(-n+13) {
-    width: 30px;
-    min-width: 30px;
-    max-width: 30px;
-  }
-
-  /* Выбранные игроки - 1 колонка */
-  .selected-players-grid {
-    grid-template-columns: 1fr;
-  }
-}
-@media (max-width: 480px) {
-  /* Основной контент */
-  main {
-    margin-left: 50px;
-    width: calc(100% - 50px);
-    padding: 20px 5px;
-  }
-
-  /* Сайдбар */
-  aside {
-    width: 50px;
-  }
-
-  .sidebar-item {
-    padding: 8px 4px;
-  }
-
-  .sidebar-item img {
-    width: 30px;
-    height: 30px;
-  }
-
-  .sidebar-item span {
-    font-size: 10px;
-  }
-
-  /* Кнопка назад */
-  .back-button {
-    left: 55px;
-    top: 15px;
-    padding: 8px 15px;
-    font-size: 12px;
-  }
-
-  /* Заголовки */
-  h1 {
-    font-size: 24px;
-    margin-bottom: 15px;
-  }
-
-  h2 {
-    font-size: 20px;
-    margin: 15px 0;
-  }
-}
-@media (max-width: 480px) {
-  /* Контейнер матчей */
-  .matches-container {
-    padding: 0 5px;
-  }
-
-  .match-row {
-    padding: 8px;
-    margin-left: -40px;
-    width: 120%;
-  }
-
-  .team-name {
-    font-size: 12px;
-  }
-
-  .team-logo {
-    width: 25px;
-    height: 25px;
-  }
-
-  .multiple-games-badge {
-    width: 16px;
-    height: 16px;
-  }
-}
-	@media (max-width: 480px) {
-  /* Starting VI */
-  .starting-vi-container {
-    margin: 20px 0 10px 0;
-    padding: 0 10px;
-  }
-
-  .starting-vi {
-    font-size: 16px;
-  }
-
-  /* Кнопка сохранения */
-  .save-roster-btn {
-    padding: 10px 20px;
-    font-size: 14px;
-    margin: 10px auto;
-  }
-
-  .save-roster-btn span:nth-child(2) {
-    width: 16px;
-    height: 16px;
-  }
-
-  .save-status {
-    font-size: 12px;
-    margin-left: 10px;
-  }
-}
-@media (max-width: 480px) {
-  /* Контейнер с выбранными игроками */
-  .selected-players-container {
-    margin-bottom: 15px;
-  }
-
-  .selected-players-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    padding: 0 5px;
-  }
-
-  .empty-slot,
-  .player-slot {
-    min-height: 100px;
-    padding: 10px;
-  }
-
-  .player-photo {
-    width: 35px;
-    height: 35px;
-  }
-
-  .player-name {
-    font-size: 10px;
-  }
-
-  .player-price {
-    font-size: 10px;
-  }
-
-  .remove-btn {
-    width: 18px;
-    height: 18px;
-    font-size: 10px;
-  }
-
-  .role-label {
-    font-size: 8px;
-    padding: 1px 6px;
-  }
-}
-	@media (max-width: 480px) {
-  /* Модальное окно поддержки */
-  .support-modal-content {
-    padding: 20px 15px;
-    margin: 10px;
-    max-width: none;
-    width: calc(100% - 20px);
-  }
-
-  .support-header h3 {
-    font-size: 20px;
-  }
-
-  .support-header p {
-    font-size: 14px;
-  }
-
-  /* Секция копирования */
-  .copy-section,
-  .qr-section {
-    padding: 15px;
-  }
-
-  .copy-section h4,
-  .qr-section h4 {
-    font-size: 14px;
-  }
-
-  .phone-number {
-    font-size: 16px;
-    padding: 6px 10px;
-  }
-
-  .bank-name,
-  .recipient-name {
-    font-size: 12px;
-  }
-
-  .copy-btn {
-    padding: 10px 15px;
-    font-size: 13px;
-  }
-
-  /* QR-код */
-  .qr-code-container {
-    padding: 10px;
-  }
-
-  .qr-code {
-    width: 150px;
-    height: 150px;
-  }
-
-  .qr-hint {
-    font-size: 12px;
-  }
-
-  /* Футер */
-  .support-footer p {
-    font-size: 12px;
-  }
-}
-/* Мобильная адаптация таблицы игроков */
-@media (max-width: 480px) {
-  /* Хэдер */
-  header {
-    padding: 15px 10px;
-    height: 70px;
-  }
-
-  .header-logo img {
-    height: 35px;
-  }
-
-  .header-rules-btn {
-    padding: 8px 12px;
-    font-size: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  /* Кнопка поддержки */
-  .header-support-container {
-    position: static;
-    transform: none;
-    margin-left: auto;
-  }
-
-  .support-btn {
-    padding: 8px 12px;
-    font-size: 12px;
-    min-width: auto;
-  }
-
-  .support-text {
-    display: none;
-  }
-
-  .support-icon {
-    font-size: 16px;
-    margin: 0;
-  }
-
-  .support-pulse {
-    display: none;
-  }
-
-  /* Показываем текст при наведении */
-  .support-btn:hover .support-text {
-    display: block;
-    position: absolute;
-    background: rgba(0, 0, 0, 0.9);
-    color: white;
-    padding: 8px 12px;
-    border-radius: 8px;
-    top: -45px;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    font-size: 12px;
-    z-index: 1000;
-  }
-
-  .support-btn:hover .support-text::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.9);
-  }
-}
-@media (max-width: 480px) {
-  /* Основной контейнер */
-  .table-container.fixed-width {
-    width: 100%;
-    margin: 0 auto;
-    overflow-x: auto;
-  }
-
-  /* Таблица игроков */
-  .players-table {
-    font-size: 10px;
-    border-radius: 8px;
-  }
-
-  .players-table table {
-    min-width: 320px;
-  }
-
-  .players-table th, 
-  .players-table td {
-    padding: 4px 6px;
-    font-size: 10px;
-  }
-
-  /* Уменьшаем ширину столбцов */
-  .players-table th[data-sort="add"],
-  .players-table td:first-child {
-    width: 30px;
-    min-width: 30px;
-    max-width: 30px;
-  }
-
-  .players-table th[data-sort="photo"],
-  .players-table td:nth-child(2) {
-    width: 35px;
-    min-width: 35px;
-    max-width: 35px;
-  }
-
-  .players-table th[data-sort="name"],
-  .players-table td:nth-child(3) {
-    width: 80px;
-    min-width: 80px;
-    max-width: 80px;
-    font-size: 9px;
-  }
-
-  /* Уменьшаем статистические столбцы */
-  .players-table th[data-sort="price"],
-  .players-table th[data-sort="avg"],
-  .players-table th[data-sort="points"],
-  .players-table th[data-sort="threes"],
-  .players-table th[data-sort="assists"],
-  .players-table th[data-sort="rebounds"],
-  .players-table th[data-sort="steals"],
-  .players-table th[data-sort="blocks"],
-  .players-table th[data-sort="turnovers"],
-  .players-table th[data-sort="selection"],
-  .players-table td:nth-child(4),
-  .players-table td:nth-child(5),
-  .players-table td:nth-child(n+6):nth-child(-n+13) {
-    width: 35px;
-    min-width: 35px;
-    max-width: 35px;
-    font-size: 9px;
-  }
-
-  /* Кнопка добавления */
-  .players-table .select-button {
-    width: 25px;
-    height: 25px;
-    font-size: 14px;
-    padding: 0;
-  }
-
-  /* Фото игроков */
-  .players-table img {
-    width: 25px;
-    height: 25px;
-  }
-
-  /* Заголовки столбцов */
-  .players-table th {
-    font-size: 9px;
-    padding: 6px 4px;
-  }
-
-  /* Скрываем длинные заголовки */
-  .players-table th[data-sort="threes"]::before {
-    content: "3-очк";
-    font-size: 8px;
-  }
-
-  .players-table th[data-sort="assists"]::before {
-    content: "АСС";
-    font-size: 8px;
-  }
-
-  .players-table th[data-sort="rebounds"]::before {
-    content: "ПДБ";
-    font-size: 8px;
-  }
-
-  .players-table th[data-sort="steals"]::before {
-    content: "ПРХ";
-    font-size: 8px;
-  }
-
-  .players-table th[data-sort="blocks"]::before {
-    content: "БЛК";
-    font-size: 8px;
-  }
-
-  .players-table th[data-sort="turnovers"]::before {
-    content: "ПТР";
-    font-size: 8px;
-  }
-
-  .players-table th[data-sort="selection"]::before {
-    content: "%";
-    font-size: 8px;
-  }
-
-  /* Скрываем оригинальный текст в заголовках */
-  .players-table th[data-sort="threes"],
-  .players-table th[data-sort="assists"],
-  .players-table th[data-sort="rebounds"],
-  .players-table th[data-sort="steals"],
-  .players-table th[data-sort="blocks"],
-  .players-table th[data-sort="turnovers"],
-  .players-table th[data-sort="selection"] {
-    font-size: 0;
-  }
-
-  /* Фильтры */
-  .table-controls {
-    padding: 0 5px;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .filter-row {
-    margin-left: 0;
-    gap: 8px;
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .filter-row label {
-    font-size: 12px;
-    flex: 1;
-    min-width: 120px;
-  }
-
-  .filter-row select {
-    padding: 6px 8px;
-    font-size: 12px;
-    min-width: 100px;
-  }
-
-  .budget-counter {
-    font-size: 14px;
-    text-align: center;
-    width: 100%;
-  }
-
-  /* Пагинация */
-  #players-pagination {
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .pagination-button {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-
-  #players-page-info {
-    font-size: 12px;
-  }
-}
-/* Контейнер кнопки поддержки */
-.header-support-container {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 100;
-}
-
-/* Основные стили желтой кнопки */
-.support-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 24px;
-  background: linear-gradient(135deg, 
-    #FFD700 0%, 
-    #FFEC8B 25%, 
-    #FFD700 50%, 
-    #FFA500 75%, 
-    #FF8C00 100%);
-  color: #8B4513;
-  text-decoration: none;
-  border-radius: 30px;
-  font-weight: bold;
-  font-size: 14px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 
-    0 4px 20px rgba(255, 215, 0, 0.4),
-    0 0 0 2px rgba(255, 255, 255, 0.8) inset,
-    0 0 0 1px rgba(139, 69, 19, 0.2);
-  border: none;
-  cursor: pointer;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
-  font-family: 'Petrov Sans', Arial, sans-serif;
-  letter-spacing: 0.5px;
-}
-
-/* Блестящие частицы */
-.support-sparkle {
-  font-size: 14px;
-  animation: sparkleFloat 3s ease-in-out infinite;
-  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
-}
-
-.support-sparkle:nth-child(1) {
-  animation-delay: 0s;
-}
-
-.support-sparkle:nth-child(4) {
-  animation-delay: 1.5s;
-}
-
-@keyframes sparkleFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-    opacity: 1;
-  }
-  50% {
-    transform: translateY(-3px) rotate(180deg);
-    opacity: 0.7;
-  }
-}
-
-/* Текст кнопки */
-.support-text {
-  position: relative;
-  z-index: 3;
-  transition: all 0.3s ease;
-  font-weight: 900;
-  background: linear-gradient(45deg, #8B4513, #A0522D);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Иконка сердца */
-.support-icon {
-  position: relative;
-  z-index: 3;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  animation: heartbeat 2s ease-in-out infinite;
-  filter: drop-shadow(0 2px 4px rgba(139, 69, 19, 0.3));
-}
-
-@keyframes heartbeat {
-  0%, 100% {
-    transform: scale(1);
-  }
-  25% {
-    transform: scale(1.3);
-  }
-  50% {
-    transform: scale(1);
-  }
-  75% {
-    transform: scale(1.2);
-  }
-}
-
-/* Пульсирующий эффект */
-.support-pulse {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, 
-    rgba(255, 215, 0, 0.6), 
-    rgba(255, 165, 0, 0.4));
-  border-radius: 30px;
-  opacity: 0;
-  animation: goldenPulse 2s ease-out infinite;
-  z-index: 1;
-}
-
-@keyframes goldenPulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 0.4;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 0;
-  }
-}
-
-/* Блестящий эффект */
-.support-shine {
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.6) 50%,
-    transparent 70%
-  );
-  transform: rotate(45deg);
-  animation: shine 4s ease-in-out infinite;
-  z-index: 2;
-}
-
-@keyframes shine {
-  0% {
-    transform: rotate(45deg) translateX(-100%);
-  }
-  50% {
-    transform: rotate(45deg) translateX(100%);
-  }
-  100% {
-    transform: rotate(45deg) translateX(-100%);
-  }
-}
-
-/* Эффекты при наведении */
-.support-btn:hover {
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 
-    0 8px 30px rgba(255, 215, 0, 0.6),
-    0 0 0 3px rgba(255, 255, 255, 0.9) inset,
-    0 0 20px rgba(255, 215, 0, 0.8);
-  background: linear-gradient(135deg, 
-    #FFEC8B 0%, 
-    #FFD700 25%, 
-    #FFA500 50%, 
-    #FF8C00 75%, 
-    #FF4500 100%);
-}
-
-.support-btn:hover .support-text {
-  transform: translateX(2px);
-  background: linear-gradient(45deg, #8B4513, #CD853F);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.support-btn:hover .support-icon {
-  transform: scale(1.4);
-  animation: heartbeat 1s ease-in-out infinite;
-}
-
-.support-btn:hover .support-sparkle {
-  animation: sparkleFloat 1s ease-in-out infinite;
-}
-
-/* Эффект нажатия */
-.support-btn:active {
-  transform: translateY(-1px) scale(0.98);
-  box-shadow: 
-    0 2px 15px rgba(255, 215, 0, 0.4),
-    0 0 0 2px rgba(255, 255, 255, 0.8) inset;
-  transition: all 0.1s ease;
-}
-
-/* Золотая рамка при фокусе */
-.support-btn:focus {
-  outline: none;
-  box-shadow: 
-    0 0 0 3px rgba(255, 215, 0, 0.6),
-    0 0 0 6px rgba(255, 165, 0, 0.3);
-}
-
-/* Эффект частиц при клике */
-.support-btn.clicked {
-  animation: goldenExplosion 0.6s ease-out;
-}
-
-@keyframes goldenExplosion {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-    box-shadow: 
-      0 0 0 20px rgba(255, 215, 0, 0.2),
-      0 0 0 40px rgba(255, 165, 0, 0.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-/* Адаптивность для мобильных устройств */
-@media (max-width: 768px) {
-  .header-support-container {
-    position: static;
-    transform: none;
-    margin-left: auto;
-  }
-  
-  .support-btn {
-    padding: 12px 18px;
-    font-size: 12px;
-  }
-  
-  .support-text {
-    display: inline;
-  }
-  
-  .support-sparkle {
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .header-support-container {
-    margin-left: 10px;
-  }
-  
-  .support-btn {
-    padding: 10px 14px;
-    font-size: 11px;
-  }
-  
-  .support-text {
-    display: none;
-  }
-  
-  .support-sparkle {
-    display: none;
-  }
-  
-  .support-btn:hover .support-text {
-    display: block;
-    position: absolute;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    color: #8B4513;
-    padding: 8px 12px;
-    border-radius: 8px;
-    top: -45px;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    font-size: 12px;
-    z-index: 1000;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-  }
-  
-  .support-btn:hover .support-text::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: #FFD700;
-  }
-}
-
-/* Эффект для темной темы */
-@media (prefers-color-scheme: dark) {
-  .support-btn {
-    box-shadow: 
-      0 4px 20px rgba(255, 215, 0, 0.6),
-      0 0 0 2px rgba(255, 255, 255, 0.9) inset,
-      0 0 0 1px rgba(139, 69, 19, 0.3);
-  }
-  
-  .support-btn:hover {
-    box-shadow: 
-      0 8px 30px rgba(255, 215, 0, 0.8),
-      0 0 0 3px rgba(255, 255, 255, 0.9) inset,
-      0 0 25px rgba(255, 215, 0, 0.9);
-  }
-}
-/* Эффект для первого посещения */
-.support-btn.new-visitor {
-  animation: welcomePulse 3s ease-in-out infinite;
-}
-
-@keyframes welcomePulse {
-  0%, 100% {
-    box-shadow: 
-      0 4px 20px rgba(255, 215, 0, 0.4),
-      0 0 0 2px rgba(255, 255, 255, 0.8) inset;
-  }
-  50% {
-    box-shadow: 
-      0 4px 30px rgba(255, 215, 0, 0.8),
-      0 0 0 3px rgba(255, 255, 255, 0.9) inset,
-      0 0 25px rgba(255, 215, 0, 0.6);
-  }
-}
-
-/* Эффект для праздников */
-.support-btn.holiday {
-  background: linear-gradient(135deg, 
-    #FFD700 0%, #FFEC8B 20%, #FFD700 40%, 
-    #FFA500 60%, #FF8C00 80%, #FF4500 100%);
-  animation: holidaySparkle 2s ease-in-out infinite;
-}
-
-@keyframes holidaySparkle {
-  0%, 100% {
-    filter: hue-rotate(0deg);
-  }
-  50% {
-    filter: hue-rotate(180deg);
-  }
-}
-/* Хэдер - повышаем z-index и добавляем фон */
-header {
-  width: 100%;
-  background-color: var(--purple);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  height: 80px;
-  position: fixed; /* Меняем на fixed */
-  top: 0;
-  left: 0;
-  z-index: 1000; /* Повышаем z-index */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Боковое меню - сдвигаем ниже хэдера */
-aside {
-  position: fixed; /* Меняем на fixed */
-  top: 80px; /* Отступ равный высоте хэдера */
-  left: 0;
-  width: 5%;
-  height: calc(100vh - 80px); /* Вычитаем высоту хэдера */
-  background: linear-gradient(to bottom, var(--orange), var(--orange-dark));
-  z-index: 900; /* Ниже хэдера */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  transition: width 0.3s ease, padding 0.3s ease;
-  --content-width: 15vw;
-  box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Основной контент - добавляем отступы сверху и слева */
-main {
-  margin-left: 7%;
-  margin-top: 80px; /* Отступ сверху для хэдера */
-  width: 93%; /* Уменьшаем ширину */
-  padding: 40px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--black);
-  flex: 1;
-  min-height: calc(100vh - 80px); /* Минимальная высота */
-}
-
-.back-button {
-  position: fixed;
-  top: 90px;
-  left: 7%;
-  padding: 10px 20px;
-  background: linear-gradient(to right, var(--orange), var(--orange-dark));
-  color: var(--black);
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 950;
-}
-/* Адаптивность для больших экранов */
-@media (min-width: 1200px) {
-  aside {
-    width: 5%;
-  }
-  
-  main {
-    margin-left: 7%;
-    width: 93%;
-  }
-  
-  .back-button {
-    left: 7%;
-  }
-}
-
-@media (max-width: 1200px) {
-  aside {
-    width: 60px;
-  }
-  
-  main {
-    margin-left: 70px;
-    width: calc(100% - 70px);
-  }
-  
-  .back-button {
-    left: 80px;
-  }
-}
-
-/* Для мобильных устройств */
-@media (max-width: 768px) {
-  header {
-    height: 70px;
-    padding: 15px;
-  }
-  
-  aside {
-    top: 70px;
-    height: calc(100vh - 70px);
-    width: 60px;
-  }
-  
-  main {
-    margin-left: 70px;
-    margin-top: 70px;
-    width: calc(100% - 70px);
-  }
-  
-  .back-button {
-    top: 80px;
-    left: 80px;
-  }
-}
-@media (max-width: 768px) {
-  .back-button {
-    top: 80px;
-    left: 80px;
-    padding: 8px 15px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 400px) {
-  .back-button {
-    top: 70px;
-    left: 60px;
-    padding: 8px 12px;
-    font-size: 11px;
-  }
-}
-
-/* Мобильная адаптация бокового меню */
-@media (max-width: 768px) {
-  aside {
-    width: 60px;
-    top: 70px;
-    height: calc(100vh - 70px);
-  }
-  
-  .sidebar-item {
-    padding: 8px 4px;
-  }
-  
-  .sidebar-item img {
-    width: 30px;
-    height: 30px;
-  }
-  
-  .sidebar-item span {
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  aside {
-    width: 50px;
-  }
-  
-  .sidebar-item {
-    padding: 6px 2px;
-  }
-  
-  .sidebar-item img {
-    width: 25px;
-    height: 25px;
-  }
-  
-  .sidebar-item span {
-    font-size: 9px;
-  }
-}
-
-/* Адаптация хедера для мобильных */
-@media (max-width: 768px) {
-  header {
-    height: 70px;
-    padding: 15px;
-  }
-  
-  .header-logo img {
-    height: 35px;
-  }
-  
-  .header-rules-btn {
-    padding: 8px 12px;
-    font-size: 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  header {
-    height: 60px;
-    padding: 10px;
-  }
-  
-  .header-logo img {
-    height: 30px;
-  }
-  
-  .header-rules-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-  }
-  
-  /* Адаптация кнопки поддержки для мобильных */
-  .header-support-container {
-    position: static;
-    margin-left: auto;
-  }
-  
-  .support-btn {
-    padding: 8px 12px;
-    font-size: 11px;
-  }
-  
-  .support-text {
-    display: none;
-  }
-  
-  .support-sparkle {
-    display: none;
-  }
-}
-
-/* Адаптация футера для мобильных */
-@media (max-width: 768px) {
-  footer {
-    padding: 20px 15px;
-    flex-wrap: wrap;
-    gap: 15px;
-    height: auto;
-  }
-  
-  footer a {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  footer {
-    padding: 15px 10px;
-    gap: 10px;
-  }
-  
-  footer a {
-    font-size: 12px;
-    padding: 5px;
-  }
-}
-/* Для очень маленьких экранов */
-@media (max-width: 400px) {
-  header {
-    height: 60px;
-    padding: 10px;
-  }
-  
-  aside {
-    top: 60px;
-    height: calc(100vh - 60px);
-    width: 50px;
-  }
-  
-  main {
-    margin-left: 50px;
-    margin-top: 60px;
-    width: calc(100% - 50px);
-    padding: 20px 5px;
-  }
-  
-  .back-button {
-    top: 70px;
-    left: 60px;
-    padding: 8px 15px;
-    font-size: 12px;
-  }
-}
-/* Убедимся, что body имеет правильную высоту */
-body {
-  font-family: 'Petrov Sans', Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--black);
-  color: var(--white);
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(99, 62, 220, 0.1) 0%, transparent 20%),
-    radial-gradient(circle at 85% 30%, rgba(254, 100, 28, 0.1) 0%, transparent 20%),
-    radial-gradient(circle at 50% 80%, rgba(253, 230, 0, 0.05) 0%, transparent 20%);
-  padding: 0;
-  margin: 0;
-}
-
-/* Основной контейнер */
-.main-container {
-  display: flex;
-  flex: 1;
-  position: relative;
-  margin-top: 0;
-  min-height: 100vh;
-}
-
-/* Футер - убедимся, что он внизу */
-footer {
-  width: 100%;
-  background: linear-gradient(to right, var(--purple), var(--purple-dark));
-  padding: 30px 20px;
-  text-align: center;
-  color: var(--white);
-  font-size: 16px;
-  height: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-  position: relative;
-  z-index: 800;
-  margin-top: auto;
-}
-/* Кнопка поддержки - корректируем позиционирование */
-.header-support-container {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1001; /* Выше хэдера */
-}
-
-/* Логотип в хэдере */
-.header-logo {
-  position: relative;
-  z-index: 1001; /* Выше хэдера */
-}
-
-/* Кнопка правил в хэдере */
-.header-rules-btn {
-  color: var(--white);
-  padding: 10px 20px;
-  border-radius: 30px;
-  font-weight: bold;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1001; /* Выше хэдера */
-  background: linear-gradient(to right, var(--orange), var(--orange-dark));
-}
-
-.header-rules-btn:hover {
-  transform: translateX(-50%) translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
-}
-@media (max-width: 768px) {
-  .table-container.fixed-width {
-    min-width: 320px;
-  }
-  
-  .scroll-indicator {
-    font-size: 10px;
-    padding: 0 10px;
-  }
-  
-  /* Уменьшаем отступы для мобильных */
-  .players-table th, 
-  .players-table td {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-}
-/* Добавьте в существующие медиа-запросы для мобильных устройств */
-@media (max-width: 480px) {
-  /* Улучшение скролла для таблицы игроков */
-  .table-container.fixed-width {
-    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
-    overflow-x: auto;
-    overflow-y: hidden;
-    touch-action: pan-x; /* Разрешаем горизонтальный скролл */
-  }
-  
-  /* Улучшение скролла для модальных окон */
-  .leaderboard-content,
-  .league-leaderboard-content,
-  .rules-content,
-  .support-modal-content {
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
-    overscroll-behavior: contain; /* Предотвращает скролл основного контента */
-  }
-  
-  /* Улучшение скролла для сайдбара */
-  aside {
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
-  }
-  
-  /* Улучшение скролла для основного контента */
-  main {
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
-    height: calc(100vh - 60px); /* Фиксированная высота для скролла */
-  }
-  
-  /* Улучшение скролла для таблиц лидерборда */
-  .leaderboard-table-container {
-    -webkit-overflow-scrolling: touch;
-    overflow-x: auto;
-  }
-}
-
-/* Общие улучшения скролла для всех устройств */
-.table-container {
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-}
-
-/* Улучшение скролла для iOS Safari */
-@supports (-webkit-touch-callout: none) {
-  .table-container {
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  main {
-    -webkit-overflow-scrolling: touch;
-  }
-}
-    .menu-toggle {
-      position: fixed;
-      top: 90px;
-      left: 20px;
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(to right, var(--orange), var(--orange-dark));
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      z-index: 1001;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--black);
-      font-weight: bold;
-      font-size: 18px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    .menu-toggle:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    aside {
-      position: fixed;
-      top: 80px;
-      left: -250px; /* Скрываем за пределами экрана */
-      width: 250px;
-      height: calc(100vh - 80px);
-      background: linear-gradient(to bottom, var(--orange), var(--orange-dark));
-      z-index: 900;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 0;
-      overflow-y: auto;
-      transition: left 0.3s ease;
-      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
-    }
-
-    aside.active {
-      left: 0; /* Показываем меню */
-    }
-
-    /* Убираем вертикальную светящуюся полосу при скролле */
-    .table-container::after {
-      display: none !important;
-    }
-
-    /* Обновляем отступы для основного контента */
-    main {
-      margin-left: 0;
-      margin-top: 80px;
-      width: 100%;
-      padding: 40px 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: var(--black);
-      flex: 1;
-      min-height: calc(100vh - 80px);
-      transition: margin-left 0.3s ease;
-    }
-
-    main.sidebar-open {
-      margin-left: 250px;
-      width: calc(100% - 250px);
-    }
-
-    /* Адаптивность для мобильных устройств */
-    @media (max-width: 768px) {
-      aside {
-        width: 200px;
-        left: -200px;
-      }
-
-      main.sidebar-open {
-        margin-left: 200px;
-        width: calc(100% - 200px);
-      }
-
-      .menu-toggle {
-        top: 80px;
-        left: 15px;
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      aside {
-        width: 180px;
-        left: -180px;
-      }
-
-      main.sidebar-open {
-        margin-left: 180px;
-        width: calc(100% - 180px);
-      }
-    }
-    body {
-      font-family: 'Petrov Sans', Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      background-color: var(--black);
-      color: var(--white);
-      background-image: 
-        radial-gradient(circle at 15% 50%, rgba(99, 62, 220, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 85% 30%, rgba(254, 100, 28, 0.1) 0%, transparent 20%),
-        radial-gradient(circle at 50% 80%, rgba(253, 230, 0, 0.05) 0%, transparent 20%);
-      padding: 0;
-      margin: 0;
-      overflow-x: auto; /* Разрешаем горизонтальный скролл для всей страницы */
-      width: 100%;
-    }
-
-    /* Убираем вертикальную светящуюся полосу при скролле */
-    .table-container::after,
-    .leaderboard-table-container::after {
-      display: none !important;
-    }
-
-    /* Обновленные стили для aside и кнопки меню */
-    .menu-toggle {
-      position: fixed;
-      top: 90px;
-      left: 20px;
-      width: 40px;
-      height: 40px;
-      background: linear-gradient(to right, var(--orange), var(--orange-dark));
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      z-index: 1001;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--black);
-      font-weight: bold;
-      font-size: 18px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    .menu-toggle.hidden {
-      display: none;
-    }
-
-    aside {
-      position: fixed;
-      top: 80px;
-      left: -250px; /* Скрываем за пределами экрана */
-      width: 250px;
-      height: calc(100vh - 80px);
-      background: linear-gradient(to bottom, var(--orange), var(--orange-dark));
-      z-index: 900;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 0;
-      overflow-y: auto;
-      transition: left 0.3s ease;
-      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
-    }
-
-    aside.active {
-      left: 0; /* Показываем меню */
-    }
-
-    /* Обновляем отступы для основного контента */
-    main {
-      margin-left: 0;
-      margin-top: 80px;
-      width: 100%;
-      padding: 40px 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background-color: var(--black);
-      flex: 1;
-      min-height: calc(100vh - 80px);
-      transition: margin-left 0.3s ease;
-      min-width: 1200px; /* Минимальная ширина для горизонтального скролла */
-    }
-
-    main.sidebar-open {
-      margin-left: 250px;
-      width: calc(100% - 250px);
-    }
-
-    /* Скрытие кнопки назад на странице выхода */
-    body.exit-page .back-button,
-    body.exit-page .menu-toggle {
-      display: none !important;
-    }
-
-    /* Обновленные стили для кнопки назад */
-    .back-button {
-      position: fixed;
-      top: 90px;
-      left: 70px;
-      padding: 10px 20px;
-      background: linear-gradient(to right, var(--orange), var(--orange-dark));
-      color: var(--black);
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      z-index: 950;
-    }
-
-    .back-button.hidden {
-      display: none;
-    }
-
-    /* Адаптивность для мобильных устройств */
-    @media (max-width: 768px) {
-      body {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
-      }
-
-      main {
-        min-width: 768px; /* Минимальная ширина для мобильных */
-      }
-
-      aside {
-        width: 200px;
-        left: -200px;
-      }
-
-      main.sidebar-open {
-        margin-left: 200px;
-        width: calc(100% - 200px);
-      }
-
-      .menu-toggle {
-        top: 80px;
-        left: 15px;
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
-      }
-
-      .back-button {
-        top: 80px;
-        left: 60px;
-        padding: 8px 16px;
-        font-size: 14px;
-      }
-
-      /* Мобильная версия для игроков в лидерборде - 2 столбца, 3 ряда */
-      #team-players,
-      #league-team-players {
-        grid-template-columns: repeat(2, 1fr) !important;
-        grid-template-rows: repeat(3, auto) !important;
-      }
-
-      .team-player {
-        min-height: 120px;
-        flex-direction: column;
-        text-align: center;
-        padding: 10px;
-      }
-
-      .team-player img {
-        width: 50px;
-        height: 50px;
-        margin-right: 0;
-        margin-bottom: 8px;
-      }
-
-      .team-player-info {
-        text-align: center;
-      }
-
-      .team-player-name {
-        font-size: 12px;
-        margin-bottom: 4px;
-      }
-
-      .team-player-stats {
-        font-size: 10px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      main {
-        min-width: 480px;
-      }
-
-      aside {
-        width: 180px;
-        left: -180px;
-      }
-
-      main.sidebar-open {
-        margin-left: 180px;
-        width: calc(100% - 180px);
-      }
-
-      .menu-toggle {
-        top: 70px;
-        left: 10px;
-        width: 32px;
-        height: 32px;
-        font-size: 14px;
-      }
-
-      .back-button {
-        top: 70px;
-        left: 50px;
-        padding: 6px 12px;
-        font-size: 12px;
-      }
-
-      /* Еще более компактный вид для очень маленьких экранов */
-      #team-players,
-      #league-team-players {
-        gap: 8px;
-      }
-
-      .team-player {
-        min-height: 100px;
-        padding: 8px;
-      }
-
-      .team-player img {
-        width: 40px;
-        height: 40px;
-      }
-    }
-
-    /* Стили для улучшения свайпа на мобильных устройствах */
-    .swipe-area {
-      width: 100%;
-      height: 100%;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    /* Улучшение скролла для таблиц */
-    .table-container {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      width: 100%;
-    }
-
-    .table-container.fixed-width {
-      min-width: 1200px;
-    }
-    /* Обновленные стили для таблицы игроков */
-    .players-table th[data-sort="price"],
-    .players-table td:nth-child(4) {
-      width: 60px;
-      min-width: 60px;
-      max-width: 60px;
-    }
-
-    /* Новый столбец для средних очков */
-    .players-table th[data-sort="fantasyAvg"],
-    .players-table td:nth-child(6) {
-      width: 50px;
-      min-width: 50px;
-      max-width: 50px;
-    }
-
-    /* Узкий столбец цены для мобильных */
-    @media (max-width: 768px) {
-      .players-table th[data-sort="price"],
-      .players-table td:nth-child(4) {
-        width: 45px;
-        min-width: 45px;
-        max-width: 45px;
-        font-size: 12px;
-      }
-
-      .players-table th[data-sort="fantasyAvg"],
-      .players-table td:nth-child(6) {
-        width: 40px;
-        min-width: 40px;
-        max-width: 40px;
-        font-size: 11px;
-      }
-
-      /* Компактные заголовки для мобильных */
-      .players-table th[data-sort="fantasyAvg"]::before {
-        content: "ФО";
-        font-size: 10px;
-      }
-
-      .players-table th[data-sort="fantasyAvg"] .full-text {
-        display: none;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .players-table th[data-sort="price"],
-      .players-table td:nth-child(4) {
-        width: 40px;
-        min-width: 40px;
-        max-width: 40px;
-        font-size: 11px;
-      }
-
-      .players-table th[data-sort="fantasyAvg"],
-      .players-table td:nth-child(6) {
-        width: 35px;
-        min-width: 35px;
-        max-width: 35px;
-        font-size: 10px;
-      }
-    }
-
-    /* Восстановление строки с бюджетом */
-    .budget-container {
-      display: flex;
-      align-items: center;
-      margin-left: auto;
-      margin-right: 20px;
-    }
-
-    .budget-counter {
-      font-size: 16px;
-      color: var(--yellow);
-      font-weight: bold;
-      text-shadow: 0 0 5px rgba(253, 230, 0, 0.5);
-      white-space: nowrap;
-    }
-
-    /* Исправление кликабельности таблицы */
-    .players-table {
-      pointer-events: auto !important;
-    }
-
-    .players-table table {
-      pointer-events: auto !important;
-    }
-
-    .players-table td,
-    .players-table th {
-      pointer-events: auto !important;
-    }
-
-    .select-button {
-      pointer-events: auto !important;
-      cursor: pointer !important;
-    }
-
-    .player-name-cell {
-      pointer-events: auto !important;
-      cursor: pointer !important;
-    }
-
-    /* Убираем блокировку событий с swipe-area для таблицы */
-    .table-container {
-      pointer-events: auto !important;
-      position: relative;
-      z-index: 2;
-    }
-
-    .players-table {
-      position: relative;
-      z-index: 3;
-    }
-
-    /* Область для свайпа не должна перекрывать таблицу */
-    .swipe-area {
-      z-index: 1;
-    }
-
-    /* Убедимся, что таблица кликабельна */
-    #players-table-body tr {
-      pointer-events: auto;
-    }
-
-    #players-table-body td {
-      pointer-events: auto;
-    }
-
-    /* Специфичные стили для кнопок в таблице */
-    #players-table-body .select-button {
-      pointer-events: auto;
-      cursor: pointer;
-      position: relative;
-      z-index: 10;
-    }
-
-    /* Улучшение отображения для мобильных */
-    @media (max-width: 768px) {
-      .table-controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        width: 100%;
-        padding: 0 10px;
-      }
-
-      .filter-row {
-        margin-left: 0;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-
-      .budget-container {
-        margin-left: 0;
-        margin-right: 0;
-        order: 3;
-        width: 100%;
-        text-align: center;
-        margin-top: 10px;
-      }
-
-      .budget-counter {
-        font-size: 14px;
-      }
-    }
   </style>
 </head>
 <body>
-<header>
-  <div class="header-logo">
-    <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
-  </div>
-  <a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
-  
-  <div class="header-support-container">
-    <button class="support-btn" onclick="showSupportModal()">
-      <span class="support-sparkle">✨</span>
-      <span class="support-text">Поддержать проект</span>
-      <span class="support-icon">❤️</span>
-      <span class="support-sparkle">✨</span>
-      <div class="support-pulse"></div>
-      <div class="support-shine"></div>
-    </button>
-  </div>
-</header>
-
-<!-- Кнопка для открытия/закрытия меню -->
-<button class="menu-toggle" id="menuToggle">☰</button>
-
-<!-- Кнопка назад -->
-<button class="back-button" onclick="goBack()">Назад</button>
-
-<!-- Область для свайпа -->
-<div class="swipe-area" id="swipeArea"></div>
-<aside id="leagues-sidebar">
-  <div class="sidebar-item" onclick="window.location.href='scout.html'">
-    <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
-    <span>Скаут</span>
-  </div>
-  <div class="sidebar-item" onclick="showLeaderboard()">
-    <img src="https://cdn-icons-png.flaticon.com/512/18911/18911539.png" alt="Лидерборд">
-    <span>Лидерборд</span>
-  </div>
-  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
-    <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
-    <span>Новости</span>
-  </div>
-  <div id="user-leagues"></div>
-  <div class="sidebar-item" onclick="window.location.href='index.html'">
-    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
-    <span>Выход</span>
-  </div>
-</aside>
-<main>
+  <header>
+    <div class="header-logo">
+      <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
+    </div>
+	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
+  </header>
+  <div class="main-container">
+     <aside id="leagues-sidebar">
+      <div class="sidebar-item" onclick="window.location.href='scout.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
+        <span>Скаут</span>
+      </div>
+      <div class="sidebar-item" onclick="showLeaderboard()">
+        <img src="https://cdn-icons-png.flaticon.com/512/18911/18911539.png" alt="Лидерборд">
+        <span>Лидерборд</span>
+      </div>
+	  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
+        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
+        <span>Новости</span>
+      </div>
+	  <div id="user-leagues"></div>
+      <div class="sidebar-item" onclick="window.location.href='index.html'">
+        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+        <span>Выход</span>
+      </div>
+    </aside>
+    <main>
+      <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
 <div class="table-container animate-fadeIn fixed-width">
     <div class="players-table">
       <div class="table-controls">
@@ -4556,9 +2234,6 @@ footer {
         </tbody>
       </table>
     </div>
-  <div class="scroll-indicator">
-    <span>← Прокрутите таблицу для просмотра всех данных →</span>
-  </div>
   </div>
       
       <!-- Starting VI -->
@@ -4703,35 +2378,6 @@ footer {
 
 <div id="popup-overlay" class="popup-overlay"></div>
 <!-- Модальное окно с правилами -->
-<div id="support-modal" class="support-modal">
-  <div class="support-modal-content">
-    <button class="support-close-btn" onclick="closeSupportModal()">×</button>
-    
-    <div class="support-header">
-      <h3>Поддержать проект</h3>
-      <p>Спасибо за вашу поддержку! 💫</p>
-    </div>
-
-    <!-- Блок с данными для копирования -->
-    <div class="copy-section">
-      <h4>📱 Перевод по номеру телефона</h4>
-      <div class="bank-info">
-        <div class="bank-name">Альфа-Банк / СБП</div>
-        <div class="phone-number" id="phone-number">+7 (914) 503-11-85</div>
-        <div class="recipient-name">Получатель: Дмитрий Павлович</div>
-      </div>
-      <button class="copy-btn" onclick="copyPhoneNumber()">
-        <span class="copy-icon">📋</span>
-        Скопировать данные
-      </button>
-    </div>
-
-    <div class="support-footer">
-      <p>Любая сумма поможет развивать проект! 🚀</p>
-    </div>
-  </div>
-</div>
-
 <div id="rules-modal" class="rules-modal">
   <div class="rules-content">
     <button class="close-rules-btn" onclick="closeRules()">✕</button>
@@ -4903,258 +2549,6 @@ function applyFilters() {
   // Обновляем отображение
   renderPlayersPage(currentPage);
 }
-const paymentData = {
-  phone: "+7 (914) 503-11-85", // Ваш номер телефона
-  name: "Дмитрий Павлович", // Ваше имя
-};
-
-// Основные функции
-function showSupportModal() {
-  // Эффект нажатия на кнопку
-  const supportBtn = document.querySelector('.support-btn');
-  supportBtn.classList.add('clicked');
-  
-  // Создаем эффект золотых частиц
-  createGoldenParticles(supportBtn);
-  
-  // Показываем модальное окно с задержкой
-  setTimeout(() => {
-    const modal = document.getElementById('support-modal');
-    modal.classList.add('show');
-    
-    // Анимация появления модального окна
-    anime({
-      targets: '.support-modal-content',
-      scale: [0.8, 1],
-      opacity: [0, 1],
-      duration: 600,
-      easing: 'easeOutElastic(1, .8)'
-    });
-    
-    // Убираем класс clicked после анимации
-    setTimeout(() => {
-      supportBtn.classList.remove('clicked');
-    }, 600);
-    
-  }, 300);
-  
-  // Статистика
-  console.log('Открыто модальное окно поддержки');
-  localStorage.setItem('support_modal_opened', new Date().toISOString());
-}
-
-// Функция создания золотых частиц
-function createGoldenParticles(button) {
-  const rect = button.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-  
-  // Символы для частиц
-  const particles = ['✨', '⭐', '🌟', '💫', '🔥', '💛', '💖'];
-  
-  for (let i = 0; i < 12; i++) {
-    const particle = document.createElement('div');
-    particle.textContent = particles[Math.floor(Math.random() * particles.length)];
-    particle.style.cssText = `
-      position: fixed;
-      font-size: ${16 + Math.random() * 8}px;
-      pointer-events: none;
-      z-index: 10000;
-      left: ${centerX}px;
-      top: ${centerY}px;
-      opacity: 1;
-      transform: translate(-50%, -50%);
-      transition: all 0.8s ease-out;
-      filter: drop-shadow(0 0 3px gold);
-    `;
-    
-    document.body.appendChild(particle);
-    
-    // Анимация частицы
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 50 + Math.random() * 100;
-    const targetX = centerX + Math.cos(angle) * distance;
-    const targetY = centerY + Math.sin(angle) * distance;
-    
-    setTimeout(() => {
-      particle.style.left = `${targetX}px`;
-      particle.style.top = `${targetY}px`;
-      particle.style.opacity = '0';
-      particle.style.transform = `translate(-50%, -50%) scale(0.5) rotate(${Math.random() * 360}deg)`;
-      
-      // Удаляем частицу после анимации
-      setTimeout(() => {
-        if (particle.parentNode) {
-          particle.parentNode.removeChild(particle);
-        }
-      }, 800);
-    }, 10);
-  }
-}
-
-// Функция для периодического мерцания кнопки
-function initSupportButtonEffects() {
-  const supportBtn = document.querySelector('.support-btn');
-  if (!supportBtn) return;
-  
-  // Случайное мерцание каждые 10-30 секунд
-  setInterval(() => {
-    if (Math.random() > 0.7) { // 30% шанс
-      supportBtn.style.animation = 'none';
-      setTimeout(() => {
-        supportBtn.style.animation = '';
-        
-        // Краткое усиление свечения
-        supportBtn.style.boxShadow = 
-          '0 0 0 3px rgba(255, 255, 255, 0.9) inset, ' +
-          '0 0 30px rgba(255, 215, 0, 0.8), ' +
-          '0 0 60px rgba(255, 165, 0, 0.4)';
-        
-        setTimeout(() => {
-          supportBtn.style.boxShadow = '';
-        }, 1000);
-      }, 10);
-    }
-  }, 10000 + Math.random() * 20000);
-}
-
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-  initSupportButtonEffects();
-  const menuToggle = document.getElementById('menuToggle');
-  if (menuToggle) {
-    menuToggle.addEventListener('click', toggleSidebar);
-  }
-  
-  // Закрытие меню при клике вне его области
-  document.addEventListener('click', closeSidebarOnClickOutside);
-  
-  // Предотвращаем закрытие при клике внутри меню
-  const sidebar = document.getElementById('leagues-sidebar');
-  if (sidebar) {
-    sidebar.addEventListener('click', function(event) {
-      event.stopPropagation();
-    });
-  }
-  
-  // Инициализация свайпа для горизонтального скролла
-  initSwipeScroll();
-  
-  // Обновление layout игроков в лидерборде
-  updateTeamPlayersLayout();
-  
-  // Обновление при изменении размера окна
-  window.addEventListener('resize', updateTeamPlayersLayout);
-  
-  // Проверяем, находимся ли мы на странице выхода
-  if (window.location.pathname.includes('index.html') || 
-      window.location.href.includes('index.html')) {
-    document.body.classList.add('exit-page');
-    const backButton = document.querySelector('.back-button');
-    const menuToggle = document.querySelector('.menu-toggle');
-    
-    if (backButton) backButton.classList.add('hidden');
-    if (menuToggle) menuToggle.classList.add('hidden');
-  }
-});
-
-// Функция для отслеживания взаимодействий
-function trackSupportInteraction(type) {
-  const interactions = JSON.parse(localStorage.getItem('support_interactions') || '{}');
-  interactions[type] = (interactions[type] || 0) + 1;
-  interactions.lastInteraction = new Date().toISOString();
-  localStorage.setItem('support_interactions', JSON.stringify(interactions));
-  
-  console.log(`Поддержка: ${type} - всего: ${interactions[type]}`);
-}
-
-function closeSupportModal() {
-  const modal = document.getElementById('support-modal');
-  anime({
-    targets: '.support-modal-content',
-    scale: 0.8,
-    opacity: 0,
-    duration: 300,
-    complete: function() {
-      modal.classList.remove('show');
-    }
-  });
-}
-
-// Функция копирования номера телефона
-async function copyPhoneNumber() {
-  const textToCopy = `89145031185`;
-  
-  const copyBtn = document.querySelector('.copy-btn');
-  
-  try {
-    // Пробуем современный API
-    await navigator.clipboard.writeText(textToCopy);
-    
-    // Показываем успех
-    showNotification('Данные скопированы! 📋', true);
-    copyBtn.classList.add('copy-success');
-    copyBtn.innerHTML = '<span class="copy-icon">✓</span> Скопировано!';
-    
-    // Возвращаем исходный вид через 2 секунды
-    setTimeout(() => {
-      copyBtn.classList.remove('copy-success');
-      copyBtn.innerHTML = '<span class="copy-icon">📋</span> Скопировать данные';
-    }, 2000);
-    
-    console.log('Данные для перевода скопированы');
-    
-  } catch (err) {
-    // Fallback для старых браузеров
-    fallbackCopyText(textToCopy);
-  }
-}
-
-// Резервный метод копирования
-function fallbackCopyText(text) {
-  const textArea = document.createElement('textarea');
-  textArea.value = text;
-  textArea.style.position = 'fixed';
-  textArea.style.left = '-999999px';
-  textArea.style.top = '-999999px';
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  
-  try {
-    const successful = document.execCommand('copy');
-    if (successful) {
-      showNotification('Данные скопированы! 📋', true);
-      console.log('Данные скопированы (fallback)');
-    } else {
-      showNotification('Не удалось скопировать данные', false);
-    }
-  } catch (err) {
-    showNotification('Ошибка копирования', false);
-    console.error('Fallback copy failed:', err);
-  }
-  
-  document.body.removeChild(textArea);
-}
-
-// Обработчики событий
-document.addEventListener('DOMContentLoaded', function() {
-  // Закрытие по клику вне окна
-  document.addEventListener('click', function(e) {
-    const modal = document.getElementById('support-modal');
-    if (modal.classList.contains('show') && e.target === modal) {
-      closeSupportModal();
-    }
-  });
-  
-  // Закрытие по ESC
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-      closeSupportModal();
-    }
-  });
-});
-
 function sortPlayers(column, direction) {
   if (!filteredPlayers.length) return;
 
@@ -5338,9 +2732,6 @@ function createPlayerRow(player) {
   const safeTeamName = (player.teams?.name || '').replace(/['"`\n\r]/g, '').trim();
   const safePosition = (player.position || '').replace(/['"`\n\r]/g, '').trim();
 
-  // Рассчитываем фэнтези очки
-  const fantasyPoints = metrics.avgAvg.toFixed(1);
-
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>
@@ -5371,7 +2762,6 @@ function createPlayerRow(player) {
     </td>
     <td>${player.price || 0}$</td>
     <td>${metrics.avgAvg.toFixed(1)}</td>
-    <td>${fantasyPoints}</td>
     <td>${metrics.avgPoints.toFixed(1)}</td>
     <td>${metrics.avgThrees.toFixed(1)}</td>
     <td>${metrics.avgAssists.toFixed(1)}</td>
@@ -5383,42 +2773,8 @@ function createPlayerRow(player) {
   `;
   return row;
 }
-function updateTableHeaders() {
-  const tableHead = document.querySelector('.players-table thead');
-  if (tableHead) {
-    tableHead.innerHTML = `
-      <tr>
-        <th data-sort="add"></th>
-        <th data-sort="photo">Фото</th>
-        <th data-sort="name">Игрок</th>
-        <th data-sort="price">Цена</th>
-        <th data-sort="avg">Ср.</th>
-        <th data-sort="fantasyAvg">
-          <span class="full-text">ФО</span>
-          <div class="tooltip-container">
-            <span class="tooltip-text">Фэнтези очки (средние)</span>
-          </div>
-        </th>
-        <th data-sort="points">Очки</th>
-        <th data-sort="threes">3-очк</th>
-        <th data-sort="assists">ПРД</th>
-        <th data-sort="rebounds">ПДБ</th>
-        <th data-sort="steals">ПРХ</th>
-        <th data-sort="blocks">БЛК</th>
-        <th data-sort="turnovers">ПТР</th>
-        <th data-sort="selection">%</th>
-      </tr>
-    `;
 
-    // Добавляем обработчики сортировки для новых заголовков
-    document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
-      header.addEventListener('click', () => {
-        const column = header.getAttribute('data-sort');
-        sortTable(column);
-      });
-    });
-  }
-}
+
 // --- Помощник для сортировки (возвращает число или строку для сравнения) ---
 // Исправленная функция для получения значения сортировки
 function getMetricForSort(player, column) {
@@ -5431,8 +2787,6 @@ function getMetricForSort(player, column) {
       return parseFloat(player.price) || 0;
     case 'avg':
       return parseFloat(metrics.avgAvg) || 0;
-    case 'fantasyAvg':
-      return parseFloat(metrics.avgAvg) || 0; // Фэнтези очки = средние очки
     case 'points':
       return parseFloat(metrics.avgPoints) || 0;
     case 'threes':
@@ -5453,28 +2807,8 @@ function getMetricForSort(player, column) {
       return 0;
   }
 }
-function restoreBudgetCounter() {
-  const tableControls = document.querySelector('.table-controls');
-  if (!tableControls) return;
 
-  // Проверяем, не существует ли уже контейнера бюджета
-  let budgetContainer = document.querySelector('.budget-container');
-  if (!budgetContainer) {
-    budgetContainer = document.createElement('div');
-    budgetContainer.className = 'budget-container';
-    budgetContainer.innerHTML = `
-      <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
-    `;
-    
-    // Вставляем контейнер бюджета в правильное место
-    const filterRow = document.querySelector('.filter-row');
-    if (filterRow && filterRow.parentNode) {
-      filterRow.parentNode.insertBefore(budgetContainer, filterRow.nextSibling);
-    } else {
-      tableControls.appendChild(budgetContainer);
-    }
-  }
-}
+
 // === Загрузка всех игроков + статистики один раз (используется при инициализации) ===
 async function loadPlayersWithStats() {
   try {
@@ -5534,20 +2868,25 @@ async function loadPlayersWithStats() {
 async function initPlayersPagination() {
   await loadPlayersWithStats();
   buildPlayersPaginationControls();
-  
-  // Обновляем заголовки таблицы
-  updateTableHeaders();
 
   // Привязываем фильтры
   document.getElementById('filter-team')?.addEventListener('change', applyFilters);
   document.getElementById('filter-position')?.addEventListener('change', applyFilters);
 
-  // Устанавливаем сортировку по умолчанию (по убыванию фэнтези очков)
-  currentSort = { column: 'fantasyAvg', direction: 'desc' };
-  sortPlayers('fantasyAvg', 'desc');
+  // Привязка сортировки
+  document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+    header.addEventListener('click', () => {
+      const column = header.getAttribute('data-sort');
+      sortTable(column);
+    });
+  });
+
+  // Устанавливаем сортировку по умолчанию (по убыванию средней статистики)
+  currentSort = { column: 'avg', direction: 'desc' };
+  sortPlayers('avg', 'desc');
   
   // Визуально отмечаем заголовок по умолчанию
-  const defaultHeader = document.querySelector('th[data-sort="fantasyAvg"]');
+  const defaultHeader = document.querySelector('th[data-sort="avg"]');
   if (defaultHeader) {
     defaultHeader.classList.add('sort-desc');
   }
@@ -5750,43 +3089,8 @@ function renderLeaderboardPage(page, totalPages, data) {
 
   console.log(`Пагинация обновлена: страница ${page} из ${totalPages}`);
 }
-async function debugTour3Issue(teamId) {
-  console.log('=== ОТЛАДКА ПРОБЛЕМЫ ТУРА 3 ===');
-  
-  try {
-    // Получаем состав команды для тура 3
-    const { data: teamPlayers, error } = await supabase
-      .from('team_players2')
-      .select('*, players(*)')
-      .eq('team_id', teamId)
-      .eq('tour_id', 3);
 
-    if (error || !teamPlayers) {
-      console.log('Ошибка загрузки состава для тура 3:', error);
-      return;
-    }
-
-    console.log('Состав команды в туре 3:', teamPlayers);
-
-    // Получаем статистику для каждого игрока в туре 3
-    for (const tp of teamPlayers) {
-      const { data: playerStats, error: statsError } = await supabase
-        .from('player_stats')
-        .select('*')
-        .eq('player_id', tp.player_id)
-        .eq('tour', 3);
-
-      console.log(`Статистика игрока ${tp.players.first_name} ${tp.players.last_name} в туре 3:`, playerStats);
-      
-      if (statsError) {
-        console.log(`Ошибка загрузки статистики для игрока ${tp.player_id}:`, statsError);
-      }
-    }
-
-  } catch (error) {
-    console.error('Ошибка отладки:', error);
-  }
-}
+// Обновленная функция renderLeagueLeaderboardPage
 function renderLeagueLeaderboardPage(page, totalPages, data) {
   const tableBody = document.getElementById('league-leaderboard-body');
   if (!tableBody) return;
@@ -5819,22 +3123,20 @@ function renderLeagueLeaderboardPage(page, totalPages, data) {
   tableBody.appendChild(headerRow);
 
   // Данные страницы
-  pageData.forEach((entry, index) => {
+  pageData.forEach((entry) => {
     const row = document.createElement('tr');
 
     // Добавляем классы для позиций
-    const actualPlace = startIndex + index + 1;
-    if (actualPlace === 1) row.classList.add('position-1');
-    else if (actualPlace === 2) row.classList.add('position-2');
-    else if (actualPlace === 3) row.classList.add('position-3');
-    
+    if (entry.place === 1) row.classList.add('position-1');
+    else if (entry.place === 2) row.classList.add('position-2');
+    else if (entry.place === 3) row.classList.add('position-3');
     if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
 
     // Создаем таблицу с очками по турам
     const tourPointsTable = createTourPointsTable(entry.tourPointsById, entry.teamId, true);
 
     row.innerHTML = `
-      <td>${actualPlace}</td>
+      <td>${entry.place}</td>
       <td>${entry.teamName || 'Без названия'}</td>
       <td>${entry.totalPoints || '0'}</td>
       <td></td>
@@ -5850,6 +3152,7 @@ function renderLeagueLeaderboardPage(page, totalPages, data) {
   // Добавляем пагинацию для лидерборда лиги
   addLeaguePagination(page, totalPages);
 }
+// Функция для перехода на предыдущую страницу
 function prevPage() {
   if (currentPage > 1 && window.sortedLeaderboard) {
     currentPage--;
@@ -5992,73 +3295,9 @@ async function showLeaderboard() {
     showNotification('Ошибка загрузки лидерборда', false);
   }
 }
-async function calculateTeamPointsForTour(teamId, tourId) {
-  try {
-    console.log(`Расчет очков для команды ${teamId} в туре ${tourId}`);
-    
-    // Получаем состав команды для этого тура
-    const { data: teamPlayers, error } = await supabase
-      .from('team_players2')
-      .select('player_id')
-      .eq('team_id', teamId)
-      .eq('tour_id', tourId);
-
-    if (error || !teamPlayers || teamPlayers.length === 0) {
-      console.log(`Нет состава для команды ${teamId} в туре ${tourId}`);
-      return 0;
-    }
-
-    // Получаем статистику всех игроков команды за этот тур
-    const playerIds = teamPlayers.map(tp => tp.player_id);
-    const { data: playerStats, error: statsError } = await supabase
-      .from('player_stats')
-      .select('*')
-      .in('player_id', playerIds)
-      .eq('tour', tourId);
-
-    if (statsError) {
-      console.error(`Ошибка загрузки статистики для тура ${tourId}:`, statsError);
-      return 0;
-    }
-
-    console.log(`Статистика игроков команды ${teamId} в туре ${tourId}:`, playerStats);
-
-    // Группируем статистику по игрокам
-    const statsByPlayer = {};
-    playerStats.forEach(stat => {
-      if (!statsByPlayer[stat.player_id]) {
-        statsByPlayer[stat.player_id] = [];
-      }
-      statsByPlayer[stat.player_id].push(stat);
-    });
-
-    // Рассчитываем очки для каждого игрока и суммируем
-    let totalPoints = 0;
-    
-    for (const playerId of playerIds) {
-      const playerStatsForTour = statsByPlayer[playerId] || [];
-      if (playerStatsForTour.length > 0) {
-        const playerPoints = calculatePlayerPoints(playerStatsForTour);
-        console.log(`Игрок ${playerId} набрал ${playerPoints} очков в туре ${tourId}`);
-        totalPoints += playerPoints;
-      } else {
-        console.log(`Нет статистики для игрока ${playerId} в туре ${tourId}`);
-      }
-    }
-
-    console.log(`Команда ${teamId} набрала ${totalPoints} очков в туре ${tourId}`);
-    return totalPoints;
-
-  } catch (error) {
-    console.error(`Ошибка расчета очков для команды ${teamId} в туре ${tourId}:`, error);
-    return 0;
-  }
-}
-
-// Обновленная функция загрузки лидерборда с исправлением
 async function loadLeaderboard() {
   try {
-    console.log('=== ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА ЛИДЕРБОРДА ===');
+    console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА ===');
 
     // Показываем индикатор загрузки
     const tableBody = document.getElementById('leaderboard-body');
@@ -6066,113 +3305,109 @@ async function loadLeaderboard() {
       tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Загрузка данных...</td></tr>';
     }
 
-    // 1. Загружаем ВСЕ необходимые данные за один раз
-    const { data: allData, error: dataError } = await supabase
-      .from('team_players2')
-      .select(`
-        team_id,
-        tour_id,
-        player_id,
-        user_teams!inner(team_name, user_id),
-        players!inner(
-          id,
-          first_name,
-          last_name,
-          player_stats!inner(
-            tour,
-            points,
-            threes,
-            assists,
-            rebounds,
-            steals,
-            blocks,
-            turnover
-          )
-        )
-      `);
+    // 1. Получаем все туры
+    const { data: tours, error: toursError } = await supabase
+      .from('tours')
+      .select('*')
+      .order('round_number', { ascending: true });
 
-    if (dataError) {
-      console.error('Ошибка загрузки данных:', dataError);
-      showNotification('Ошибка загрузки данных', false);
+    if (toursError) {
+      console.error('Ошибка загрузки туров:', toursError);
+      showNotification('Ошибка загрузки туров', false);
       return;
     }
 
-    console.log('Загружено записей:', allData?.length);
+    console.log('Загружено туров:', tours?.length);
 
-    if (!allData || allData.length === 0) {
+    // 2. Получаем все команды
+    const { data: teams, error: teamsError } = await supabase
+      .from('user_teams')
+      .select('*');
+
+    if (teamsError) {
+      console.error('Ошибка загрузки команд:', teamsError);
+      showNotification('Ошибка загрузки команд', false);
+      return;
+    }
+
+    console.log('Загружено команд:', teams?.length);
+
+    // 3. Получаем все связи "команда-игрок-тур" из team_players2
+    const { data: teamPlayers, error: teamPlayersError } = await supabase
+      .from('team_players2')
+      .select('*');
+
+    if (teamPlayersError) {
+      console.error('Ошибка загрузки связей "команда-игрок":', teamPlayersError);
+      showNotification('Ошибка загрузки связей "команда-игрок"', false);
+      return;
+    }
+
+    console.log('Загружено связей команда-игрок:', teamPlayers?.length);
+
+    // 4. Получаем статистику всех игроков
+    const { data: allPlayerStats, error: playerStatsError } = await supabase
+      .from('player_stats')
+      .select('*');
+
+    if (playerStatsError) {
+      console.error('Ошибка загрузки статистики игроков:', playerStatsError);
+      showNotification('Ошибка загрузки статистики игроков', false);
+      return;
+    }
+
+    console.log('Загружено статистик игроков:', allPlayerStats?.length);
+
+    // 5. Если нет данных, показываем сообщение
+    if (!teams || teams.length === 0) {
+      console.log('Нет команд для отображения');
       if (tableBody) {
         tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Нет данных для отображения</td></tr>';
       }
       return;
     }
 
-    // 2. Группируем данные по командам и турам
-    const teamData = {};
-
-    allData.forEach(item => {
-      const teamId = item.team_id;
-      const tourId = item.tour_id;
-      const playerId = item.player_id;
-      
-      if (!teamData[teamId]) {
-        teamData[teamId] = {
-          teamName: item.user_teams?.team_name || `Команда ${teamId}`,
-          teamId: teamId,
-          tours: {}
-        };
-      }
-
-      if (!teamData[teamId].tours[tourId]) {
-        teamData[teamId].tours[tourId] = [];
-      }
-
-      // Добавляем статистику игрока
-      if (item.players && item.players.player_stats) {
-        item.players.player_stats.forEach(stat => {
-          if (stat.tour === tourId) {
-            teamData[teamId].tours[tourId].push({
-              playerId: playerId,
-              stats: stat
-            });
-          }
-        });
-      }
-    });
-
-    console.log('Сгруппированные данные:', teamData);
-
-    // 3. Рассчитываем очки для каждой команды
+    // 6. Объединяем данные и считаем очки
     const leaderboardData = {};
 
-    Object.keys(teamData).forEach(teamId => {
-      const team = teamData[teamId];
-      const tourPointsById = {};
+    for (const team of teams) {
+      const teamTourPoints = {};
       let totalPoints = 0;
 
-      // Рассчитываем очки по турам
-      Object.keys(team.tours).forEach(tourId => {
-        const tourStats = team.tours[tourId];
-        let tourPoints = 0;
+      for (const tour of tours) {
+        // Находим игроков команды для этого тура
+        const teamPlayersForTour = teamPlayers.filter(tp =>
+          tp.team_id === team.id && tp.tour_id === tour.id
+        );
 
-        tourStats.forEach(playerStat => {
-          tourPoints += calculatePlayerPoints([playerStat.stats]);
-        });
+		let tourPoints = 0;
+		for (const tp of teamPlayersForTour) {
+		  // Находим ВСЕ статистики игрока за этот тур
+		  const playerStatsForTour = allPlayerStats.filter(ps =>
+			ps.player_id === tp.player_id && ps.tour === tour.id
+		  );
+		  if (playerStatsForTour.length > 0) {
+			// Суммируем статистики и рассчитываем очки
+			const playerPoints = calculatePlayerPoints(playerStatsForTour);
+			tourPoints += playerPoints;
+		  }
+		}
 
-        tourPointsById[tourId] = tourPoints.toFixed(1);
+        teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
-      });
+      }
 
-      leaderboardData[teamId] = {
-        teamName: team.teamName,
+      leaderboardData[team.id] = {
+        teamName: team.team_name,
         totalPoints: totalPoints.toFixed(1),
-        teamId: teamId,
-        tourPointsById: tourPointsById
+        teamId: team.id,
+        tourPointsById: teamTourPoints,
       };
-    });
+    }
 
-    console.log('Рассчитанные очки:', leaderboardData);
+    console.log('Обработано данных команд:', Object.keys(leaderboardData).length);
 
-    // 4. Сортируем по общим очкам
+    // 7. Сортируем по общим очкам
     const sortedLeaderboard = Object.values(leaderboardData)
       .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
       .map((data, index) => ({ ...data, place: index + 1 }));
@@ -6188,8 +3423,9 @@ async function loadLeaderboard() {
     currentPage = 1;
 
     console.log('Отсортировано записей:', sortedLeaderboard.length);
+    console.log('Всего страниц:', totalPages);
 
-    // 5. Отображаем таблицу
+    // 8. Отображаем таблицу
     renderLeaderboardPage(currentPage, totalPages, sortedLeaderboard);
 
     console.log('=== ЗАВЕРШЕНИЕ ЗАГРУЗКИ ЛИДЕРБОРДА ===');
@@ -6793,8 +4029,6 @@ async function viewTeamDetails(teamId, tourId) {
     players.forEach((player, index) => {
       player.style.animationDelay = `${index * 0.1}s`;
     });
-	    // После загрузки данных обновляем layout
-    setTimeout(updateTeamPlayersLayout, 100);
 
  } catch (error) {
     console.error('Ошибка просмотра состава:', error);
@@ -7153,40 +4387,75 @@ function renderLeagueLeaderboard(data) {
   // Отображаем первую страницу
   renderLeagueLeaderboardPage(leagueCurrentPage, leagueTotalPages, data);
 }
-async function recalculateTeamPoints(teamId) {
-  try {
-    console.log(`Принудительный пересчет очков для команды ${teamId}`);
-    
-    const { data: tours, error: toursError } = await supabase
-      .from('tours')
-      .select('*')
-      .order('round_number', { ascending: true });
 
-    if (toursError) throw toursError;
+// Новая функция для отображения страницы лидерборда лиги
+function renderLeagueLeaderboardPage(page, totalPages, data) {
+  const tableBody = document.getElementById('league-leaderboard-body');
+  if (!tableBody) return;
 
-    let totalPoints = 0;
-    const tourPointsById = {};
+  tableBody.innerHTML = '';
 
-    for (const tour of tours) {
-      const tourPoints = await calculateTeamPointsForTour(teamId, tour.id);
-      tourPointsById[tour.id] = tourPoints.toFixed(1);
-      totalPoints += tourPoints;
+  if (!data || data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align: center; padding: 20px; color: var(--gray);">
+          В лиге пока нет данных для отображения
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  const startIndex = (page - 1) * managersPerPage;
+  const endIndex = startIndex + managersPerPage;
+  const pageData = data.slice(startIndex, endIndex);
+
+  // Заголовок таблицы
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `
+    <th>Место</th>
+    <th>Команда</th>
+    <th>Общие очки</th>
+    <th>Очки по турам</th>
+  `;
+  tableBody.appendChild(headerRow);
+
+  // Данные страницы
+  pageData.forEach((entry) => {
+    const row = document.createElement('tr');
+
+    // Добавляем классы для позиций
+    if (entry.place === 1) row.classList.add('position-1');
+    else if (entry.place === 2) row.classList.add('position-2');
+    else if (entry.place === 3) row.classList.add('position-3');
+    if (entry.teamId === currentUserTeamId) row.classList.add('user-position');
+
+    // Формируем ячейки с очками по турам
+    let tourPointsCells = '';
+    if (entry.tourPointsById) {
+tourPointsCells = Object.values(entry.tourPointsById)
+  .map((points, index) => {
+    const tourId = Object.keys(entry.tourPointsById)[index];
+    // ПЕРЕДАЕМ true для лиг
+    return `<span class="tour-points" onclick="viewTeamDetailsWithScroll('${entry.teamId}', '${tourId}', true)">${points}</span>`;
+  })
+  .join(' | ');
+    } else {
+      tourPointsCells = 'Нет данных';
     }
 
-    console.log(`Пересчитанные очки команды ${teamId}:`, {
-      totalPoints: totalPoints.toFixed(1),
-      tourPointsById
-    });
+    row.innerHTML = `
+      <td>${entry.place}</td>
+      <td>${entry.teamName || 'Без названия'}</td>
+      <td>${entry.totalPoints || '0'}</td>
+      <td>${tourPointsCells}</td>
+    `;
 
-    return {
-      totalPoints: totalPoints.toFixed(1),
-      tourPointsById
-    };
+    tableBody.appendChild(row);
+  });
 
-  } catch (error) {
-    console.error('Ошибка пересчета очков:', error);
-    return null;
-  }
+  // Добавляем пагинацию для лидерборда лиги
+  addLeaguePagination(page, totalPages);
 }
 function debugLeaderboardData() {
   console.log('=== ОТЛАДКА ДАННЫХ ЛИДЕРБОРДА ===');
@@ -7426,8 +4695,7 @@ async function viewLeagueTeamDetails(teamId, tourId) {
         player.style.transition = 'all 0.5s ease';
       }, index * 100);
     });
-    // После загрузки данных обновляем layout
-    setTimeout(updateTeamPlayersLayout, 100);
+
  } catch (error) {
     console.error('Ошибка просмотра состава:', error);
     showNotification('Ошибка просмотра состава', false);
@@ -7453,134 +4721,6 @@ function closeLeagueLeaderboard() {
       modal.style.display = 'none';
     }
   });
-}
-function toggleSidebar() {
-  const sidebar = document.getElementById('leagues-sidebar');
-  const mainContent = document.getElementById('mainContent');
-  const menuToggle = document.getElementById('menuToggle');
-  
-  sidebar.classList.toggle('active');
-  mainContent.classList.toggle('sidebar-open');
-  
-  // Меняем иконку кнопки
-  if (sidebar.classList.contains('active')) {
-    menuToggle.innerHTML = '✕';
-  } else {
-    menuToggle.innerHTML = '☰';
-  }
-}
-
-// Закрытие меню при клике вне его области
-function closeSidebarOnClickOutside(event) {
-  const sidebar = document.getElementById('leagues-sidebar');
-  const menuToggle = document.getElementById('menuToggle');
-  
-  if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
-    toggleSidebar();
-  }
-}
-function navigateTo(url, isExit = false) {
-  if (isExit) {
-    // Добавляем класс для скрытия кнопок
-    document.body.classList.add('exit-page');
-    
-    // Скрываем кнопки
-    const backButton = document.querySelector('.back-button');
-    const menuToggle = document.querySelector('.menu-toggle');
-    
-    if (backButton) backButton.classList.add('hidden');
-    if (menuToggle) menuToggle.classList.add('hidden');
-    
-    // Небольшая задержка для анимации
-    setTimeout(() => {
-      window.location.href = url;
-    }, 100);
-  } else {
-    window.location.href = url;
-  }
-}
-function goBack() {
-  window.history.back();
-}
-function initSwipeScroll() {
-  const swipeArea = document.getElementById('swipeArea');
-  let startX = 0;
-  let startY = 0;
-  let isScrolling = false;
-
-  if (!swipeArea) return;
-
-  // Область свайпа должна быть только там, где нет кликабельных элементов
-  swipeArea.style.pointerEvents = 'auto';
-  swipeArea.style.zIndex = '1';
-
-  swipeArea.addEventListener('touchstart', function(e) {
-    // Проверяем, не начали ли мы касание на кликабельном элементе
-    const target = e.target;
-    const isClickable = target.closest('.select-button') || 
-                       target.closest('.player-name-cell') ||
-                       target.closest('.players-table') ||
-                       target.closest('#players-table-body');
-    
-    if (isClickable) {
-      return; // Не обрабатываем свайп на кликабельных элементах
-    }
-
-    startX = e.touches[0].pageX;
-    startY = e.touches[0].pageY;
-    isScrolling = false;
-  });
-
-  swipeArea.addEventListener('touchmove', function(e) {
-    if (!startX || !startY) return;
-
-    const x = e.touches[0].pageX;
-    const y = e.touches[0].pageY;
-    
-    const diffX = Math.abs(x - startX);
-    const diffY = Math.abs(y - startY);
-
-    // Если горизонтальное движение больше вертикального - это свайп
-    if (diffX > diffY && diffX > 10) {
-      e.preventDefault();
-      isScrolling = true;
-      
-      // Скроллим всю страницу
-      window.scrollBy(startX - x, 0);
-    }
-  });
-
-  swipeArea.addEventListener('touchend', function() {
-    startX = 0;
-    startY = 0;
-    isScrolling = false;
-  });
-}
-function updateTeamPlayersLayout() {
-  const teamPlayers = document.getElementById('team-players');
-  const leagueTeamPlayers = document.getElementById('league-team-players');
-  
-  if (window.innerWidth <= 768) {
-    // Мобильная версия - 2 колонки, 3 ряда
-    if (teamPlayers) {
-      teamPlayers.style.gridTemplateColumns = 'repeat(2, 1fr)';
-      teamPlayers.style.gridTemplateRows = 'repeat(3, auto)';
-    }
-    if (leagueTeamPlayers) {
-      leagueTeamPlayers.style.gridTemplateColumns = 'repeat(2, 1fr)';
-      leagueTeamPlayers.style.gridTemplateRows = 'repeat(3, auto)';
-    }
-  } else {
-    // Десктоп версия - 3 колонки, 2 ряда
-    if (teamPlayers) {
-      teamPlayers.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      teamPlayers.style.gridTemplateRows = 'repeat(2, auto)';
-    }
-    if (leagueTeamPlayers) {
-      leagueTeamPlayers.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      leagueTeamPlayers.style.gridTemplateRows = 'repeat(2, auto)';
-    }
-  }
 }
 async function debugData() {
   console.log('=== ОТЛАДКА ДАННЫХ ===');
@@ -7730,37 +4870,6 @@ function removePlayer(index) {
   updateSpentBudget();
   showNotification(`Игрок ${player.first_name} ${player.last_name} удалён`, true);
 }
-function initMobileTableScroll() {
-  const tableContainer = document.querySelector('.table-container');
-  
-  if (!tableContainer) return;
-  
-  // Предотвращаем вертикальный скролл при горизонтальном скролле таблицы
-  tableContainer.addEventListener('touchstart', function(e) {
-    this.startX = e.touches[0].pageX;
-    this.startY = e.touches[0].pageY;
-    this.scrollLeft = this.scrollLeft;
-    this.scrollTop = this.scrollTop;
-  });
-  
-  tableContainer.addEventListener('touchmove', function(e) {
-    const x = e.touches[0].pageX;
-    const y = e.touches[0].pageY;
-    const dx = x - this.startX;
-    const dy = y - this.startY;
-    
-    // Если горизонтальное движение больше вертикального - скроллим таблицу
-    if (Math.abs(dx) > Math.abs(dy)) {
-      e.preventDefault();
-      this.scrollLeft = this.scrollLeft - dx;
-    }
-  });
-}
-
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-  initMobileTableScroll();
-});
 function updateSelectedPlayersUI() {
   const selectedPlayersList = document.getElementById('selected-players-list');
   if (!selectedPlayersList) {
@@ -8387,53 +5496,7 @@ function sortTable(column) {
   currentPage = 1;
   renderPlayersPage(currentPage);
 }
-document.addEventListener('DOMContentLoaded', function() {
-  // Восстанавливаем строку с бюджетом
-  restoreBudgetCounter();
-  
-  // Обновляем отображение бюджета
-  updateSpentBudget();
 
-  // Добавляем обработчики для меню
-  const menuToggle = document.getElementById('menuToggle');
-  if (menuToggle) {
-    menuToggle.addEventListener('click', toggleSidebar);
-  }
-  
-  // Закрытие меню при клике вне его области
-  document.addEventListener('click', closeSidebarOnClickOutside);
-  
-  // Предотвращаем закрытие при клике внутри меню
-  const sidebar = document.getElementById('leagues-sidebar');
-  if (sidebar) {
-    sidebar.addEventListener('click', function(event) {
-      event.stopPropagation();
-    });
-  }
-  
-  // Инициализация свайпа для горизонтального скролла (исправленная)
-  initSwipeScroll();
-  
-  // Обновление layout игроков в лидерборде
-  updateTeamPlayersLayout();
-  
-  // Обновление при изменении размера окна
-  window.addEventListener('resize', updateTeamPlayersLayout);
-  
-  // Проверяем, находимся ли мы на странице выхода
-  if (window.location.pathname.includes('index.html') || 
-      window.location.href.includes('index.html')) {
-    document.body.classList.add('exit-page');
-    const backButton = document.querySelector('.back-button');
-    const menuToggle = document.querySelector('.menu-toggle');
-    
-    if (backButton) backButton.classList.add('hidden');
-    if (menuToggle) menuToggle.classList.add('hidden');
-  }
-  
-  // Инициализация таблицы игроков
-  initPlayersPagination().catch(e => console.error(e));
-});
     // Получение индекса колонки по имени
     function getColumnIndex(columnName) {
       const headers = document.querySelectorAll('.players-table th');
@@ -8809,102 +5872,6 @@ function addPlayerToTeam(playerId, firstName, lastName, price, photoUrl, teamNam
     return false;
   }
 }
-function initMobileScroll() {
-  if (isMobileDevice()) {
-    console.log('Инициализация мобильного скролла');
-    
-    // Добавляем обработчики для улучшения скролла
-    enhanceTableScroll();
-    preventBodyScrollOnModals();
-    initPullToRefresh();
-  }
-}
-
-// Улучшение скролла таблицы
-function enhanceTableScroll() {
-  const tableContainers = document.querySelectorAll('.table-container');
-  
-  tableContainers.forEach(container => {
-    // Предотвращаем вертикальный скролл при горизонтальном скролле
-    container.addEventListener('touchstart', function(e) {
-      this.startX = e.touches[0].pageX;
-      this.startY = e.touches[0].pageY;
-      this.scrollLeft = this.scrollLeft;
-      this.scrollTop = this.scrollTop;
-    });
-    
-    container.addEventListener('touchmove', function(e) {
-      const x = e.touches[0].pageX;
-      const y = e.touches[0].pageY;
-      const dx = x - this.startX;
-      const dy = y - this.startY;
-      
-      // Если горизонтальное движение больше вертикального - скроллим таблицу
-      if (Math.abs(dx) > Math.abs(dy)) {
-        e.preventDefault();
-        this.scrollLeft = this.scrollLeft - dx;
-      }
-    });
-  });
-}
-
-// Предотвращение скролла body при открытии модальных окон
-function preventBodyScrollOnModals() {
-  const modals = document.querySelectorAll('.leaderboard-modal, .league-leaderboard-modal, .rules-modal, .support-modal');
-  
-  modals.forEach(modal => {
-    modal.addEventListener('show', function() {
-      document.body.style.overflow = 'hidden';
-    });
-    
-    modal.addEventListener('hide', function() {
-      document.body.style.overflow = '';
-    });
-  });
-}
-
-// Инициализация Pull-to-Refresh (опционально)
-function initPullToRefresh() {
-  let startY = 0;
-  
-  document.addEventListener('touchstart', function(e) {
-    startY = e.touches[0].pageY;
-  });
-  
-  document.addEventListener('touchmove', function(e) {
-    const y = e.touches[0].pageY;
-    // Если пользователь тянет вниз с самого верха - обновляем страницу
-    if (y - startY > 100 && window.scrollY === 0) {
-      window.location.reload();
-    }
-  });
-}
-
-// Функция для определения мобильного устройства (улучшенная)
-function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-         window.innerWidth <= 480;
-}
-
-// Мета-тег для viewport (добавьте в <head> если его нет)
-function addViewportMeta() {
-  if (!document.querySelector('meta[name="viewport"]')) {
-    const meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-    document.head.appendChild(meta);
-  }
-}
-
-// Вызов функций при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-  addViewportMeta();
-  initMobileScroll();
-  optimizeForMobile(); // Ваша существующая функция
-});
-
-// Также вызываем при изменении размера окна
-window.addEventListener('resize', initMobileScroll);
 async function renderPlayersTable() {
   const tableBody = document.getElementById("players-table-body");
   tableBody.innerHTML = "<tr><td colspan='14' style='text-align: center;'>Загрузка...</td></tr>";
@@ -9067,35 +6034,6 @@ async function renderPlayersTable() {
     tableBody.innerHTML = '<tr><td colspan="14" style="text-align: center; color: var(--gray);">Ошибка загрузки данных</td></tr>';
   }
 }
-function adjustLayoutHeights() {
-  const header = document.querySelector('header');
-  const aside = document.querySelector('aside');
-  const main = document.querySelector('main');
-  const backButton = document.querySelector('.back-button');
-  
-  if (header && aside && main) {
-    const headerHeight = header.offsetHeight;
-    
-    // Обновляем высоты
-    aside.style.top = `${headerHeight}px`;
-    aside.style.height = `calc(100vh - ${headerHeight}px)`;
-    
-    main.style.marginTop = `${headerHeight}px`;
-    main.style.minHeight = `calc(100vh - ${headerHeight}px)`;
-    
-    if (backButton) {
-      backButton.style.top = `${headerHeight + 10}px`;
-    }
-  }
-}
-
-// Вызываем при загрузке и изменении размера
-document.addEventListener('DOMContentLoaded', adjustLayoutHeights);
-window.addEventListener('resize', adjustLayoutHeights);
-window.addEventListener('load', adjustLayoutHeights);
-
-// Также вызываем после анимаций загрузки
-setTimeout(adjustLayoutHeights, 1000);
 async function calculateAverageStats(playerId) {
   const { data: playerStats, error } = await supabase
     .from('player_stats')
@@ -9286,67 +6224,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPlayersPagination();
   loadSavedRoster();
 });
-// Функция для определения мобильного устройства
-function isMobileDevice() {
-  return window.innerWidth <= 400;
-}
 
-// Оптимизация для мобильных устройств
-function optimizeForMobile() {
-  if (isMobileDevice()) {
-    console.log('Оптимизация для мобильного устройства');
-    
-    // Уменьшаем количество отображаемых игроков на странице
-    if (window.playersPerPage) {
-      window.playersPerPage = 6;
-    }
-    
-    // Добавляем свайп для таблицы
-    initTableSwipe();
-    
-    // Улучшаем скролл
-    initMobileScroll();
-    
-    // Добавляем визуальные подсказки для скролла
-    addScrollIndicators();
-  }
-}
-
-// Добавление визуальных индикаторов скролла
-function addScrollIndicators() {
-  const containers = document.querySelectorAll('.table-container, .leaderboard-table-container');
-  
-  containers.forEach(container => {
-    if (container.scrollWidth > container.clientWidth) {
-      container.classList.add('can-scroll');
-    }
-  });
-}
-
-// Инициализация свайпа для таблицы
-function initTableSwipe() {
-  const tableContainer = document.querySelector('.table-container');
-  let startX = 0;
-  let scrollLeft = 0;
-
-  if (tableContainer) {
-    tableContainer.addEventListener('touchstart', (e) => {
-      startX = e.touches[0].pageX - tableContainer.offsetLeft;
-      scrollLeft = tableContainer.scrollLeft;
-    });
-
-    tableContainer.addEventListener('touchmove', (e) => {
-      if (!startX) return;
-      const x = e.touches[0].pageX - tableContainer.offsetLeft;
-      const walk = (x - startX) * 2;
-      tableContainer.scrollLeft = scrollLeft - walk;
-    });
-  }
-}
-
-// Вызываем при загрузке и изменении размера
-document.addEventListener('DOMContentLoaded', optimizeForMobile);
-window.addEventListener('resize', optimizeForMobile);
 // Функция для закрытия popup
 function closePlayerPopup() {
   const popup = document.getElementById('player-popup');
@@ -9449,4 +6327,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
   </script>
 </body>
+
 </html>
+
