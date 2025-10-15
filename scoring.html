@@ -3932,6 +3932,110 @@ footer {
     -webkit-overflow-scrolling: touch;
   }
 }
+    .menu-toggle {
+      position: fixed;
+      top: 90px;
+      left: 20px;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(to right, var(--orange), var(--orange-dark));
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 1001;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--black);
+      font-weight: bold;
+      font-size: 18px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .menu-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    aside {
+      position: fixed;
+      top: 80px;
+      left: -250px; /* Скрываем за пределами экрана */
+      width: 250px;
+      height: calc(100vh - 80px);
+      background: linear-gradient(to bottom, var(--orange), var(--orange-dark));
+      z-index: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+    }
+
+    aside.active {
+      left: 0; /* Показываем меню */
+    }
+
+    /* Убираем вертикальную светящуюся полосу при скролле */
+    .table-container::after {
+      display: none !important;
+    }
+
+    /* Обновляем отступы для основного контента */
+    main {
+      margin-left: 0;
+      margin-top: 80px;
+      width: 100%;
+      padding: 40px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: var(--black);
+      flex: 1;
+      min-height: calc(100vh - 80px);
+      transition: margin-left 0.3s ease;
+    }
+
+    main.sidebar-open {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+    }
+
+    /* Адаптивность для мобильных устройств */
+    @media (max-width: 768px) {
+      aside {
+        width: 200px;
+        left: -200px;
+      }
+
+      main.sidebar-open {
+        margin-left: 200px;
+        width: calc(100% - 200px);
+      }
+
+      .menu-toggle {
+        top: 80px;
+        left: 15px;
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      aside {
+        width: 180px;
+        left: -180px;
+      }
+
+      main.sidebar-open {
+        margin-left: 180px;
+        width: calc(100% - 180px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -3941,39 +4045,41 @@ footer {
   </div>
   <a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
   
-  <!-- Упрощенная кнопка поддержки -->
-<div class="header-support-container">
-  <button class="support-btn" onclick="showSupportModal()">
-    <span class="support-sparkle">✨</span>
-    <span class="support-text">Поддержать проект</span>
-    <span class="support-icon">❤️</span>
-    <span class="support-sparkle">✨</span>
-    <div class="support-pulse"></div>
-    <div class="support-shine"></div>
-  </button>
-</div>
+  <div class="header-support-container">
+    <button class="support-btn" onclick="showSupportModal()">
+      <span class="support-sparkle">✨</span>
+      <span class="support-text">Поддержать проект</span>
+      <span class="support-icon">❤️</span>
+      <span class="support-sparkle">✨</span>
+      <div class="support-pulse"></div>
+      <div class="support-shine"></div>
+    </button>
+  </div>
 </header>
 
-     <aside id="leagues-sidebar">
-      <div class="sidebar-item" onclick="window.location.href='scout.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
-        <span>Скаут</span>
-      </div>
-      <div class="sidebar-item" onclick="showLeaderboard()">
-        <img src="https://cdn-icons-png.flaticon.com/512/18911/18911539.png" alt="Лидерборд">
-        <span>Лидерборд</span>
-      </div>
-	  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
-        <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
-        <span>Новости</span>
-      </div>
-	  <div id="user-leagues"></div>
-      <div class="sidebar-item" onclick="window.location.href='index.html'">
-        <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
-        <span>Выход</span>
-      </div>
-    </aside>
-    <main>
+<!-- Кнопка для открытия/закрытия меню -->
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<aside id="leagues-sidebar">
+  <div class="sidebar-item" onclick="window.location.href='scout.html'">
+    <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
+    <span>Скаут</span>
+  </div>
+  <div class="sidebar-item" onclick="showLeaderboard()">
+    <img src="https://cdn-icons-png.flaticon.com/512/18911/18911539.png" alt="Лидерборд">
+    <span>Лидерборд</span>
+  </div>
+  <div class="sidebar-item" onclick="window.location.href='https://www.sports.ru/tribuna/blogs/codeandcourt/'">
+    <img src="https://cdn-icons-png.flaticon.com/512/227/227061.png" alt="Новости">
+    <span>Новости</span>
+  </div>
+  <div id="user-leagues"></div>
+  <div class="sidebar-item" onclick="window.location.href='index.html'">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" alt="Выход">
+    <span>Выход</span>
+  </div>
+</aside>
+<main>
       <button class="back-button" onclick="window.location.href='pick.html'">Назад</button>
 <div class="table-container animate-fadeIn fixed-width">
     <div class="players-table">
@@ -4486,7 +4592,21 @@ function initSupportButtonEffects() {
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
   initSupportButtonEffects();
+  const menuToggle = document.getElementById('menuToggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', toggleSidebar);
+  }
   
+  // Закрытие меню при клике вне его области
+  document.addEventListener('click', closeSidebarOnClickOutside);
+  
+  // Предотвращаем закрытие при клике внутри меню
+  const sidebar = document.getElementById('leagues-sidebar');
+  if (sidebar) {
+    sidebar.addEventListener('click', function(event) {
+      event.stopPropagation();
+    });
+  }
   // Добавляем обработчик для красивого закрытия
   const supportBtn = document.querySelector('.support-btn');
   supportBtn.addEventListener('mouseenter', function() {
@@ -6836,6 +6956,32 @@ function closeLeagueLeaderboard() {
     }
   });
 }
+function toggleSidebar() {
+  const sidebar = document.getElementById('leagues-sidebar');
+  const mainContent = document.getElementById('mainContent');
+  const menuToggle = document.getElementById('menuToggle');
+  
+  sidebar.classList.toggle('active');
+  mainContent.classList.toggle('sidebar-open');
+  
+  // Меняем иконку кнопки
+  if (sidebar.classList.contains('active')) {
+    menuToggle.innerHTML = '✕';
+  } else {
+    menuToggle.innerHTML = '☰';
+  }
+}
+
+// Закрытие меню при клике вне его области
+function closeSidebarOnClickOutside(event) {
+  const sidebar = document.getElementById('leagues-sidebar');
+  const menuToggle = document.getElementById('menuToggle');
+  
+  if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('active')) {
+    toggleSidebar();
+  }
+}
+
 async function debugData() {
   console.log('=== ОТЛАДКА ДАННЫХ ===');
   
