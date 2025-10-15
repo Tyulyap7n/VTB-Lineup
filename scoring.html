@@ -2346,110 +2346,76 @@ main {
       transform: translateY(-3px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
-	  header, footer {
+	/* Дополнительные стили для расширения хэдера, футера и элементов на полную ширину */
+
+header, footer {
     width: 100vw;
-    max-width: 100%;
-    left: 0;
-    margin: 0;
-    padding: 0 20px;
+    margin-left: calc(-50vw + 50%);
+    padding-left: calc(50vw - 50%);
+    padding-right: calc(50vw - 50%);
     box-sizing: border-box;
-  }
+}
 
-  /* Хэдер */
-  header {
-    height: 100px;
-    padding: 20px;
-    justify-content: space-between;
-  }
-
-  /* Футер */
-  footer {
-    height: 100px;
-    padding: 20px;
-    justify-content: center;
-    gap: 40px;
-  }
-
-  /* Полоса "Стартовые 6" на полную ширину */
-  .starting-vi-container {
+/* Полоса "Стартовые 6" на полную ширину */
+.starting-vi-container {
     width: 100%;
-    max-width: 100%;
-    margin: 30px 0;
-    padding: 0 20px;
+    margin-left: 0;
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
-  }
+}
 
-  .starting-vi {
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--yellow);
-    text-shadow: 0 0 10px rgba(253, 230, 0, 0.5);
+/* Контейнер для выбранных игроков */
+.selected-players-container {
     width: 100%;
-    text-align: center;
-  }
-
-  /* Контейнер для "Стартовые 6" */
-  .selected-players-container {
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto 20px;
-    padding: 0 20px;
+    margin-left: 0;
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
-  }
+}
 
-  .selected-players-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 15px;
+/* Контейнер для кнопки "Сохранить состав" */
+.save-roster-btn-container {
     width: 100%;
-  }
-
-  /* Контейнер для кнопки "Сохранить состав" и матчей тура */
-  .save-roster-btn-container, .matches-container {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 20px;
+    margin-left: 0;
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
-    margin: 20px auto;
-  }
-
-  /* Кнопка "Сохранить состав" */
-  .save-roster-btn {
-    width: 100%;
-    max-width: 500px;
-    padding: 15px 30px;
-    font-size: 18px;
-    margin: 0 auto;
-    display: block;
-  }
-
-  /* Контейнер для матчей тура */
-  .matches-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    margin: 20px auto;
-  }
+    justify-content: center;
+}
 
-  .match-row {
+/* Кнопка "Сохранить состав" */
+.save-roster-btn {
+    width: auto;
+    max-width: 400px;
+    font-size: 18px;
+    padding: 15px 30px;
+}
+
+/* Контейнер для матчей тура */
+#matches-container {
+    width: 100%;
+    margin-left: 0;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+}
+
+/* Строка матча */
+.match-row {
     width: 100%;
     max-width: 1000px;
     margin: 10px auto;
-  }
+}
 
-  /* Адаптивность для мобильных устройств */
-  @media (max-width: 768px) {
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
     .selected-players-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+        grid-template-columns: repeat(3, 1fr);
     }
+}
 
-    .save-roster-btn {
-      width: 100%;
-      max-width: 100%;
-    }
-  }
   </style>
 </head>
 <body>
