@@ -520,10 +520,12 @@ main {
   background-color: rgba(253, 230, 0, 0.3);
   transform: scale(1.05);
 }
-.table-container.fixed-width {
-  width: 1300px;
+.table-container {
+  width: 100%;
   margin: 0 auto;
+  overflow-x: auto; /* Для горизонтальной прокрутки, если нужно */
 }
+
 
     @keyframes borderAnimation {
       0% { background-position: 0% 50%; }
@@ -635,12 +637,12 @@ main {
     }
     
     /* Уменьшаем ширину столбца с фото */
-    .players-table th[data-sort="photo"],
-    .players-table td:nth-child(2) {
-      width: 60px;
-      min-width: 60px;
-      max-width: 60px;
-    }
+.players-table th[data-sort="photo"],
+.players-table td:nth-child(2) {
+  width: 80px;
+  min-width: 80px;
+}
+
     
     /* Ширина для столбца с именем игрока */
     .players-table th[data-sort="name"],
@@ -2343,6 +2345,21 @@ main {
     font-size: 14px;
   }
 }
+/* Отступ для контейнера с матчами тура */
+#matches-container {
+  width: 90%;
+  margin-left: 10%;
+  margin-top: 20px;
+}
+
+/* Адаптивность для мобильной версии */
+@media (max-width: 768px) {
+  #matches-container {
+    width: 90%;
+    margin-left: 5%; /* Немного меньше отступ на мобильной версии */
+    margin-top: 10px;
+  }
+}
 
   </style>
 </head>
@@ -2402,7 +2419,7 @@ main {
         <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
       </div>
 <!-- Замените текущую таблицу на эту -->
-      <table style="width: 100%; min-width: 1300px;">
+      <table style="width: 100%;">
         <thead>
           <tr>
             <th data-sort="add"></th>
@@ -6545,6 +6562,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
