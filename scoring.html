@@ -4293,6 +4293,174 @@ footer {
     .table-container.fixed-width {
       min-width: 1200px;
     }
+    /* Обновленные стили для таблицы игроков */
+    .players-table th[data-sort="price"],
+    .players-table td:nth-child(4) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+    }
+
+    /* Новый столбец для средних очков */
+    .players-table th[data-sort="fantasyAvg"],
+    .players-table td:nth-child(6) {
+      width: 50px;
+      min-width: 50px;
+      max-width: 50px;
+    }
+
+    /* Узкий столбец цены для мобильных */
+    @media (max-width: 768px) {
+      .players-table th[data-sort="price"],
+      .players-table td:nth-child(4) {
+        width: 45px;
+        min-width: 45px;
+        max-width: 45px;
+        font-size: 12px;
+      }
+
+      .players-table th[data-sort="fantasyAvg"],
+      .players-table td:nth-child(6) {
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+        font-size: 11px;
+      }
+
+      /* Компактные заголовки для мобильных */
+      .players-table th[data-sort="fantasyAvg"]::before {
+        content: "ФО";
+        font-size: 10px;
+      }
+
+      .players-table th[data-sort="fantasyAvg"] .full-text {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .players-table th[data-sort="price"],
+      .players-table td:nth-child(4) {
+        width: 40px;
+        min-width: 40px;
+        max-width: 40px;
+        font-size: 11px;
+      }
+
+      .players-table th[data-sort="fantasyAvg"],
+      .players-table td:nth-child(6) {
+        width: 35px;
+        min-width: 35px;
+        max-width: 35px;
+        font-size: 10px;
+      }
+    }
+
+    /* Восстановление строки с бюджетом */
+    .budget-container {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+      margin-right: 20px;
+    }
+
+    .budget-counter {
+      font-size: 16px;
+      color: var(--yellow);
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(253, 230, 0, 0.5);
+      white-space: nowrap;
+    }
+
+    /* Исправление кликабельности таблицы */
+    .players-table {
+      pointer-events: auto !important;
+    }
+
+    .players-table table {
+      pointer-events: auto !important;
+    }
+
+    .players-table td,
+    .players-table th {
+      pointer-events: auto !important;
+    }
+
+    .select-button {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
+
+    .player-name-cell {
+      pointer-events: auto !important;
+      cursor: pointer !important;
+    }
+
+    /* Убираем блокировку событий с swipe-area для таблицы */
+    .table-container {
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 2;
+    }
+
+    .players-table {
+      position: relative;
+      z-index: 3;
+    }
+
+    /* Область для свайпа не должна перекрывать таблицу */
+    .swipe-area {
+      z-index: 1;
+    }
+
+    /* Убедимся, что таблица кликабельна */
+    #players-table-body tr {
+      pointer-events: auto;
+    }
+
+    #players-table-body td {
+      pointer-events: auto;
+    }
+
+    /* Специфичные стили для кнопок в таблице */
+    #players-table-body .select-button {
+      pointer-events: auto;
+      cursor: pointer;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Улучшение отображения для мобильных */
+    @media (max-width: 768px) {
+      .table-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
+        padding: 0 10px;
+      }
+
+      .filter-row {
+        margin-left: 0;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .budget-container {
+        margin-left: 0;
+        margin-right: 0;
+        order: 3;
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+      }
+
+      .budget-counter {
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -5170,6 +5338,9 @@ function createPlayerRow(player) {
   const safeTeamName = (player.teams?.name || '').replace(/['"`\n\r]/g, '').trim();
   const safePosition = (player.position || '').replace(/['"`\n\r]/g, '').trim();
 
+  // Рассчитываем фэнтези очки
+  const fantasyPoints = metrics.avgAvg.toFixed(1);
+
   const row = document.createElement("tr");
   row.innerHTML = `
     <td>
@@ -5200,6 +5371,7 @@ function createPlayerRow(player) {
     </td>
     <td>${player.price || 0}$</td>
     <td>${metrics.avgAvg.toFixed(1)}</td>
+    <td>${fantasyPoints}</td>
     <td>${metrics.avgPoints.toFixed(1)}</td>
     <td>${metrics.avgThrees.toFixed(1)}</td>
     <td>${metrics.avgAssists.toFixed(1)}</td>
@@ -5211,8 +5383,42 @@ function createPlayerRow(player) {
   `;
   return row;
 }
+function updateTableHeaders() {
+  const tableHead = document.querySelector('.players-table thead');
+  if (tableHead) {
+    tableHead.innerHTML = `
+      <tr>
+        <th data-sort="add"></th>
+        <th data-sort="photo">Фото</th>
+        <th data-sort="name">Игрок</th>
+        <th data-sort="price">Цена</th>
+        <th data-sort="avg">Ср.</th>
+        <th data-sort="fantasyAvg">
+          <span class="full-text">ФО</span>
+          <div class="tooltip-container">
+            <span class="tooltip-text">Фэнтези очки (средние)</span>
+          </div>
+        </th>
+        <th data-sort="points">Очки</th>
+        <th data-sort="threes">3-очк</th>
+        <th data-sort="assists">ПРД</th>
+        <th data-sort="rebounds">ПДБ</th>
+        <th data-sort="steals">ПРХ</th>
+        <th data-sort="blocks">БЛК</th>
+        <th data-sort="turnovers">ПТР</th>
+        <th data-sort="selection">%</th>
+      </tr>
+    `;
 
-
+    // Добавляем обработчики сортировки для новых заголовков
+    document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
+      header.addEventListener('click', () => {
+        const column = header.getAttribute('data-sort');
+        sortTable(column);
+      });
+    });
+  }
+}
 // --- Помощник для сортировки (возвращает число или строку для сравнения) ---
 // Исправленная функция для получения значения сортировки
 function getMetricForSort(player, column) {
@@ -5225,6 +5431,8 @@ function getMetricForSort(player, column) {
       return parseFloat(player.price) || 0;
     case 'avg':
       return parseFloat(metrics.avgAvg) || 0;
+    case 'fantasyAvg':
+      return parseFloat(metrics.avgAvg) || 0; // Фэнтези очки = средние очки
     case 'points':
       return parseFloat(metrics.avgPoints) || 0;
     case 'threes':
@@ -5245,8 +5453,28 @@ function getMetricForSort(player, column) {
       return 0;
   }
 }
+function restoreBudgetCounter() {
+  const tableControls = document.querySelector('.table-controls');
+  if (!tableControls) return;
 
-
+  // Проверяем, не существует ли уже контейнера бюджета
+  let budgetContainer = document.querySelector('.budget-container');
+  if (!budgetContainer) {
+    budgetContainer = document.createElement('div');
+    budgetContainer.className = 'budget-container';
+    budgetContainer.innerHTML = `
+      <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
+    `;
+    
+    // Вставляем контейнер бюджета в правильное место
+    const filterRow = document.querySelector('.filter-row');
+    if (filterRow && filterRow.parentNode) {
+      filterRow.parentNode.insertBefore(budgetContainer, filterRow.nextSibling);
+    } else {
+      tableControls.appendChild(budgetContainer);
+    }
+  }
+}
 // === Загрузка всех игроков + статистики один раз (используется при инициализации) ===
 async function loadPlayersWithStats() {
   try {
@@ -5306,25 +5534,20 @@ async function loadPlayersWithStats() {
 async function initPlayersPagination() {
   await loadPlayersWithStats();
   buildPlayersPaginationControls();
+  
+  // Обновляем заголовки таблицы
+  updateTableHeaders();
 
   // Привязываем фильтры
   document.getElementById('filter-team')?.addEventListener('change', applyFilters);
   document.getElementById('filter-position')?.addEventListener('change', applyFilters);
 
-  // Привязка сортировки
-  document.querySelectorAll('.players-table th[data-sort]').forEach(header => {
-    header.addEventListener('click', () => {
-      const column = header.getAttribute('data-sort');
-      sortTable(column);
-    });
-  });
-
-  // Устанавливаем сортировку по умолчанию (по убыванию средней статистики)
-  currentSort = { column: 'avg', direction: 'desc' };
-  sortPlayers('avg', 'desc');
+  // Устанавливаем сортировку по умолчанию (по убыванию фэнтези очков)
+  currentSort = { column: 'fantasyAvg', direction: 'desc' };
+  sortPlayers('fantasyAvg', 'desc');
   
   // Визуально отмечаем заголовок по умолчанию
-  const defaultHeader = document.querySelector('th[data-sort="avg"]');
+  const defaultHeader = document.querySelector('th[data-sort="fantasyAvg"]');
   if (defaultHeader) {
     defaultHeader.classList.add('sort-desc');
   }
@@ -7287,9 +7510,22 @@ function initSwipeScroll() {
 
   if (!swipeArea) return;
 
+  // Область свайпа должна быть только там, где нет кликабельных элементов
   swipeArea.style.pointerEvents = 'auto';
+  swipeArea.style.zIndex = '1';
 
   swipeArea.addEventListener('touchstart', function(e) {
+    // Проверяем, не начали ли мы касание на кликабельном элементе
+    const target = e.target;
+    const isClickable = target.closest('.select-button') || 
+                       target.closest('.player-name-cell') ||
+                       target.closest('.players-table') ||
+                       target.closest('#players-table-body');
+    
+    if (isClickable) {
+      return; // Не обрабатываем свайп на кликабельных элементах
+    }
+
     startX = e.touches[0].pageX;
     startY = e.touches[0].pageY;
     isScrolling = false;
@@ -8151,7 +8387,53 @@ function sortTable(column) {
   currentPage = 1;
   renderPlayersPage(currentPage);
 }
+document.addEventListener('DOMContentLoaded', function() {
+  // Восстанавливаем строку с бюджетом
+  restoreBudgetCounter();
+  
+  // Обновляем отображение бюджета
+  updateSpentBudget();
 
+  // Добавляем обработчики для меню
+  const menuToggle = document.getElementById('menuToggle');
+  if (menuToggle) {
+    menuToggle.addEventListener('click', toggleSidebar);
+  }
+  
+  // Закрытие меню при клике вне его области
+  document.addEventListener('click', closeSidebarOnClickOutside);
+  
+  // Предотвращаем закрытие при клике внутри меню
+  const sidebar = document.getElementById('leagues-sidebar');
+  if (sidebar) {
+    sidebar.addEventListener('click', function(event) {
+      event.stopPropagation();
+    });
+  }
+  
+  // Инициализация свайпа для горизонтального скролла (исправленная)
+  initSwipeScroll();
+  
+  // Обновление layout игроков в лидерборде
+  updateTeamPlayersLayout();
+  
+  // Обновление при изменении размера окна
+  window.addEventListener('resize', updateTeamPlayersLayout);
+  
+  // Проверяем, находимся ли мы на странице выхода
+  if (window.location.pathname.includes('index.html') || 
+      window.location.href.includes('index.html')) {
+    document.body.classList.add('exit-page');
+    const backButton = document.querySelector('.back-button');
+    const menuToggle = document.querySelector('.menu-toggle');
+    
+    if (backButton) backButton.classList.add('hidden');
+    if (menuToggle) menuToggle.classList.add('hidden');
+  }
+  
+  // Инициализация таблицы игроков
+  initPlayersPagination().catch(e => console.error(e));
+});
     // Получение индекса колонки по имени
     function getColumnIndex(columnName) {
       const headers = document.querySelectorAll('.players-table th');
