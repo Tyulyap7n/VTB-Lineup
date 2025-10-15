@@ -2360,6 +2360,98 @@ main {
     margin-top: 10px;
   }
 }
+/* Основной контейнер */
+.main-container {
+  display: flex;
+  width: 100%;
+  position: relative;
+}
+
+/* Боковая панель (aside) */
+aside {
+  width: 250px;
+  min-width: 250px;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+/* Основной контент (main) */
+main {
+  flex: 1;
+  margin-left: 0;
+  width: 100%;
+  transition: margin-left 0.3s ease;
+}
+
+/* Таблица игроков */
+.players-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Контейнер матчей */
+#matches-container {
+  width: 100%;
+  margin-left: 0;
+  padding: 0 10px;
+}
+
+/* Кнопка для открытия/закрытия aside (появляется только на мобильной версии) */
+.menu-toggle-btn {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: var(--orange);
+  color: var(--black);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Адаптивность для мобильной версии */
+@media (max-width: 768px) {
+  /* Скрываем aside по умолчанию */
+  aside {
+    transform: translateX(-100%);
+  }
+
+  /* Добавляем отступ для main, когда aside открыт */
+  main.aside-open {
+    margin-left: 250px;
+  }
+
+  /* Показываем кнопку меню */
+  .menu-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Убираем фиксированную ширину таблицы */
+  .players-table table {
+    min-width: unset !important;
+    width: 100% !important;
+  }
+}
+/* Контейнер матчей */
+#matches-container {
+  width: calc(100% - 20px);
+  margin: 20px auto 0;
+  padding: 0 10px;
+}
+
+/* Стили для строки матча */
+.match-row {
+  width: 100%;
+  margin-left: 0;
+  padding: 10px;
+}
 
   </style>
 </head>
@@ -2375,6 +2467,7 @@ main {
 
   </header>
   <div class="main-container">
+	  <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
      <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
         <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
@@ -4595,6 +4688,19 @@ function renderLeagueLeaderboard(data) {
   // Отображаем первую страницу
   renderLeagueLeaderboardPage(leagueCurrentPage, leagueTotalPages, data);
 }
+function toggleSidebar() {
+  const aside = document.querySelector('aside');
+  const main = document.querySelector('main');
+  const isOpen = aside.style.transform !== 'translateX(-100%)';
+
+  if (isOpen) {
+    aside.style.transform = 'translateX(-100%)';
+    main.classList.remove('aside-open');
+  } else {
+    aside.style.transform = 'translateX(0)';
+    main.classList.add('aside-open');
+  }
+}
 
 // Новая функция для отображения страницы лидерборда лиги
 function renderLeagueLeaderboardPage(page, totalPages, data) {
@@ -6562,6 +6668,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
