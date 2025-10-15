@@ -2167,11 +2167,17 @@ main {
     margin: 0 auto !important;
     padding: 10px !important;
   }
-
-  aside {
-    display: none !important; /* убираем боковую панель */
-  }
-
+  .match-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Центрируем контейнер */
+  padding: 10px;
+  background: linear-gradient(to right, var(--purple-light), var(--purple));
+  border-radius: 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  margin-left: -80px;
+}
   header {
     flex-direction: column;
     height: auto;
@@ -2193,7 +2199,7 @@ main {
 
   .players-table table {
     min-width: unset;
-    width: 100%;
+    width: 1400px;
     display: block;
     overflow-x: auto;
   }
@@ -6397,5 +6403,6 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
