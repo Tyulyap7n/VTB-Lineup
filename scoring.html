@@ -520,12 +520,10 @@ main {
   background-color: rgba(253, 230, 0, 0.3);
   transform: scale(1.05);
 }
-.table-container {
-  width: 100%;
+.table-container.fixed-width {
+  width: 1300px;
   margin: 0 auto;
-  overflow-x: auto; /* Для горизонтальной прокрутки, если нужно */
 }
-
 
     @keyframes borderAnimation {
       0% { background-position: 0% 50%; }
@@ -637,12 +635,12 @@ main {
     }
     
     /* Уменьшаем ширину столбца с фото */
-.players-table th[data-sort="photo"],
-.players-table td:nth-child(2) {
-  width: 80px;
-  min-width: 80px;
-}
-
+    .players-table th[data-sort="photo"],
+    .players-table td:nth-child(2) {
+      width: 60px;
+      min-width: 60px;
+      max-width: 60px;
+    }
     
     /* Ширина для столбца с именем игрока */
     .players-table th[data-sort="name"],
@@ -2159,300 +2157,6 @@ main {
       font-size: 12px;
       display: none;
     }
-/* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
-@media (max-width: 768px) {
-  body, main, .table-container, .players-table, .selected-players-container, 
-  .leaderboard-content, .leaderboard-table-container, .filter-row, 
-  .selected-players-grid, .matches-container, .team-details {
-    width: 1400px !important;
-    max-width: 1400px !important;
-    margin: 0 auto !important;
-    padding: 10px !important;
-  }
-  .match-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between; /* Центрируем контейнер */
-  padding: 10px;
-  background: linear-gradient(to right, var(--purple-light), var(--purple));
-  border-radius: 10px;
-  margin-bottom: 10px;
-  width: 100%;
-  margin-left: -80px;
-}
-  header {
-
-    height: auto;
-    padding: 10px;
-
-	width: 1400px;
-  }
-
-  .back-button {
-    position: static;
-    margin: 10px auto;
-    width: 90%;
-  }
-
-  .filter-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .players-table table {
-	left: 20px;
-    min-width: unset;
-    width: 1400px;
-    display: block;
-    overflow-x: auto;
-  }
-
-  .players-table th, .players-table td {
-    font-size: 12px;
-    padding: 6px;
-  }
-
-  .selected-players-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .empty-slot, .player-slot {
-    min-height: 100px;
-  }
-
-  .leaderboard-content {
-    padding: 20px;
-  }
-
-  footer {
-    flex-direction: column;
-    gap: 10px;
-	width: 1400px;
-    height: auto;
-    padding: 20px;
-  }
-}
-/* Кнопка "Поддержать проект" в хэдере */
-.support-project-btn {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 8px 16px;
-  background: linear-gradient(to right, var(--yellow), var(--yellow-dark));
-  color: var(--black);
-  border-radius: 20px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  z-index: 10;
-}
-
-.support-project-btn:hover {
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Модальное окно поддержки */
-.support-modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  z-index: 2000;
-  justify-content: center;
-  align-items: center;
-  backdrop-filter: blur(5px);
-}
-
-.support-modal-content {
-  background: linear-gradient(to bottom, var(--purple), var(--purple-dark));
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 1px solid var(--yellow);
-}
-
-.support-modal h2 {
-  color: var(--yellow);
-  margin-bottom: 20px;
-}
-
-.support-modal p {
-  color: var(--white);
-  margin-bottom: 15px;
-  line-height: 1.6;
-}
-
-.support-modal .close-btn {
-  padding: 10px 20px;
-  background: linear-gradient(to right, var(--orange), var(--orange-dark));
-  color: var(--black);
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  margin-top: 20px;
-}
-
-.support-modal .close-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Адаптивность для мобильной версии */
-@media (max-width: 768px) {
-  /* Растягиваем контент на всю ширину */
-  main {
-    margin-left: 0 !important;
-    width: 100% !important;
-    padding: 10px !important;
-  }
-
-  /* Отталкиваем aside вниз */
-  aside {
-    position: relative;
-    width: 100%;
-    height: auto;
-    flex-direction: row;
-    justify-content: center;
-    padding: 10px 0;
-    box-shadow: none;
-  }
-
-  .sidebar-item {
-    flex-direction: row;
-    gap: 5px;
-    padding: 8px 12px;
-  }
-
-  .sidebar-item span {
-    display: none;
-  }
-
-  /* Кнопка "Поддержать проект" в мобильной версии */
-  .support-project-btn {
-    right: 10px;
-    padding: 6px 12px;
-    font-size: 14px;
-  }
-}
-/* Отступ для контейнера с матчами тура */
-#matches-container {
-  width: 90%;
-  margin-left: 10%;
-  margin-top: 20px;
-}
-
-/* Адаптивность для мобильной версии */
-@media (max-width: 768px) {
-  #matches-container {
-    width: 90%;
-    margin-left: 2%; /* Немного меньше отступ на мобильной версии */
-    margin-top: 10px;
-  }
-}
-/* Основной контейнер */
-.main-container {
-  display: flex;
-  width: 100%;
-  position: relative;
-}
-
-/* Боковая панель (aside) */
-aside {
-  width: 250px;
-  min-width: 250px;
-  transition: transform 0.3s ease;
-  z-index: 1000;
-}
-
-/* Основной контент (main) */
-main {
-  flex: 1;
-  margin-left: 0;
-  width: 100%;
-  transition: margin-left 0.3s ease;
-}
-
-/* Таблица игроков */
-.players-table {
-  width: 100%;
-  overflow-x: auto;
-}
-
-/* Контейнер матчей */
-#matches-container {
-  width: 100%;
-  margin-left: 0;
-  padding: 0 10px;
-}
-
-/* Кнопка для открытия/закрытия aside (появляется только на мобильной версии) */
-.menu-toggle-btn {
-  display: none;
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1001;
-  background: var(--orange);
-  color: var(--black);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-/* Адаптивность для мобильной версии */
-@media (max-width: 768px) {
-  /* Скрываем aside по умолчанию */
-  aside {
-    transform: translateX(-100%);
-  }
-
-  /* Добавляем отступ для main, когда aside открыт */
-  main.aside-open {
-    margin-left: 250px;
-  }
-
-  /* Показываем кнопку меню */
-  .menu-toggle-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Убираем фиксированную ширину таблицы */
-  .players-table table {
-    min-width: unset !important;
-    width: 100% !important;
-  }
-}
-/* Контейнер матчей */
-#matches-container {
-  width: calc(100% - 20px);
-  margin: 20px auto 0;
-  padding: 0 10px;
-}
-
-/* Стили для строки матча */
-.match-row {
-  width: 100%;
-  margin-left: 0;
-  padding: 10px;
-}
-
   </style>
 </head>
 <body>
@@ -2461,13 +2165,8 @@ main {
       <img src="https://lineupfantasy.netlify.app/image/logo.jpg" alt="LineUP">
     </div>
 	<a href="#" class="header-rules-btn" onclick="showRules(); return false;">Правила</a>
-	  <a href="#" class="support-project-btn" onclick="showSupportModal(); return false;">
-  Поддержать проект
-</a>
-
   </header>
   <div class="main-container">
-	  <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
      <aside id="leagues-sidebar">
       <div class="sidebar-item" onclick="window.location.href='scout.html'">
         <img src="https://cdn-icons-png.flaticon.com/512/15188/15188959.png" alt="Скаут">
@@ -2512,7 +2211,7 @@ main {
         <div class="budget-counter">Потрачено: <span id="spent-money">0</span> / 70$</div>
       </div>
 <!-- Замените текущую таблицу на эту -->
-      <table style="width: 100%;">
+      <table style="width: 100%; min-width: 1300px;">
         <thead>
           <tr>
             <th data-sort="add"></th>
@@ -4688,19 +4387,6 @@ function renderLeagueLeaderboard(data) {
   // Отображаем первую страницу
   renderLeagueLeaderboardPage(leagueCurrentPage, leagueTotalPages, data);
 }
-function toggleSidebar() {
-  const aside = document.querySelector('aside');
-  const main = document.querySelector('main');
-  const isOpen = aside.style.transform !== 'translateX(-100%)';
-
-  if (isOpen) {
-    aside.style.transform = 'translateX(-100%)';
-    main.classList.remove('aside-open');
-  } else {
-    aside.style.transform = 'translateX(0)';
-    main.classList.add('aside-open');
-  }
-}
 
 // Новая функция для отображения страницы лидерборда лиги
 function renderLeagueLeaderboardPage(page, totalPages, data) {
@@ -5229,31 +4915,6 @@ function updateSelectedPlayersUI() {
     selectedPlayersList.appendChild(slot);
   });
 }
-	// Функция для показа модального окна поддержки
-function showSupportModal() {
-  const modal = document.createElement('div');
-  modal.className = 'support-modal';
-  modal.innerHTML = `
-    <div class="support-modal-content">
-      <h2>Поддержать проект</h2>
-      <p>Если вам нравится LineUP Fantasy, вы можете поддержать проект финансово.</p>
-      <p><strong>Номер для перевода:</strong> +7 999 123-45-67</p>
-      <p>Любая сумма поможет развитию проекта!</p>
-      <button class="close-btn" onclick="closeSupportModal()">Закрыть</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.style.display = 'flex';
-}
-
-// Функция для закрытия модального окна поддержки
-function closeSupportModal() {
-  const modal = document.querySelector('.support-modal');
-  if (modal) {
-    modal.remove();
-  }
-}
-
 async function saveRoster() {
   try {
     // Получаем текущего пользователя
@@ -6668,11 +6329,4 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
-
-
-
-
-
-
-
 
