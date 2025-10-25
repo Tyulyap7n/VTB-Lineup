@@ -3428,6 +3428,7 @@ async function loadLeaderboard() {
   try {
     console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА ===');
 
+    // Показываем индикатор загрузки
     const tableBody = document.getElementById('leaderboard-body');
     if (tableBody) {
       tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Загрузка данных...</td></tr>';
@@ -3445,6 +3446,8 @@ async function loadLeaderboard() {
       return;
     }
 
+    console.log('Загружено туров:', tours?.length);
+
     // 2. Получаем все команды
     const { data: teams, error: teamsError } = await supabase
       .from('user_teams')
@@ -3456,16 +3459,20 @@ async function loadLeaderboard() {
       return;
     }
 
-    // 3. Получаем все связи "команда-игрок-тур"
+    console.log('Загружено команд:', teams?.length);
+
+    // 3. Получаем все связи "команда-игрок-тур" из team_players2
     const { data: teamPlayers, error: teamPlayersError } = await supabase
       .from('team_players2')
       .select('*');
 
     if (teamPlayersError) {
-      console.error('Ошибка загрузки связей:', teamPlayersError);
-      showNotification('Ошибка загрузки связей', false);
+      console.error('Ошибка загрузки связей "команда-игрок":', teamPlayersError);
+      showNotification('Ошибка загрузки связей "команда-игрок"', false);
       return;
     }
+
+    console.log('Загружено связей команда-игрок:', teamPlayers?.length);
 
     // 4. Получаем статистику всех игроков
     const { data: allPlayerStats, error: playerStatsError } = await supabase
@@ -3473,19 +3480,23 @@ async function loadLeaderboard() {
       .select('*');
 
     if (playerStatsError) {
-      console.error('Ошибка загрузки статистики:', playerStatsError);
-      showNotification('Ошибка загрузки статистики', false);
+      console.error('Ошибка загрузки статистики игроков:', playerStatsError);
+      showNotification('Ошибка загрузки статистики игроков', false);
       return;
     }
 
+    console.log('Загружено статистик игроков:', allPlayerStats?.length);
+
+    // 5. Если нет данных, показываем сообщение
     if (!teams || teams.length === 0) {
+      console.log('Нет команд для отображения');
       if (tableBody) {
         tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Нет данных для отображения</td></tr>';
       }
       return;
     }
 
-    // 5. Используем ТОЧНО ТАКОЙ ЖЕ расчет как в viewTeamDetails
+    // 6. Объединяем данные и считаем очки
     const leaderboardData = {};
 
     for (const team of teams) {
@@ -3498,34 +3509,18 @@ async function loadLeaderboard() {
           tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-        let tourPoints = 0;
-        
-        // Группируем статистику по player_id для суммирования (как в viewTeamDetails)
-        const playerStatsByPlayerId = {};
-        allPlayerStats.forEach(stat => {
-          if (!playerStatsByPlayerId[stat.player_id]) {
-            playerStatsByPlayerId[stat.player_id] = [];
-          }
-          playerStatsByPlayerId[stat.player_id].push(stat);
-        });
-
-        for (const tp of teamPlayersForTour) {
-          const playerStats = playerStatsByPlayerId[tp.player_id] || [];
-
-          // ТОЧНО ТАКОЙ ЖЕ расчет как в viewTeamDetails
-          const playerPoints = playerStats.reduce((sum, stat) => {
-            return sum + (
-              (stat.points || 0) +
-              1.5 * (stat.assists || 0) +
-              1.3 * (stat.rebounds || 0) +
-              3 * (stat.steals || 0) +
-              3 * (stat.blocks || 0) -
-              2 * (stat.turnover || 0)
-            );
-          }, 0);
-
-          tourPoints += playerPoints;
-        }
+		let tourPoints = 0;
+		for (const tp of teamPlayersForTour) {
+		  // Находим ВСЕ статистики игрока за этот тур
+		  const playerStatsForTour = allPlayerStats.filter(ps =>
+			ps.player_id === tp.player_id && ps.tour === tour.id
+		  );
+		  if (playerStatsForTour.length > 0) {
+			// Суммируем статистики и рассчитываем очки
+			const playerPoints = calculatePlayerPoints(playerStatsForTour);
+			tourPoints += playerPoints;
+		  }
+		}
 
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
@@ -3539,21 +3534,39 @@ async function loadLeaderboard() {
       };
     }
 
-    // Сортируем по общим очкам
+    console.log('Обработано данных команд:', Object.keys(leaderboardData).length);
+
+    // 7. Сортируем по общим очкам
     const sortedLeaderboard = Object.values(leaderboardData)
       .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
       .map((data, index) => ({ ...data, place: index + 1 }));
 
+    // Сохраняем данные глобально
     window.sortedLeaderboard = sortedLeaderboard;
+    
+    // Рассчитываем общее количество страниц
     totalPages = Math.ceil(sortedLeaderboard.length / managersPerPage);
     if (totalPages === 0) totalPages = 1;
+    
+    // Устанавливаем текущую страницу
     currentPage = 1;
 
+    console.log('Отсортировано записей:', sortedLeaderboard.length);
+    console.log('Всего страниц:', totalPages);
+
+    // 8. Отображаем таблицу
     renderLeaderboardPage(currentPage, totalPages, sortedLeaderboard);
+
+    console.log('=== ЗАВЕРШЕНИЕ ЗАГРУЗКИ ЛИДЕРБОРДА ===');
 
   } catch (error) {
     console.error('Ошибка загрузки лидерборда:', error);
     showNotification('Ошибка загрузки лидерборда', false);
+    
+    const tableBody = document.getElementById('leaderboard-body');
+    if (tableBody) {
+      tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: red;">Ошибка загрузки данных</td></tr>';
+    }
   }
 }
 // Функция для открытия модального окна с матчами текущего тура
@@ -4347,6 +4360,8 @@ async function showLeagueLeaderboard(leagueId) {
     }
   }
 }
+
+
 async function loadLeagueLeaderboardData(leagueId, league) {
   try {
     console.log('Загрузка данных для лиги:', league.name);
@@ -4379,7 +4394,7 @@ async function loadLeagueLeaderboardData(leagueId, league) {
       throw new Error('У участников лиги нет команд');
     }
 
-    // 5. Получаем связи "команда-игрок-тур"
+    // 5. Получаем связи "команда-игрок-тур" из team_players2
     const teamIds = teams.map(team => team.id).filter(id => id);
     const { data: teamPlayers, error: teamPlayersError } = await supabase
       .from('team_players2')
@@ -4389,61 +4404,56 @@ async function loadLeagueLeaderboardData(leagueId, league) {
       console.warn('Ошибка загрузки составов команд:', teamPlayersError);
     }
 
-    // 6. Получаем статистику игроков
+    // 6. **Добавляем загрузку статистики игроков**
     const { data: allPlayerStats, error: playerStatsError } = await supabase
       .from('player_stats')
       .select('*');
     if (playerStatsError) {
       console.warn('Ошибка загрузки статистики игроков:', playerStatsError);
+      // Продолжаем с пустым массивом
     }
 
-    // 7. Рассчитываем очки для каждой команды лиги (ТОЧНО ТАК ЖЕ как в основном лидерборде)
+    // 7. Рассчитываем очки для каждой команды лиги
     const leaderboardData = {};
     for (const team of teams) {
       const teamTourPoints = {};
       let totalPoints = 0;
 
       for (const tour of tours) {
+        // Находим игроков команды для этого тура
         const teamPlayersForTour = (teamPlayers || []).filter(tp =>
           tp && tp.team_id === team.id && tp.tour_id === tour.id
         );
 
         let tourPoints = 0;
 
-        // Группируем статистику по player_id для суммирования
-        const playerStatsByPlayerId = {};
-        (allPlayerStats || []).forEach(stat => {
-          if (!playerStatsByPlayerId[stat.player_id]) {
-            playerStatsByPlayerId[stat.player_id] = [];
-          }
-          playerStatsByPlayerId[stat.player_id].push(stat);
-        });
-
+        // Суммируем очки игроков команды за тур
         for (const tp of teamPlayersForTour) {
-          const playerStats = playerStatsByPlayerId[tp.player_id] || [];
+          // Находим ВСЕ записи статистики игрока за этот тур
+          const playerStatsForTour = (allPlayerStats || []).filter(ps =>
+            ps && ps.player_id === tp.player_id && ps.tour === tour.id
+          );
 
-          // ТОЧНО ТАКОЙ ЖЕ расчет
-          const playerPoints = playerStats.reduce((sum, stat) => {
-            return sum + (
-              (stat.points || 0) +
-              1.5 * (stat.assists || 0) +
-              1.3 * (stat.rebounds || 0) +
-              3 * (stat.steals || 0) +
-              3 * (stat.blocks || 0) -
-              2 * (stat.turnover || 0)
-            );
-          }, 0);
-
-          tourPoints += playerPoints;
+          if (playerStatsForTour.length > 0) {
+            // Суммируем все записи статистики игрока за тур
+            const playerPoints = calculatePlayerPoints(playerStatsForTour);
+            tourPoints += playerPoints;
+          }
         }
 
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
       }
 
+      // Формируем строку с очками по турам
+      const tourPointsString = tours
+        .map(tour => teamTourPoints[tour.id] || "0")
+        .join(' | ');
+
       leaderboardData[team.id] = {
         teamName: team.team_name,
         totalPoints: totalPoints.toFixed(1),
+        tourPoints: tourPointsString,
         teamId: team.id,
         tourPointsById: teamTourPoints,
       };
@@ -4495,6 +4505,7 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     throw error;
   }
 }
+
 // Исправленная функция для отображения лидерборда лиги
 function renderLeagueLeaderboard(data) {
   const tableBody = document.getElementById('league-leaderboard-body');
@@ -4922,7 +4933,9 @@ async function checkTourStatus(tourId) {
   }
 }
 function calculatePlayerPoints(stats) {
-  if (!stats || stats.length === 0) return 0;
+  if (!stats || stats.length === 0) {
+    return 0; // Если статистики нет, возвращаем 0 очков
+  }
 
   return stats.reduce((sum, stat) => {
     return sum + (
@@ -6455,7 +6468,5 @@ document.addEventListener("DOMContentLoaded", function() {
 });
   </script>
 </body>
+
 </html>
-
-
-
