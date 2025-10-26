@@ -3516,8 +3516,16 @@ async function loadLeaderboard() {
 			ps.player_id === tp.player_id && ps.tour === tour.id
 		  );
 		  if (playerStatsForTour.length > 0) {
-			// Суммируем статистики и рассчитываем очки
-			const playerPoints = calculatePlayerPoints(playerStatsForTour);
+			const playerPoints = playerStatsForTour.reduce((sum, stat) => {
+			  return sum + (
+			    (stat.points || 0) +
+			    1.5 * (stat.assists || 0) +
+			    1.3 * (stat.rebounds || 0) +
+			    3 * (stat.steals || 0) +
+			    3 * (stat.blocks || 0) -
+			    2 * (stat.turnover || 0)
+			  );
+			}, 0);
 			tourPoints += playerPoints;
 		  }
 		}
@@ -4436,7 +4444,17 @@ async function loadLeagueLeaderboardData(leagueId, league) {
 
           if (playerStatsForTour.length > 0) {
             // Суммируем все записи статистики игрока за тур
-            const playerPoints = calculatePlayerPoints(playerStatsForTour);
+			// Суммируем все записи статистики игрока за тур
+			const playerPoints = playerStatsForTour.reduce((sum, stat) => {
+			  return sum + (
+			    (stat.points || 0) +
+			    1.5 * (stat.assists || 0) +
+			    1.3 * (stat.rebounds || 0) +
+			    3 * (stat.steals || 0) +
+			    3 * (stat.blocks || 0) -
+			    2 * (stat.turnover || 0)
+			  );
+			}, 0);
             tourPoints += playerPoints;
           }
         }
@@ -6470,3 +6488,4 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
