@@ -4457,18 +4457,7 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     
     if (toursError) throw new Error('Не удалось загрузить туры');
     console.log('Загружено туров:', tours?.length);
-	// В функции loadLeagueLeaderboardData замените блок с прогрессом:
-console.log(`Обработка команды ${++processedTeams}/${teams.length}: ${team.team_name}`);
 
-// Обновляем прогресс в интерфейсе
-if (content) {
-  const progress = Math.round((processedTeams / teams.length) * 100);
-  const progressElement = content.querySelector('#league-progress');
-  if (progressElement) {
-    progressElement.style.width = `${progress}%`;
-    progressElement.textContent = `${progress}%`;
-  }
-}
     // 2. Получаем участников лиги
     console.log('Загрузка участников лиги...');
     const { data: leagueMembers, error: membersError } = await supabase
@@ -4511,12 +4500,24 @@ if (content) {
     
     if (playerStatsError) console.warn('Ошибка загрузки статистики игроков:', playerStatsError);
 
-    // 7. Рассчитываем очки для каждой команды лиги (СТАРАЯ РАБОТАЮЩАЯ ВЕРСИЯ)
+    // 7. Рассчитываем очки для каждой команды лиги
     const leaderboardData = {};
-    let processedTeams = 0;
+    let processedTeams = 0; // ИНИЦИАЛИЗИРУЕМ переменную
 
     for (const team of teams) {
-      console.log(`Обработка команды ${++processedTeams}/${teams.length}: ${team.team_name}`);
+      processedTeams++; // УВЕЛИЧИВАЕМ счетчик
+      console.log(`Обработка команды ${processedTeams}/${teams.length}: ${team.team_name}`);
+      
+      // Обновляем прогресс в интерфейсе
+      const content = document.querySelector('.league-leaderboard-content');
+      if (content) {
+        const progress = Math.round((processedTeams / teams.length) * 100);
+        const progressElement = content.querySelector('#league-progress');
+        if (progressElement) {
+          progressElement.style.width = `${progress}%`;
+          progressElement.textContent = `${progress}%`;
+        }
+      }
       
       const teamTourPoints = {};
       let totalPoints = 0;
@@ -6593,6 +6594,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
