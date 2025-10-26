@@ -4445,8 +4445,15 @@ content.innerHTML = `
 }
 async function loadLeagueLeaderboardData(leagueId, league) {
   try {
-    console.log('=== НАЧАЛО ЗАГРУЗКИ ДАННЫХ ЛИГИ ===');
-    console.log('Лига:', league.name, 'ID:', leagueId);
+    console.log('=== ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА ДАННЫХ ЛИГИ ===');
+    
+    const content = document.querySelector('.league-leaderboard-content');
+    
+    // Обновляем прогресс
+    if (content && content.querySelector('#league-progress')) {
+      content.querySelector('#league-progress').style.width = '10%';
+      content.querySelector('#league-progress').textContent = '10%';
+    }
 
     // 1. Получаем все туры
     console.log('Загрузка туров...');
@@ -4467,12 +4474,10 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     
     if (membersError) throw new Error('Не удалось загрузить участников лиги');
     if (!leagueMembers || leagueMembers.length === 0) throw new Error('В лиге нет участников');
-    console.log('Участников лиги:', leagueMembers.length);
-
-    // 3. Получаем ID пользователей из лиги
+    
     const userIds = leagueMembers.map(member => member.user_id).filter(id => id);
 
-    // 4. Получаем команды участников лиги
+    // 3. Получаем команды участников лиги
     console.log('Загрузка команд участников...');
     const { data: teams, error: teamsError } = await supabase
       .from('user_teams')
@@ -4481,53 +4486,104 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     
     if (teamsError) throw new Error('Не удалось загрузить команды участников');
     if (!teams || teams.length === 0) throw new Error('У участников лиги нет команд');
-    console.log('Найдено команд:', teams.length);
 
-    // 5. Получаем ВСЕ связи "команда-игрок-тур" для этих команд
+    // Обновляем прогресс
+    if (content && content.querySelector('#league-progress')) {
+      content.querySelector('#league-progress').style.width = '30%';
+      content.querySelector('#league-progress').textContent = '30%';
+    }
+
+    // 4. ОДИН ЗАПРОС: Получаем ВСЕ составы команд лиги
     const teamIds = teams.map(team => team.id);
-    const { data: teamPlayers, error: teamPlayersError } = await supabase
+    console.log('Загрузка всех составов команд...');
+    const { data: allTeamPlayers, error: teamPlayersError } = await supabase
       .from('team_players2')
       .select('*')
       .in('team_id', teamIds);
     
     if (teamPlayersError) console.warn('Ошибка загрузки составов команд:', teamPlayersError);
 
-    // 6. Получаем ВСЮ статистику игроков
-    console.log('Загрузка статистики игроков...');
+    // Обновляем прогресс
+    if (content && content.querySelector('#league-progress')) {
+      content.querySelector('#league-progress').style.width = '50%';
+      content.querySelector('#league-progress').textContent = '50%';
+    }
+
+    // 5. ОДИН ЗАПРОС: Получаем ВСЮ статистику игроков
+    console.log('Загрузка всей статистики игроков...');
     const { data: allPlayerStats, error: playerStatsError } = await supabase
       .from('player_stats')
       .select('*');
     
     if (playerStatsError) console.warn('Ошибка загрузки статистики игроков:', playerStatsError);
 
-    // 7. Рассчитываем очки для каждой команды лиги
-    const leaderboardData = {};
-    let processedTeams = 0; // ИНИЦИАЛИЗИРУЕМ переменную
+    // Обновляем прогресс
+    if (content && content.querySelector('#league-progress')) {
+      content.querySelector('#league-progress').style.width = '70%';
+      content.querySelector('#league-progress').textContent = '70%';
+    }
 
-    for (const team of teams) {
-      processedTeams++; // УВЕЛИЧИВАЕМ счетчик
-      console.log(`Обработка команды ${processedTeams}/${teams.length}: ${team.team_name}`);
-      
-      // Обновляем прогресс в интерфейсе
-      const content = document.querySelector('.league-leaderboard-content');
-      if (content) {
-        const progress = Math.round((processedTeams / teams.length) * 100);
-        const progressElement = content.querySelector('#league-progress');
-        if (progressElement) {
-          progressElement.style.width = `${progress}%`;
-          progressElement.textContent = `${progress}%`;
+    // 6. ОПТИМИЗИРОВАННЫЙ РАСЧЕТ: Создаем быстрые lookup-таблицы
+    console.log('Создание lookup-таблиц...');
+    
+    // Группируем статистику по player_id и tour
+    const statsByPlayerAndTour = {};
+    if (allPlayerStats) {
+      allPlayerStats.forEach(stat => {
+        const key = `${stat.player_id}_${stat.tour}`;
+        if (!statsByPlayerAndTour[key]) {
+          statsByPlayerAndTour[key] = [];
         }
-      }
-      
+        statsByPlayerAndTour[key].push(stat);
+      });
+    }
+
+    // Группируем составы по team_id и tour_id
+    const teamPlayersByTeamAndTour = {};
+    if (allTeamPlayers) {
+      allTeamPlayers.forEach(tp => {
+        const key = `${tp.team_id}_${tp.tour_id}`;
+        if (!teamPlayersByTeamAndTour[key]) {
+          teamPlayersByTeamAndTour[key] = [];
+        }
+        teamPlayersByTeamAndTour[key].push(tp.player_id);
+      });
+    }
+
+    // Обновляем прогресс
+    if (content && content.querySelector('#league-progress')) {
+      content.querySelector('#league-progress').style.width = '85%';
+      content.querySelector('#league-progress').textContent = '85%';
+    }
+
+    // 7. БЫСТРЫЙ РАСЧЕТ очков для всех команд
+    console.log('Быстрый расчет очков...');
+    const leaderboardData = {};
+
+    teams.forEach((team, index) => {
       const teamTourPoints = {};
       let totalPoints = 0;
 
-      for (const tour of tours) {
-        // Используем старую работающую функцию
-        const tourPoints = await getTeamPointsForTour(team.id, tour.id);
+      // Для каждого тура считаем очки команды
+      tours.forEach(tour => {
+        const teamTourKey = `${team.id}_${tour.id}`;
+        const playerIds = teamPlayersByTeamAndTour[teamTourKey] || [];
+        
+        let tourPoints = 0;
+        
+        // Суммируем очки всех игроков команды в этом туре
+        playerIds.forEach(playerId => {
+          const statsKey = `${playerId}_${tour.id}`;
+          const playerStats = statsByPlayerAndTour[statsKey] || [];
+          
+          if (playerStats.length > 0) {
+            tourPoints += calculateFantasyPointsFromArray(playerStats);
+          }
+        });
+
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
-      }
+      });
 
       leaderboardData[team.id] = {
         teamName: team.team_name,
@@ -4535,69 +4591,93 @@ async function loadLeagueLeaderboardData(leagueId, league) {
         teamId: team.id,
         tourPointsById: teamTourPoints,
       };
+
+      // Обновляем прогресс каждые 10 команд
+      if (index % 10 === 0 && content && content.querySelector('#league-progress')) {
+        const progress = 85 + Math.round((index / teams.length) * 15);
+        content.querySelector('#league-progress').style.width = `${progress}%`;
+        content.querySelector('#league-progress').textContent = `${progress}%`;
+      }
+    });
+
+    // Обновляем прогресс
+    if (content && content.querySelector('#league-progress')) {
+      content.querySelector('#league-progress').style.width = '100%';
+      content.querySelector('#league-progress').textContent = '100%';
     }
 
-    // Сортируем по общим очкам
+    // 8. Сортируем по общим очкам
     const sortedLeaderboard = Object.values(leaderboardData)
       .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
       .map((data, index) => ({ ...data, place: index + 1 }));
 
-    console.log('Отсортированный лидерборд:', sortedLeaderboard);
+    console.log('Отсортированный лидерборд:', sortedLeaderboard.length, 'команд');
 
     // Обновляем содержимое модального окна
-    const content = document.querySelector('.league-leaderboard-content');
-    content.innerHTML = `
-      <div class="league-header">
-        <img id="league-modal-logo" class="league-header-logo"
-             src="${league.logo_url || 'https://via.placeholder.com/50'}"
-             alt="${league.name}">
-        <div class="league-header-info">
-          <h2 id="league-modal-name">${league.name}</h2>
-          <div class="league-code">Код лиги: <span id="league-modal-code">${league.code}</span></div>
-        </div>
-      </div>
-      <div class="leaderboard-table-container">
-        <table class="leaderboard-table">
-          <thead>
-            <tr>
-              <th>Место</th>
-              <th>Команда</th>
-              <th>Общие очки</th>
-              <th>Очки по турам</th>
-            </tr>
-          </thead>
-          <tbody id="league-leaderboard-body">
-            <!-- Данные будут загружены динамически -->
-          </tbody>
-        </table>
-      </div>
-      <div id="league-team-details" class="team-details" style="display: none;">
-        <h3>Состав команды</h3>
-        <div id="league-team-players"></div>
-      </div>
-      <button class="close-leaderboard" onclick="closeLeagueLeaderboard()">Закрыть</button>
-    `;
-
-    // Отображаем данные с пагинацией
-    renderLeagueLeaderboard(sortedLeaderboard);
-    console.log('=== ЗАВЕРШЕНИЕ ЗАГРУЗКИ ДАННЫХ ЛИГИ ===');
+    updateLeagueModalContent(league, sortedLeaderboard);
+    
+    console.log('=== ОПТИМИЗИРОВАННАЯ ЗАГРУЗКА ЗАВЕРШЕНА ===');
 
   } catch (error) {
     console.error('Критическая ошибка в loadLeagueLeaderboardData:', error);
-    
-    const content = document.querySelector('.league-leaderboard-content');
-    content.innerHTML = `
-      <div style="text-align: center; padding: 20px; color: var(--white);">
-        <h3 style="color: var(--yellow);">Ошибка загрузки</h3>
-        <p>${error.message}</p>
-        <button class="close-leaderboard" onclick="closeLeagueLeaderboard()" style="margin-top: 20px;">
-          Закрыть
-        </button>
-      </div>
-    `;
-    
-    throw error;
+    showLeagueError(error.message);
   }
+}
+
+// Вспомогательная функция для обновления контента модального окна
+function updateLeagueModalContent(league, sortedLeaderboard) {
+  const content = document.querySelector('.league-leaderboard-content');
+  content.innerHTML = `
+    <div class="league-header">
+      <img id="league-modal-logo" class="league-header-logo"
+           src="${league.logo_url || 'https://via.placeholder.com/50'}"
+           alt="${league.name}">
+      <div class="league-header-info">
+        <h2 id="league-modal-name">${league.name}</h2>
+        <div class="league-code">Код лиги: <span id="league-modal-code">${league.code}</span></div>
+        <div style="color: var(--yellow); margin-top: 10px; font-size: 14px;">
+          Загружено ${sortedLeaderboard.length} команд
+        </div>
+      </div>
+    </div>
+    <div class="leaderboard-table-container">
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>Место</th>
+            <th>Команда</th>
+            <th>Общие очки</th>
+            <th>Очки по турам</th>
+          </tr>
+        </thead>
+        <tbody id="league-leaderboard-body">
+          <!-- Данные будут загружены динамически -->
+        </tbody>
+      </table>
+    </div>
+    <div id="league-team-details" class="team-details" style="display: none;">
+      <h3>Состав команды</h3>
+      <div id="league-team-players"></div>
+    </div>
+    <button class="close-leaderboard" onclick="closeLeagueLeaderboard()">Закрыть</button>
+  `;
+
+  // Отображаем данные с пагинацией
+  renderLeagueLeaderboard(sortedLeaderboard);
+}
+
+// Вспомогательная функция для показа ошибок
+function showLeagueError(message) {
+  const content = document.querySelector('.league-leaderboard-content');
+  content.innerHTML = `
+    <div style="text-align: center; padding: 20px; color: var(--white);">
+      <h3 style="color: var(--yellow);">Ошибка загрузки</h3>
+      <p>${message}</p>
+      <button class="close-leaderboard" onclick="closeLeagueLeaderboard()" style="margin-top: 20px;">
+        Закрыть
+      </button>
+    </div>
+  `;
 }
 // Исправленная функция для отображения лидерборда лиги
 function renderLeagueLeaderboard(data) {
@@ -6594,6 +6674,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
