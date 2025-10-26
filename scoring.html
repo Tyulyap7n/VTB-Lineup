@@ -2935,7 +2935,52 @@ function showSupportInfo() {
     easing: 'easeOutElastic(1, .8)'
   });
 }
+// Функция для получения очков команды за тур
+async function getTeamPointsForTour(teamId, tourId) {
+  const cacheKey = `${teamId}_${tourId}`;
+  
+  // Проверяем кэш
+  if (teamPointsCache[cacheKey] !== undefined) {
+    return teamPointsCache[cacheKey];
+  }
 
+  try {
+    // Получаем состав команды за тур
+    const { data: teamPlayers, error } = await supabase
+      .from('team_players2')
+      .select('player_id')
+      .eq('team_id', teamId)
+      .eq('tour_id', tourId);
+
+    if (error || !teamPlayers || teamPlayers.length === 0) {
+      teamPointsCache[cacheKey] = 0;
+      return 0;
+    }
+
+    let totalPoints = 0;
+
+    // Для каждого игрока в составе получаем его статистику и считаем очки
+    for (const tp of teamPlayers) {
+      const { data: playerStats, error: statsError } = await supabase
+        .from('player_stats')
+        .select('*')
+        .eq('player_id', tp.player_id)
+        .eq('tour', tourId);
+
+      if (!statsError && playerStats) {
+        totalPoints += calculateFantasyPointsFromArray(playerStats);
+      }
+    }
+
+    // Сохраняем в кэш
+    teamPointsCache[cacheKey] = totalPoints;
+    return totalPoints;
+  } catch (error) {
+    console.error('Ошибка получения очков команды:', error);
+    teamPointsCache[cacheKey] = 0;
+    return 0;
+  }
+}
 // Функция для закрытия модального окна поддержки
 function closeSupportModal() {
   const modal = document.getElementById('support-modal');
@@ -4342,12 +4387,19 @@ async function showLeagueLeaderboard(leagueId) {
     const content = modal.querySelector('.league-leaderboard-content');
 
     // Показываем загрузку
-    content.innerHTML = `
-      <div style="text-align: center; padding: 20px;">
-        <div class="loader"></div>
-        <p>Загрузка данных лиги...</p>
+// Показываем загрузку с прогресс-баром
+content.innerHTML = `
+  <div style="text-align: center; padding: 20px;">
+    <div class="loader"></div>
+    <p>Загрузка данных лиги...</p>
+    <div style="background: var(--purple-dark); border-radius: 10px; height: 20px; margin: 10px 0; overflow: hidden;">
+      <div id="league-progress" style="background: var(--yellow); height: 100%; width: 0%; transition: width 0.3s; display: flex; align-items: center; justify-content: center; color: var(--black); font-size: 12px; font-weight: bold;">
+        0%
       </div>
-    `;
+    </div>
+    <p style="font-size: 14px; color: var(--gray);">Обработка команд...</p>
+  </div>
+`;
     modal.style.display = 'flex';
 
     // Получаем информацию о лиге
@@ -4394,16 +4446,31 @@ async function showLeagueLeaderboard(leagueId) {
 async function loadLeagueLeaderboardData(leagueId, league) {
   try {
     console.log('=== НАЧАЛО ЗАГРУЗКИ ДАННЫХ ЛИГИ ===');
+    console.log('Лига:', league.name, 'ID:', leagueId);
 
     // 1. Получаем все туры
+    console.log('Загрузка туров...');
     const { data: tours, error: toursError } = await supabase
       .from('tours')
       .select('*')
       .order('round_number', { ascending: true });
     
     if (toursError) throw new Error('Не удалось загрузить туры');
+    console.log('Загружено туров:', tours?.length);
+	// В функции loadLeagueLeaderboardData замените блок с прогрессом:
+console.log(`Обработка команды ${++processedTeams}/${teams.length}: ${team.team_name}`);
 
+// Обновляем прогресс в интерфейсе
+if (content) {
+  const progress = Math.round((processedTeams / teams.length) * 100);
+  const progressElement = content.querySelector('#league-progress');
+  if (progressElement) {
+    progressElement.style.width = `${progress}%`;
+    progressElement.textContent = `${progress}%`;
+  }
+}
     // 2. Получаем участников лиги
+    console.log('Загрузка участников лиги...');
     const { data: leagueMembers, error: membersError } = await supabase
       .from('user_leagues')
       .select('user_id')
@@ -4411,11 +4478,13 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     
     if (membersError) throw new Error('Не удалось загрузить участников лиги');
     if (!leagueMembers || leagueMembers.length === 0) throw new Error('В лиге нет участников');
+    console.log('Участников лиги:', leagueMembers.length);
 
     // 3. Получаем ID пользователей из лиги
     const userIds = leagueMembers.map(member => member.user_id).filter(id => id);
 
     // 4. Получаем команды участников лиги
+    console.log('Загрузка команд участников...');
     const { data: teams, error: teamsError } = await supabase
       .from('user_teams')
       .select('*')
@@ -4423,6 +4492,7 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     
     if (teamsError) throw new Error('Не удалось загрузить команды участников');
     if (!teams || teams.length === 0) throw new Error('У участников лиги нет команд');
+    console.log('Найдено команд:', teams.length);
 
     // 5. Получаем ВСЕ связи "команда-игрок-тур" для этих команд
     const teamIds = teams.map(team => team.id);
@@ -4434,38 +4504,26 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     if (teamPlayersError) console.warn('Ошибка загрузки составов команд:', teamPlayersError);
 
     // 6. Получаем ВСЮ статистику игроков
+    console.log('Загрузка статистики игроков...');
     const { data: allPlayerStats, error: playerStatsError } = await supabase
       .from('player_stats')
       .select('*');
     
     if (playerStatsError) console.warn('Ошибка загрузки статистики игроков:', playerStatsError);
 
-    // 7. Рассчитываем очки для каждой команды лиги (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
+    // 7. Рассчитываем очки для каждой команды лиги (СТАРАЯ РАБОТАЮЩАЯ ВЕРСИЯ)
     const leaderboardData = {};
+    let processedTeams = 0;
 
     for (const team of teams) {
+      console.log(`Обработка команды ${++processedTeams}/${teams.length}: ${team.team_name}`);
+      
       const teamTourPoints = {};
       let totalPoints = 0;
 
       for (const tour of tours) {
-        // Находим игроков команды для этого тура
-        const teamPlayersForTour = (teamPlayers || []).filter(tp =>
-          tp && tp.team_id === team.id && tp.tour_id === tour.id
-        );
-
-        let tourPoints = 0;
-        for (const tp of teamPlayersForTour) {
-          // Находим ВСЕ статистики игрока за этот тур
-          const playerStatsForTour = (allPlayerStats || []).filter(ps =>
-            ps && ps.player_id === tp.player_id && ps.tour === tour.id
-          );
-          if (playerStatsForTour.length > 0) {
-            // Суммируем статистики и рассчитываем очки
-            const playerPoints = calculateFantasyPointsFromArray(playerStatsForTour);
-            tourPoints += playerPoints;
-          }
-        }
-
+        // Используем старую работающую функцию
+        const tourPoints = await getTeamPointsForTour(team.id, tour.id);
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
       }
@@ -4482,6 +4540,8 @@ async function loadLeagueLeaderboardData(leagueId, league) {
     const sortedLeaderboard = Object.values(leaderboardData)
       .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
       .map((data, index) => ({ ...data, place: index + 1 }));
+
+    console.log('Отсортированный лидерборд:', sortedLeaderboard);
 
     // Обновляем содержимое модального окна
     const content = document.querySelector('.league-leaderboard-content');
@@ -6533,6 +6593,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
