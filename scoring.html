@@ -4320,6 +4320,9 @@ async function showLeagueLeaderboard(leagueId) {
   try {
     console.log('Загрузка лидерборда лиги ID:', leagueId);
 
+    // Сначала запускаем отладку
+    await debugLeagueData(leagueId);
+
     // Убедимся, что модальное окно существует
     createLeagueLeaderboardModal();
 
@@ -4380,85 +4383,85 @@ async function showLeagueLeaderboard(leagueId) {
 
 async function loadLeagueLeaderboardData(leagueId, league) {
   try {
-    console.log('Загрузка данных для лиги:', league.name);
+    console.log('=== НАЧАЛО ЗАГРУЗКИ ДАННЫХ ЛИГИ ===');
+    console.log('Лига:', league.name, 'ID:', leagueId);
 
     // 1. Получаем все туры
+    console.log('Загрузка туров...');
     const { data: tours, error: toursError } = await supabase
       .from('tours')
       .select('*')
       .order('round_number', { ascending: true });
-    if (toursError || !tours) throw new Error('Не удалось загрузить туры');
+    
+    if (toursError) {
+      console.error('Ошибка загрузки туров:', toursError);
+      throw new Error('Не удалось загрузить туры');
+    }
+    console.log('Загружено туров:', tours?.length);
 
     // 2. Получаем участников лиги
+    console.log('Загрузка участников лиги...');
     const { data: leagueMembers, error: membersError } = await supabase
       .from('user_leagues')
       .select('user_id')
       .eq('league_id', leagueId);
-    if (membersError || !leagueMembers || leagueMembers.length === 0) {
+    
+    if (membersError) {
+      console.error('Ошибка загрузки участников:', membersError);
+      throw new Error('Не удалось загрузить участников лиги');
+    }
+    
+    if (!leagueMembers || leagueMembers.length === 0) {
+      console.log('В лиге нет участников');
       throw new Error('В лиге нет участников');
     }
+    console.log('Участников лиги:', leagueMembers.length);
 
     // 3. Получаем ID пользователей из лиги
     const userIds = leagueMembers.map(member => member.user_id).filter(id => id);
+    console.log('ID пользователей:', userIds);
 
     // 4. Получаем команды участников лиги
+    console.log('Загрузка команд участников...');
     const { data: teams, error: teamsError } = await supabase
       .from('user_teams')
       .select('*')
       .in('user_id', userIds);
-    if (teamsError || !teams || teams.length === 0) {
+    
+    if (teamsError) {
+      console.error('Ошибка загрузки команд:', teamsError);
+      throw new Error('Не удалось загрузить команды участников');
+    }
+    
+    if (!teams || teams.length === 0) {
+      console.log('У участников лиги нет команд');
       throw new Error('У участников лиги нет команд');
     }
+    console.log('Найдено команд:', teams.length);
 
-    // 5. Получаем связи "команда-игрок-тур" из team_players2
-    const teamIds = teams.map(team => team.id).filter(id => id);
-    const { data: teamPlayers, error: teamPlayersError } = await supabase
-      .from('team_players2')
-      .select('*')
-      .in('team_id', teamIds);
-    if (teamPlayersError) {
-      console.warn('Ошибка загрузки составов команд:', teamPlayersError);
-    }
-
-    // 6. **Добавляем загрузку статистики игроков**
-    const { data: allPlayerStats, error: playerStatsError } = await supabase
-      .from('player_stats')
-      .select('*');
-    if (playerStatsError) {
-      console.warn('Ошибка загрузки статистики игроков:', playerStatsError);
-      // Продолжаем с пустым массивом
-    }
-
-    // 7. Рассчитываем очки для каждой команды лиги
+    // 5. Рассчитываем очки для каждой команды лиги
+    console.log('Начинаем расчет очков для команд...');
     const leaderboardData = {};
+
     for (const team of teams) {
+      console.log(`Обработка команды: ${team.team_name} (ID: ${team.id})`);
       const teamTourPoints = {};
       let totalPoints = 0;
 
       for (const tour of tours) {
-        // Находим игроков команды для этого тура
-        const teamPlayersForTour = (teamPlayers || []).filter(tp =>
-          tp && tp.team_id === team.id && tp.tour_id === tour.id
-        );
-
-let tourPoints = await getTeamPointsForTour(team.id, tour.id);
-
+        const tourPoints = await getTeamPointsForTour(team.id, tour.id);
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
       }
 
-      // Формируем строку с очками по турам
-      const tourPointsString = tours
-        .map(tour => teamTourPoints[tour.id] || "0")
-        .join(' | ');
-
       leaderboardData[team.id] = {
         teamName: team.team_name,
         totalPoints: totalPoints.toFixed(1),
-        tourPoints: tourPointsString,
         teamId: team.id,
         tourPointsById: teamTourPoints,
       };
+      
+      console.log(`Команда ${team.team_name}: ${totalPoints} очков`);
     }
 
     // Сортируем по общим очкам
@@ -4466,7 +4469,9 @@ let tourPoints = await getTeamPointsForTour(team.id, tour.id);
       .sort((a, b) => parseFloat(b.totalPoints) - parseFloat(a.totalPoints))
       .map((data, index) => ({ ...data, place: index + 1 }));
 
-    // Заполняем заголовок модального окна
+    console.log('Отсортированный лидерборд:', sortedLeaderboard);
+
+    // Обновляем содержимое модального окна
     const content = document.querySelector('.league-leaderboard-content');
     content.innerHTML = `
       <div class="league-header">
@@ -4482,10 +4487,10 @@ let tourPoints = await getTeamPointsForTour(team.id, tour.id);
         <table class="leaderboard-table">
           <thead>
             <tr>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
+              <th>Место</th>
+              <th>Команда</th>
+              <th>Общие очки</th>
+              <th>Очки по турам</th>
             </tr>
           </thead>
           <tbody id="league-leaderboard-body">
@@ -4502,8 +4507,26 @@ let tourPoints = await getTeamPointsForTour(team.id, tour.id);
 
     // Отображаем данные с пагинацией
     renderLeagueLeaderboard(sortedLeaderboard);
+    console.log('=== ЗАВЕРШЕНИЕ ЗАГРУЗКИ ДАННЫХ ЛИГИ ===');
+
   } catch (error) {
-    console.error('Ошибка:', error);
+    console.error('Критическая ошибка в loadLeagueLeaderboardData:', error);
+    
+    // Показываем сообщение об ошибке пользователю
+    const content = document.querySelector('.league-leaderboard-content');
+    content.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: var(--white);">
+        <h3 style="color: var(--yellow);">Ошибка загрузки</h3>
+        <p>${error.message}</p>
+        <p style="font-size: 14px; color: var(--gray); margin-top: 10px;">
+          Проверьте консоль для подробной информации
+        </p>
+        <button class="close-leaderboard" onclick="closeLeagueLeaderboard()" style="margin-top: 20px;">
+          Закрыть
+        </button>
+      </div>
+    `;
+    
     throw error;
   }
 }
@@ -6412,7 +6435,37 @@ document.addEventListener("DOMContentLoaded", () => {
   initPlayersPagination();
   loadSavedRoster();
 });
-
+// Функция для отладки данных лиги
+async function debugLeagueData(leagueId) {
+  console.log('=== ОТЛАДКА ДАННЫХ ЛИГИ ===');
+  
+  try {
+    // Проверяем участников лиги
+    const { data: members, error: membersError } = await supabase
+      .from('user_leagues')
+      .select('*')
+      .eq('league_id', leagueId);
+    
+    console.log('Участники лиги:', members);
+    
+    if (members && members.length > 0) {
+      const userIds = members.map(m => m.user_id);
+      
+      // Проверяем команды участников
+      const { data: teams, error: teamsError } = await supabase
+        .from('user_teams')
+        .select('*')
+        .in('user_id', userIds);
+      
+      console.log('Команды участников:', teams);
+    }
+    
+  } catch (error) {
+    console.error('Ошибка отладки:', error);
+  }
+  
+  console.log('=== КОНЕЦ ОТЛАДКИ ===');
+}
 // Функция для закрытия popup
 function closePlayerPopup() {
   const popup = document.getElementById('player-popup');
@@ -6517,6 +6570,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
