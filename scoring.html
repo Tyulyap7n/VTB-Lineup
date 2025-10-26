@@ -3497,9 +3497,10 @@ async function showLeaderboard() {
     showNotification('Ошибка загрузки лидерборда', false);
   }
 }
+// Обновленная функция loadLeaderboard с оптимизированным подходом
 async function loadLeaderboard() {
   try {
-    console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА ===');
+    console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ) ===');
 
     // Показываем индикатор загрузки
     const tableBody = document.getElementById('leaderboard-body');
@@ -3569,28 +3570,41 @@ async function loadLeaderboard() {
       return;
     }
 
-    // 6. Объединяем данные и считаем очки (ОПТИМИЗИРОВАННАЯ ВЕРСИЯ)
+    // 6. ОПТИМИЗИРОВАННЫЙ РАСЧЕТ - используем тот же подход, что и в лиге
     const leaderboardData = {};
+    
+    // Создаем кэш для быстрого доступа к статистике
+    const statsByPlayerAndTour = {};
+    allPlayerStats.forEach(stat => {
+      const key = `${stat.player_id}_${stat.tour}`;
+      if (!statsByPlayerAndTour[key]) {
+        statsByPlayerAndTour[key] = [];
+      }
+      statsByPlayerAndTour[key].push(stat);
+    });
 
+    // Обрабатываем каждую команду
     for (const team of teams) {
       const teamTourPoints = {};
       let totalPoints = 0;
 
+      // Для каждого тура считаем очки команды
       for (const tour of tours) {
-        // Находим игроков команды для этого тура
-        const teamPlayersForTour = teamPlayers.filter(tp =>
+        let tourPoints = 0;
+
+        // Находим всех игроков команды для этого тура
+        const teamPlayersForTour = teamPlayers.filter(tp => 
           tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-        let tourPoints = 0;
+        // Для каждого игрока в составе суммируем статистику
         for (const tp of teamPlayersForTour) {
-          // Находим ВСЕ статистики игрока за этот тур
-          const playerStatsForTour = allPlayerStats.filter(ps =>
-            ps.player_id === tp.player_id && ps.tour === tour.id
-          );
-          if (playerStatsForTour.length > 0) {
-            // Суммируем статистики и рассчитываем очки
-            const playerPoints = calculateFantasyPointsFromArray(playerStatsForTour);
+          const statsKey = `${tp.player_id}_${tour.id}`;
+          const playerStats = statsByPlayerAndTour[statsKey] || [];
+          
+          if (playerStats.length > 0) {
+            // Используем ту же функцию расчета, что и в лиге
+            const playerPoints = calculateFantasyPointsFromArray(playerStats);
             tourPoints += playerPoints;
           }
         }
@@ -3641,6 +3655,22 @@ async function loadLeaderboard() {
       tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: red;">Ошибка загрузки данных</td></tr>';
     }
   }
+}
+
+// Функция для расчета очков из массива статистик (используется в обоих лидербордах)
+function calculateFantasyPointsFromArray(statsArray) {
+  if (!statsArray || statsArray.length === 0) return 0;
+  
+  return statsArray.reduce((total, stat) => {
+    return total + (
+      (stat.points || 0) +
+      1.3 * (stat.rebounds || 0) +
+      1.5 * (stat.assists || 0) +
+      3 * (stat.steals || 0) +
+      3 * (stat.blocks || 0) -
+      2 * (stat.turnover || 0)
+    );
+  }, 0);
 }
 // Функция для открытия модального окна с матчами текущего тура
 async function showTourMatches() {
@@ -6692,6 +6722,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
