@@ -2585,7 +2585,7 @@ main {
     let tours = [];
     let currentUserId = null;
     let currentUserTeamId = null; // Добавляем переменную для ID команды пользователя
-
+let teamPointsCache = {};
 let managersPerPage = 10;
 let totalPages = 1;
 let sortedLeaderboard = [];
@@ -3509,26 +3509,7 @@ async function loadLeaderboard() {
           tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-		let tourPoints = 0;
-		for (const tp of teamPlayersForTour) {
-		  // Находим ВСЕ статистики игрока за этот тур
-		  const playerStatsForTour = allPlayerStats.filter(ps =>
-			ps.player_id === tp.player_id && ps.tour === tour.id
-		  );
-		  if (playerStatsForTour.length > 0) {
-			const playerPoints = playerStatsForTour.reduce((sum, stat) => {
-			  return sum + (
-			    (stat.points || 0) +
-			    1.5 * (stat.assists || 0) +
-			    1.3 * (stat.rebounds || 0) +
-			    3 * (stat.steals || 0) +
-			    3 * (stat.blocks || 0) -
-			    2 * (stat.turnover || 0)
-			  );
-			}, 0);
-			tourPoints += playerPoints;
-		  }
-		}
+		let tourPoints = await getTeamPointsForTour(team.id, tour.id);
 
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
@@ -4433,31 +4414,7 @@ async function loadLeagueLeaderboardData(leagueId, league) {
           tp && tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-        let tourPoints = 0;
-
-        // Суммируем очки игроков команды за тур
-        for (const tp of teamPlayersForTour) {
-          // Находим ВСЕ записи статистики игрока за этот тур
-          const playerStatsForTour = (allPlayerStats || []).filter(ps =>
-            ps && ps.player_id === tp.player_id && ps.tour === tour.id
-          );
-
-          if (playerStatsForTour.length > 0) {
-            // Суммируем все записи статистики игрока за тур
-			// Суммируем все записи статистики игрока за тур
-			const playerPoints = playerStatsForTour.reduce((sum, stat) => {
-			  return sum + (
-			    (stat.points || 0) +
-			    1.5 * (stat.assists || 0) +
-			    1.3 * (stat.rebounds || 0) +
-			    3 * (stat.steals || 0) +
-			    3 * (stat.blocks || 0) -
-			    2 * (stat.turnover || 0)
-			  );
-			}, 0);
-            tourPoints += playerPoints;
-          }
-        }
+let tourPoints = await getTeamPointsForTour(team.id, tour.id);
 
         teamTourPoints[tour.id] = tourPoints.toFixed(1);
         totalPoints += tourPoints;
@@ -4966,7 +4923,52 @@ function calculatePlayerPoints(stats) {
     );
   }, 0);
 }
+// Функция для получения очков команды за тур
+async function getTeamPointsForTour(teamId, tourId) {
+  const cacheKey = `${teamId}_${tourId}`;
+  
+  // Проверяем кэш
+  if (teamPointsCache[cacheKey] !== undefined) {
+    return teamPointsCache[cacheKey];
+  }
 
+  try {
+    // Получаем состав команды за тур
+    const { data: teamPlayers, error } = await supabase
+      .from('team_players2')
+      .select('player_id')
+      .eq('team_id', teamId)
+      .eq('tour_id', tourId);
+
+    if (error || !teamPlayers || teamPlayers.length === 0) {
+      teamPointsCache[cacheKey] = 0;
+      return 0;
+    }
+
+    let totalPoints = 0;
+
+    // Для каждого игрока в составе получаем его статистику и считаем очки
+    for (const tp of teamPlayers) {
+      const { data: playerStats, error: statsError } = await supabase
+        .from('player_stats')
+        .select('*')
+        .eq('player_id', tp.player_id)
+        .eq('tour', tourId);
+
+      if (!statsError && playerStats) {
+        totalPoints += calculateFantasyPointsFromArray(playerStats);
+      }
+    }
+
+    // Сохраняем в кэш
+    teamPointsCache[cacheKey] = totalPoints;
+    return totalPoints;
+  } catch (error) {
+    console.error('Ошибка получения очков команды:', error);
+    teamPointsCache[cacheKey] = 0;
+    return 0;
+  }
+}
 // Вспомогательная функция для расчета очков из статистики
 function calculatePointsFromStats(stats) {
   return (
@@ -6488,4 +6490,5 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
