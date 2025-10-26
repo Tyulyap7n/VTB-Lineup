@@ -2635,6 +2635,33 @@ function applyFilters() {
   // Обновляем отображение
   renderPlayersPage(currentPage);
 }
+// Функция для подсчёта очков из массива статистик
+function calculateFantasyPointsFromArray(statsArray) {
+  if (!statsArray || statsArray.length === 0) return 0;
+  
+  return statsArray.reduce((total, stat) => {
+    return total + (
+      (stat.points || 0) +
+      1.5 * (stat.assists || 0) +
+      1.3 * (stat.rebounds || 0) +
+      3 * (stat.steals || 0) +
+      3 * (stat.blocks || 0) -
+      2 * (stat.turnover || 0)
+    );
+  }, 0);
+}
+
+// Функция для подсчёта очков из одной статистики (для попапа)
+function calculateFantasyPointsFromSingle(stat) {
+  return (
+    (stat.points || 0) +
+    1.5 * (stat.assists || 0) +
+    1.3 * (stat.rebounds || 0) +
+    3 * (stat.steals || 0) +
+    3 * (stat.blocks || 0) -
+    2 * (stat.turnover || 0)
+  );
+}
 function sortPlayers(column, direction) {
   if (!filteredPlayers.length) return;
 
@@ -4131,7 +4158,7 @@ async function viewTeamDetails(teamId, tourId) {
       const playerStats = playerStatsByPlayerId[player.id] || [];
 
       // Рассчитываем очки по единой формуле (с суммированием дублирующихся записей)
-      const playerPoints = calculatePlayerPoints(playerStats);
+      const playerPoints = calculateFantasyPointsFromArray(playerStats);
       totalTeamPoints += playerPoints;
 
       const playerDiv = document.createElement('div');
@@ -4752,7 +4779,7 @@ async function viewLeagueTeamDetails(teamId, tourId) {
       const playerStats = playerStatsByPlayerId[player.id] || [];
 
       // Рассчитываем очки игрока (с суммированием дублирующихся записей)
-      const playerPoints = calculatePlayerPoints(playerStats);
+      const playerPoints = calculateFantasyPointsFromArray(playerStats);
       totalPoints += playerPoints;
 
       // Создаем элемент игрока
@@ -6490,5 +6517,6 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
