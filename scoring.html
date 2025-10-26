@@ -3487,9 +3487,10 @@ async function showLeaderboard() {
   }
 }
 // Обновленная функция loadLeaderboard с оптимизированным подходом
+// ИСПРАВЛЕННАЯ функция loadLeaderboard - суммируем ВСЕ статистики игрока за тур
 async function loadLeaderboard() {
   try {
-    console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА (ИСПРАВЛЕННАЯ ВЕРСИЯ) ===');
+    console.log('=== НАЧАЛО ЗАГРУЗКИ ЛИДЕРБОРДА (СУММИРОВАНИЕ ВСЕХ СТАТИСТИК) ===');
 
     const tableBody = document.getElementById('leaderboard-body');
     if (tableBody) {
@@ -3532,17 +3533,17 @@ async function loadLeaderboard() {
       return;
     }
 
-    // 5. СОЗДАЕМ КЭШ ДЛЯ БЫСТРОГО ДОСТУПА - ключ: playerId_tourId
-    const statsCache = {};
+    // 5. Группируем статистику по игрокам и турам - ВАЖНО: собираем ВСЕ записи
+    const statsByPlayerAndTour = {};
     allPlayerStats.forEach(stat => {
       const key = `${stat.player_id}_${stat.tour}`;
-      if (!statsCache[key]) {
-        statsCache[key] = [];
+      if (!statsByPlayerAndTour[key]) {
+        statsByPlayerAndTour[key] = [];
       }
-      statsCache[key].push(stat);
+      statsByPlayerAndTour[key].push(stat);
     });
 
-    // 6. РАСЧЕТ ОЧКОВ КОМАНД - ТОЧНО ТАК ЖЕ КАК В ЛИГЕ
+    // 6. РАСЧЕТ ОЧКОВ - СУММИРУЕМ ВСЕ СТАТИСТИКИ ИГРОКА ЗА ТУР
     const leaderboardData = {};
 
     for (const team of teams) {
@@ -3558,25 +3559,31 @@ async function loadLeaderboard() {
           tp.team_id === team.id && tp.tour_id === tour.id
         );
 
-        // Для каждого игрока суммируем статистику
+        // Для каждого игрока СУММИРУЕМ ВСЕ его статистики за тур
         for (const tp of teamPlayersForTour) {
-          const cacheKey = `${tp.player_id}_${tour.id}`;
-          const playerStats = statsCache[cacheKey] || [];
+          const statsKey = `${tp.player_id}_${tour.id}`;
+          const playerStatsArray = statsByPlayerAndTour[statsKey] || [];
 
-          if (playerStats.length > 0) {
-            // ВАЖНО: используем ту же функцию расчета!
-            const playerPoints = playerStats.reduce((sum, stat) => {
-              return sum + (
-                (stat.points || 0) +
-                1.3 * (stat.rebounds || 0) +
-                1.5 * (stat.assists || 0) +
-                3 * (stat.steals || 0) +
-                3 * (stat.blocks || 0) -
-                2 * (stat.turnover || 0)
-              );
-            }, 0);
-            
+          if (playerStatsArray.length > 0) {
+            // ВАЖНО: используем функцию, которая суммирует ВСЕ статистики игрока за тур
+            const playerPoints = calculateFantasyPointsFromArray(playerStatsArray);
             tourPoints += playerPoints;
+            
+            // ДЕБАГ: выводим детали расчета для проверки
+            if (team.id === currentUserTeamId) { // только для своей команды
+              console.log(`Игрок ${tp.player_id}, Тур ${tour.id}:`, {
+                statsCount: playerStatsArray.length,
+                totalPoints: playerPoints,
+                stats: playerStatsArray.map(s => ({
+                  points: s.points,
+                  rebounds: s.rebounds,
+                  assists: s.assists,
+                  steals: s.steals,
+                  blocks: s.blocks,
+                  turnover: s.turnover
+                }))
+              });
+            }
           }
         }
 
@@ -3608,14 +3615,10 @@ async function loadLeaderboard() {
   } catch (error) {
     console.error('Ошибка загрузки лидерборда:', error);
     showNotification('Ошибка загрузки лидерборда', false);
-    
-    const tableBody = document.getElementById('leaderboard-body');
-    if (tableBody) {
-      tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: red;">Ошибка загрузки данных</td></tr>';
-    }
   }
 }
-// Функция для расчета очков из массива статистик (используется в обоих лидербордах)
+
+// ТА ЖЕ функция расчета, что используется в деталях команды
 function calculateFantasyPointsFromArray(statsArray) {
   if (!statsArray || statsArray.length === 0) return 0;
   
@@ -6680,6 +6683,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </body>
 
 </html>
+
 
 
 
